@@ -1,7 +1,7 @@
 HTTP_PARSER_PATH = http-parser
 LIBUV_PATH = libuv
 
-LIBUV_NAME=libuv.a
+LIBUV_NAME=libuv.la
 OS_NAME=$(shell uname -s)
 ifeq (${OS_NAME},Darwin)
 	RTLIB=
