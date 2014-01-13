@@ -1,7 +1,7 @@
 #ifndef __ERROR_H__
 #define __ERROR_H__
 
-#include"base.h"
+#include "base.h"
 
 namespace native
 {
@@ -23,24 +23,39 @@ namespace native
     class error
     {
     public:
-        error() : uv_err_() {}
-        error(uv_err_t e) : uv_err_(e) {}
-        error(uv_err_code c) : uv_err_{ c, 0 } {}
-        error(int c) : uv_err_{ static_cast<uv_err_code>(c), 0 } { }
+        error() : uv_err_(), is_error(false) {}
+        error(uv_errno_t e) : uv_err_(e), is_error(true) {}
+        error(int iErrCode) : uv_err_(), is_error(iErrCode!=0) {
+            if(is_error) {
+                uv_err_ = static_cast<uv_errno_t>(iErrCode);
+            }
+        }
         ~error() = default;
+        bool isError() { return is_error; }
+        operator bool() { return isError(); }
+        virtual error& operator=(int iErrCode) {
+            setError(iErrCode);
+            return *this;
+        }
 
-    public:
-        operator bool() { return uv_err_.code != UV_OK; }
+        void setError(int iErrCode) {
+            if(iErrCode == 0){
+                is_error = false;
+                return;
+            }
+            is_error = true;
+            uv_err_ = static_cast<uv_errno_t>(iErrCode);
+        }
+        int code() const { return uv_err_; }
 
-        uv_err_code code() const { return uv_err_.code; }
-        const char* name() const { return uv_err_name(uv_err_); }
-        const char* str() const { return uv_strerror(uv_err_); }
+        const char* name() const { return is_error ? uv_err_name(uv_err_) : 0; }
+        const char* str() const { return is_error ? uv_strerror(uv_err_) : 0; }
 
     private:
-        uv_err_t uv_err_;
+        uv_errno_t uv_err_;
+        //FIXME: remove this bool field. this is temporary till wil find the final solution
+        bool is_error;
     };
-
-    error get_last_error() { return uv_last_error(uv_default_loop()); }
 }
 
 

@@ -38,7 +38,8 @@ namespace native
             }
 
             // TODO: bind and listen
-            static std::shared_ptr<tcp> create_server(const std::string& ip, int port) {
+            static std::shared_ptr<tcp> create_server(const std::string& ip, int port)
+            {
                 return nullptr;
             }
 
@@ -46,25 +47,106 @@ namespace native
             bool keepalive(bool enable, unsigned int delay) { return uv_tcp_keepalive(get<uv_tcp_t>(), enable?1:0, delay) == 0; }
             bool simultanious_accepts(bool enable) { return uv_tcp_simultaneous_accepts(get<uv_tcp_t>(), enable?1:0) == 0; }
 
-            bool bind(const std::string& ip, int port) { return uv_tcp_bind(get<uv_tcp_t>(), uv_ip4_addr(ip.c_str(), port)) == 0; }
-            bool bind6(const std::string& ip, int port) { return uv_tcp_bind6(get<uv_tcp_t>(), uv_ip6_addr(ip.c_str(), port)) == 0; }
+            /** A general method which iAddr can be ip4 or ip6
+             */
+            bool bind(const sockaddr* iAddr, error& oError)
+            {
+                oError = uv_tcp_bind(get<uv_tcp_t>(), iAddr);
+                return !oError;
+            }
+
+            /** ip4 bind
+             */
+            bool bind(const std::string& ip, int port, error& oError)
+            {
+                ip4_addr addr;
+                to_ip4_addr(ip.c_str(), port, addr, oError);
+                if(oError) {
+                    return false;
+                }
+                return bind(reinterpret_cast<const sockaddr*>(&addr), oError);
+            }
+
+            /** ip4 bind without error
+             */
+            bool bind(const std::string& ip, int port)
+            {
+                error err;
+                return bind(ip, port, err);
+            }
+
+            /** ip6 bind with error
+             */
+            bool bind6(const std::string& ip, int port, error& oError)
+            {
+                ip6_addr addr;
+                to_ip6_addr(ip.c_str(), port, addr, oError);
+                if(oError) {
+                    return false;
+                }
+                return bind(reinterpret_cast<const sockaddr*>(&addr), oError);
+            }
+
+            /** ip6 bind without error
+             */
+            bool bind6(const std::string& ip, int port)
+            {
+                error err;
+                return bind(ip, port, err);
+            }
+
+            bool connect(const std::string& ip, int port, std::function<void(error)> callback, error& oError)
+            {
+                callbacks::store(get()->data, native::internal::uv_cid_connect, callback);
+                ip4_addr addr;
+                to_ip4_addr(ip, port, addr, oError);
+                if (oError)
+                {
+                    return false;
+                }
+                uv_connect_t* connection_p = new uv_connect_t;
+                oError = uv_tcp_connect(connection_p, get<uv_tcp_t>(), reinterpret_cast<const sockaddr*>(&addr), [](uv_connect_t* req, int status) {
+                    callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_connect, error(status));
+                    delete req;
+                });
+                if(oError)
+                {
+                    delete connection_p;
+                }
+                return !oError;
+            }
 
             bool connect(const std::string& ip, int port, std::function<void(error)> callback)
             {
-                callbacks::store(get()->data, native::internal::uv_cid_connect, callback);
-                return uv_tcp_connect(new uv_connect_t, get<uv_tcp_t>(), to_ip4_addr(ip, port), [](uv_connect_t* req, int status) {
-                    callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_connect, status?uv_last_error(req->handle->loop):error());
+                error err;
+                return connect(ip, port, callback, err);
+            }
+
+            bool connect6(const std::string& ip, int port, std::function<void(error)> callback, error& oError)
+            {
+                callbacks::store(get()->data, native::internal::uv_cid_connect6, callback);
+                ip6_addr addr;
+                to_ip6_addr(ip, port, addr, oError);
+                if (oError)
+                {
+                    return false;
+                }
+                uv_connect_t* connection_p = new uv_connect_t;
+                oError = uv_tcp_connect(connection_p, get<uv_tcp_t>(), reinterpret_cast<const sockaddr*>(&addr), [](uv_connect_t* req, int status) {
+                    callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_connect6, error(status));
                     delete req;
-                }) == 0;
+                });
+                if(oError)
+                {
+                    delete connection_p;
+                }
+                return !oError;
             }
 
             bool connect6(const std::string& ip, int port, std::function<void(error)> callback)
             {
-                callbacks::store(get()->data, native::internal::uv_cid_connect6, callback);
-                return uv_tcp_connect6(new uv_connect_t, get<uv_tcp_t>(), to_ip6_addr(ip, port), [](uv_connect_t* req, int status) {
-                    callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_connect6, status?uv_last_error(req->handle->loop):error());
-                    delete req;
-                }) == 0;
+                error err;
+                return connect6(ip, port, callback, err);
             }
 
             bool getsockname(bool& ip4, std::string& ip, int& port)

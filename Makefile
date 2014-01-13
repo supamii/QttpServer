@@ -1,39 +1,68 @@
-HTTP_PARSER_PATH = http-parser
-LIBUV_PATH = libuv
+# Variable default definitions. Override them by exporting them in your shell.
+CXX ?= g++
+LINK ?= g++
+OUTDIR ?= out
+TESTJOBS ?=
+GYPFLAGS ?= -Dlibrary=static_library -Dcomponent=static_library
 
-LIBUV_NAME=libuv.la
-OS_NAME=$(shell uname -s)
-ifeq (${OS_NAME},Darwin)
-	RTLIB=
-	CXXFLAGS = -framework CoreFoundation -framework CoreServices -std=gnu++0x -stdlib=libc++ -g -O0 -I$(LIBUV_PATH)/include -I$(HTTP_PARSER_PATH) -I. -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+# internal staff
+ARCHES = ia32 x64 arm mipsel
+DEFAULT_ARCHES = ia32 x64 arm
+MODES = release debug optdebug
+DEFAULT_MODES = release debug
 
-else
-	RTLIB=-lrt
-	CXXFLAGS = -std=gnu++0x -g -O0 -I$(LIBUV_PATH)/include -I$(HTTP_PARSER_PATH) -I. -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
-endif
+GYPFILES = build/all.gyp
 
-all: webclient webserver file_test
+# Generates all combinations of ARCHES and MODES, e.g. "ia32.release".
+BUILDS = $(foreach mode,$(MODES),$(addsuffix .$(mode),$(ARCHES)))
 
-webclient: webclient.cpp $(LIBUV_PATH)/$(LIBUV_NAME) $(HTTP_PARSER_PATH)/http_parser.o $(wildcard native/*.h)
-	$(CXX) $(CXXFLAGS) -o webclient webclient.cpp $(LIBUV_PATH)/$(LIBUV_NAME) $(HTTP_PARSER_PATH)/http_parser.o $(RTLIB) -lm -lpthread
+.PHONY: all clean dependencies native
 
-webserver: webserver.cpp $(LIBUV_PATH)/$(LIBUV_NAME) $(HTTP_PARSER_PATH)/http_parser.o $(wildcard native/*.h)
-	$(CXX) $(CXXFLAGS) -o webserver webserver.cpp $(LIBUV_PATH)/$(LIBUV_NAME) $(HTTP_PARSER_PATH)/http_parser.o $(RTLIB) -lm -lpthread
+# Target definitions. "all" is the default.
+all: $(DEFAULT_MODES)
 
-file_test: file_test.cpp $(LIBUV_PATH)/$(LIBUV_NAME) $(HTTP_PARSER_PATH)/http_parser.o $(wildcard native/*.h)
-	$(CXX) $(CXXFLAGS) -o file_test file_test.cpp $(LIBUV_PATH)/$(LIBUV_NAME) $(HTTP_PARSER_PATH)/http_parser.o $(RTLIB) -lm -lpthread
+# Defines how to build a particular target (e.g. ia32.release).
+$(BUILDS): $(OUTDIR)/Makefile.$$@
+	@$(MAKE) -C "$(OUTDIR)" -f Makefile.$@ \
+	    CXX="$(CXX)" LINK="$(LINK)" BUILDTYPE=Release \
+	    builddir="$(shell pwd)/$(OUTDIR)/$@"
+		
 
-$(LIBUV_PATH)/$(LIBUV_NAME):
-	$(MAKE) -C $(LIBUV_PATH)
+native: $(OUTDIR)/Makefile.native
+	@$(MAKE) -C "$(OUTDIR)" -f Makefile.native \
+	    CXX="$(CXX)" LINK="$(LINK)" BUILDTYPE=Release \
+	    builddir="$(shell pwd)/$(OUTDIR)/$@"
 
-$(HTTP_PARSER_PATH)/http_parser.o:
-	$(MAKE) -C $(HTTP_PARSER_PATH) http_parser.o
+# Clean targets. You can clean each architecture individually, or everything.
+$(addsuffix .clean, $(ARCHES)):
+	rm -f $(OUTDIR)/Makefile.$(basename $@)*
+	rm -rf $(OUTDIR)/$(basename $@).release
+	rm -rf $(OUTDIR)/$(basename $@).debug
+	rm -rf $(OUTDIR)/$(basename $@).optdebug
+	find $(OUTDIR) -regex '.*\(host\|target\)\.$(basename $@).*\.mk' -delete
 
-clean:
-	$(MAKE) -C libuv clean
-	$(MAKE) -C http-parser clean
-	rm -f $(LIBUV_PATH)/$(LIBUV_NAME)
-	rm -f $(HTTP_PARSER_PATH)/http_parser.o
-	rm -f webclient webserver file_test
+native.clean:
+	rm -f $(OUTDIR)/Makefile.native
+	rm -rf $(OUTDIR)/native
+	find $(OUTDIR) -regex '.*\(host\|target\)\.native\.mk' -delete
 
+clean: $(addsuffix .clean, $(ARCHES)) native.clean
 
+# GYP file generation targets.
+OUT_MAKEFILES = $(addprefix $(OUTDIR)/Makefile.,$(BUILDS))
+$(OUT_MAKEFILES): $(GYPFILES)
+	GYP_GENERATORS=make \
+	build/gyp/gyp --generator-output="$(OUTDIR)" build/all.gyp \
+	              -I build/common.gypi --depth=. \
+	              -S$(suffix $(basename $@))$(suffix $@) $(GYPFLAGS)
+
+$(OUTDIR)/Makefile.native: $(GYPFILES)
+	GYP_GENERATORS=make \
+	build/gyp/gyp --generator-output="$(OUTDIR)" build/all.gyp \
+	              -Ibuild/common.gypi --depth=. -S.native $(GYPFLAGS)
+
+# Dependencies.
+# Remember to keep these in sync with the DEPS file.
+dependencies:
+	svn checkout --force http://gyp.googlecode.com/svn/trunk build/gyp \
+	    --revision 1806

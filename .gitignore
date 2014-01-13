@@ -1,6 +1,8 @@
 .cproject
 .project
 .settings/*
+out/*
+*.swp
 
 doc/html/*
 doc/latex/*
@@ -14,3 +16,4 @@ webserver.dSYM
 webclient.dSYM
 file_test.dSYM
 *.xcodeproj
+build/gyp/*

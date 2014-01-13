@@ -24,7 +24,7 @@ namespace native
             {
                 callbacks::store(get()->data, native::internal::uv_cid_listen, callback);
                 return uv_listen(get<uv_stream_t>(), backlog, [](uv_stream_t* s, int status) {
-                    callbacks::invoke<decltype(callback)>(s->data, native::internal::uv_cid_listen, status?uv_last_error(s->loop):error());
+                    callbacks::invoke<decltype(callback)>(s->data, native::internal::uv_cid_listen, ((status != 0)?error(status):error()));
                 }) == 0;
             }
 
@@ -44,21 +44,28 @@ namespace native
                 callbacks::store(get()->data, native::internal::uv_cid_read_start, callback);
 
                 return uv_read_start(get<uv_stream_t>(),
-                    [](uv_handle_t*, size_t suggested_size){
+                    [](uv_handle_t*, size_t suggested_size, uv_buf_t* buf){
                         auto size = std::max(suggested_size, max_alloc_size);
-                        return uv_buf_t { new char[size], size };
+                        buf->base = new char[size];
+                        buf->len = size;
+                        if((buf->base == NULL) && (buf->len > 0))
+                        {
+                            assert(0);
+                            //TODO: error
+                        }
                     },
-                    [](uv_stream_t* s, ssize_t nread, uv_buf_t buf){
+                    [](uv_stream_t* s, ssize_t nread, const uv_buf_t* buf){
                         if(nread < 0)
                         {
-                            assert(uv_last_error(s->loop).code == UV_EOF);
+                            //TODO: to find workaround
+                            //assert(uv_last_error(s->loop).code == UV_EOF);
                             callbacks::invoke<decltype(callback)>(s->data, native::internal::uv_cid_read_start, nullptr, nread);
                         }
                         else if(nread >= 0)
                         {
-                            callbacks::invoke<decltype(callback)>(s->data, native::internal::uv_cid_read_start, buf.base, nread);
+                            callbacks::invoke<decltype(callback)>(s->data, native::internal::uv_cid_read_start, buf->base, nread);
                         }
-                        delete buf.base;
+                        delete buf->base;
                     }) == 0;
             }
 
@@ -74,7 +81,7 @@ namespace native
                 uv_buf_t bufs[] = { uv_buf_t { const_cast<char*>(buf), static_cast<size_t>(len) } };
                 callbacks::store(get()->data, native::internal::uv_cid_write, callback);
                 return uv_write(new uv_write_t, get<uv_stream_t>(), bufs, 1, [](uv_write_t* req, int status) {
-                    callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_write, status?uv_last_error(req->handle->loop):error());
+                    callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_write, ((status != 0)?error(status):error()));
                     delete req;
                 }) == 0;
             }
@@ -84,7 +91,7 @@ namespace native
                 uv_buf_t bufs[] = { uv_buf_t { const_cast<char*>(buf.c_str()), buf.length()} };
                 callbacks::store(get()->data, native::internal::uv_cid_write, callback);
                 return uv_write(new uv_write_t, get<uv_stream_t>(), bufs, 1, [](uv_write_t* req, int status) {
-                    callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_write, status?uv_last_error(req->handle->loop):error());
+                    callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_write, ((status != 0)?error(status):error()));
                     delete req;
                 }) == 0;
             }
@@ -94,7 +101,7 @@ namespace native
                 uv_buf_t bufs[] = { uv_buf_t { const_cast<char*>(&buf[0]), buf.size() } };
                 callbacks::store(get()->data, native::internal::uv_cid_write, callback);
                 return uv_write(new uv_write_t, get<uv_stream_t>(), bufs, 1, [](uv_write_t* req, int status) {
-                    callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_write, status?uv_last_error(req->handle->loop):error());
+                    callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_write, ((status !=0)?error(status):error()));
                     delete req;
                 }) == 0;
             }
@@ -105,7 +112,7 @@ namespace native
             {
                 callbacks::store(get()->data, native::internal::uv_cid_shutdown, callback);
                 return uv_shutdown(new uv_shutdown_t, get<uv_stream_t>(), [](uv_shutdown_t* req, int status) {
-                    callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_shutdown, status?uv_last_error(req->handle->loop):error());
+                    callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_shutdown, ((status != 0)?error(status):error()));
                     delete req;
                 }) == 0;
             }

@@ -297,12 +297,12 @@ namespace native
 
         private:
             client_context(native::net::tcp* server)
-                : socket_(nullptr)
-                , parser_()
+                : parser_()
+                , parser_settings_()
                 , was_header_value_(true)
                 , last_header_field_()
                 , last_header_value_()
-                , parser_settings_()
+                , socket_(nullptr)
                 , request_(nullptr)
                 , response_(nullptr)
                 , callback_lut_(new callbacks(1))

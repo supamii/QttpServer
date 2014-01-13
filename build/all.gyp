@@ -4,36 +4,34 @@
     { 
       'target_name' : 'webserver',
       'type' : 'executable',
+      'dependencies': [
+        '../libuv/uv.gyp:libuv',
+        '../http-parser/http_parser.gyp:http_parser'
+      ],
       'sources' : [
-        'webserver.cpp',
-        'native',
-        'http-parser/http_parser.c',
-        'http-parser/http_parser.h',
-        
+        '../samples/webserver.cpp'
       ],
       'include_dirs' : [
-        'libuv/include',
-        '../node.native'
+        '../libuv/include',
+        '../http-parser',
+        '../native'
       ],
-      'libraries' : [
-        'libuv/libuv.a'
+      'cflags':[
+        '-std=c++11'
       ],
       'conditions' : [
         ['OS=="mac"', {
-
           'xcode_settings': {
             'OTHER_CPLUSPLUSFLAGS' : ['-std=c++11','-stdlib=libc++'],
             'OTHER_LDFLAGS': ['-stdlib=libc++'],
             'ARCHS': '$(ARCHS_STANDARD_64_BIT)'
           },
-
           'link_settings': {
             'libraries': [
               '$(SDKROOT)/System/Library/Frameworks/CoreServices.framework',
               '$(SDKROOT)/System/Library/Frameworks/CoreFoundation.framework'
             ],
           },
-
         }]
       ]
     },
@@ -41,29 +39,28 @@
     { 
       'target_name' : 'webclient',
       'type' : 'executable',
+      'dependencies': [
+        '../libuv/uv.gyp:libuv',
+        '../http-parser/http_parser.gyp:http_parser'
+      ],
       'sources' : [
-        'webclient.cpp',
-        'native',
-        'http-parser/http_parser.c',
-        'http-parser/http_parser.h',
-        
+        '../samples/webclient.cpp'
       ],
       'include_dirs' : [
-        'libuv/include',
-        '../node.native'
+        '../libuv/include',
+        '../http-parser',
+        '../native'
       ],
-      'libraries' : [
-        'libuv/libuv.a'
+      'cflags':[
+        '-std=c++11'
       ],
       'conditions' : [
         ['OS=="mac"', {
-
           'xcode_settings': {
             'OTHER_CPLUSPLUSFLAGS' : ['-std=c++11','-stdlib=libc++'],
             'OTHER_LDFLAGS': ['-stdlib=libc++'],
             'ARCHS': '$(ARCHS_STANDARD_64_BIT)'
           },
-
           'link_settings': {
             'libraries': [
               '$(SDKROOT)/System/Library/Frameworks/CoreServices.framework',

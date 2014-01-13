@@ -38,24 +38,29 @@ namespace native
         uv_loop_t* get() { return uv_loop_; }
 
         /*!
-         *  Starts the loop.
+         *  Runs the event loop until the reference count drops to zero. Always returns zero.
          *  Internally, this function just calls uv_run() function.
          */
         bool run() { 
-
-            /* new libuv stuff */
             return uv_run(uv_loop_, UV_RUN_DEFAULT)==0; 
         }
 
         /*!
-         *  Polls for new events without blocking.
+         *  Poll for new events once. Note that this function blocks if there are no pending events. Returns true when done (no active handles
+         *  or requests left), or non-zero if more events are expected (meaning you
+         *  should run the event loop again sometime in the future).
          *  Internally, this function just calls uv_run_once() function.
          */
         bool run_once() { 
-
-            //return uv_run_once(uv_loop_)==0; 
-     
             return uv_run(uv_loop_, UV_RUN_ONCE)==0; 
+        }
+
+        /*!
+         *  Poll for new events once but don't block if there are no pending events.
+         *  Internally, this function just calls uv_run_once() function.
+         */
+        bool run_nowait() { 
+            return uv_run(uv_loop_, UV_RUN_NOWAIT)==0; 
         }
 
         /*!
@@ -70,11 +75,6 @@ namespace native
          */
         int64_t now() { return uv_now(uv_loop_); }
 
-        /*!
-         *  Returns the last error occured in the loop.
-         */
-        error last_error() { return uv_last_error(uv_loop_); }
-
     private:
         loop(const loop&);
         void operator =(const loop&);
@@ -86,19 +86,28 @@ namespace native
     /*!
      *  Starts the default loop.
      */
-    int run()
+    bool run()
     {
-        /*New libuv requires a runmode enum argument*/
-        return uv_run(uv_default_loop(),UV_RUN_DEFAULT);
+        return (uv_run(uv_default_loop(), UV_RUN_DEFAULT) ==0);
     }
 
     /*!
-     *  Polls for new events without blocking for the default loop.
+     *  Polls for new events once for the default loop.
+     *  Note that this function blocks if there are no pending events. Returns true when done (no active handles
+     *  or requests left), or non-zero if more events are expected (meaning you
+     *  should run the event loop again sometime in the future).
      */
-    int run_once()
+    bool run_once()
     {
-        /*New libuv requires a runmode argument*/
-        return uv_run(uv_default_loop(),UV_RUN_ONCE);
+        return (uv_run(uv_default_loop(), UV_RUN_ONCE) == 0);
+    }
+
+    /*!
+     *  Polls for new events once but don't block if there are no pending events for the default loop.
+     */
+    bool run_nowait()
+    {
+        return (uv_run(uv_default_loop(), UV_RUN_NOWAIT) ==0);
     }
 }
 

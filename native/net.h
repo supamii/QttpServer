@@ -11,8 +11,23 @@ namespace native
         typedef sockaddr_in ip4_addr;
         typedef sockaddr_in6 ip6_addr;
 
-        ip4_addr to_ip4_addr(const std::string& ip, int port) { return uv_ip4_addr(ip.c_str(), port); }
-        ip6_addr to_ip6_addr(const std::string& ip, int port) { return uv_ip6_addr(ip.c_str(), port); }
+        bool to_ip4_addr(const std::string& ip, int port, ip4_addr& oAddr, error& oError) {
+            oError = uv_ip4_addr(ip.c_str(), port, &oAddr);
+            return !oError;
+        }
+        bool to_ip6_addr(const std::string& ip, int port, ip6_addr& oAddr, error& oError) {
+            oError = uv_ip6_addr(ip.c_str(), port, &oAddr);
+            return !oError;
+        }
+
+        bool to_ip4_addr(const std::string& ip, int port, ip4_addr& oAddr) {
+            error err;
+            return to_ip4_addr(ip, port, oAddr, err);
+        }
+        bool to_ip6_addr(const std::string& ip, int port, ip6_addr& oAddr) {
+            error err;
+            return to_ip6_addr(ip, port, oAddr, err);
+        }
 
         bool from_ip4_addr(ip4_addr* src, std::string& ip, int& port)
         {

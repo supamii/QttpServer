@@ -94,10 +94,10 @@ namespace native
                 assert(req->fs_type == UV_FS_READ);
 
                 auto ctx = reinterpret_cast<rte_context*>(callbacks::get_data<callback_t>(req->data, 0));
-                if(req->errorno)
+                if(req->result < 0)
                 {
                     // system error
-                    invoke_from_req<callback_t>(req, std::string(), error(req->errorno));
+                    invoke_from_req<callback_t>(req, std::string(), error(req->result));
                     delete_req<callback_t, rte_context>(req);
                 }
                 else if(req->result == 0)
@@ -112,10 +112,10 @@ namespace native
 
                     uv_fs_req_cleanup(req);
 
-                    if(uv_fs_read(uv_default_loop(), req, ctx->file, ctx->buf, rte_context::buflen, ctx->result.length(), rte_cb<callback_t>))
+                    error err(uv_fs_read(uv_default_loop(), req, ctx->file, ctx->buf, rte_context::buflen, ctx->result.length(), rte_cb<callback_t>));
+                    if(err)
                     {
-                        // failed to initiate uv_fs_read():
-                        invoke_from_req<callback_t>(req, std::string(), error(uv_last_error(uv_default_loop())));
+                        invoke_from_req<callback_t>(req, std::string(), err);
                         delete_req<callback_t, rte_context>(req);
                     }
                 }
@@ -125,14 +125,15 @@ namespace native
         bool open(const std::string& path, int flags, int mode, std::function<void(native::fs::file_handle fd, error e)> callback)
         {
             auto req = internal::create_req(callback);
-            if(uv_fs_open(uv_default_loop(), req, path.c_str(), flags, mode, [](uv_fs_t* req) {
+            error err;
+            if((err = uv_fs_open(uv_default_loop(), req, path.c_str(), flags, mode, [](uv_fs_t* req) {
                 assert(req->fs_type == UV_FS_OPEN);
 
-                if(req->errorno) internal::invoke_from_req<decltype(callback)>(req, file_handle(-1), error(req->errorno));
-                else internal::invoke_from_req<decltype(callback)>(req, req->result, error(req->result<0?UV_ENOENT:UV_OK));
+                if(req->result < 0) internal::invoke_from_req<decltype(callback)>(req, file_handle(-1), error(req->result));
+                else internal::invoke_from_req<decltype(callback)>(req, req->result, error());
 
                 internal::delete_req(req);
-            })) {
+            }))) {
                 // failed to initiate uv_fs_open()
                 internal::delete_req(req);
                 return false;
@@ -147,10 +148,10 @@ namespace native
             if(uv_fs_read(uv_default_loop(), req, fd, buf, len, offset, [](uv_fs_t* req){
                 assert(req->fs_type == UV_FS_READ);
 
-                if(req->errorno)
+                if(req->result < 0)
                 {
                     // system error
-                    internal::invoke_from_req<decltype(callback)>(req, std::string(), error(req->errorno));
+                    internal::invoke_from_req<decltype(callback)>(req, std::string(), error(req->result));
                 }
                 else if(req->result == 0)
                 {
@@ -180,9 +181,9 @@ namespace native
             if(uv_fs_write(uv_default_loop(), req, fd, const_cast<char*>(buf), len, offset, [](uv_fs_t* req){
                 assert(req->fs_type == UV_FS_WRITE);
 
-                if(req->errorno)
+                if(req->result)
                 {
-                    internal::invoke_from_req<decltype(callback)>(req, 0, error(req->errorno));
+                    internal::invoke_from_req<decltype(callback)>(req, 0, error(req->result));
                 }
                 else
                 {
@@ -217,7 +218,7 @@ namespace native
             auto req = internal::create_req(callback);
             if(uv_fs_close(uv_default_loop(), req, fd, [](uv_fs_t* req){
                 assert(req->fs_type == UV_FS_CLOSE);
-                internal::invoke_from_req<decltype(callback)>(req, req->errorno?error(req->errorno):error());
+                internal::invoke_from_req<decltype(callback)>(req, req->result < 0?error(req->result):error());
                 internal::delete_req(req);
             })) {
                 internal::delete_req(req);
@@ -231,7 +232,7 @@ namespace native
             auto req = internal::create_req(callback);
             if(uv_fs_unlink(uv_default_loop(), req, path.c_str(), [](uv_fs_t* req){
                 assert(req->fs_type == UV_FS_UNLINK);
-                internal::invoke_from_req<decltype(callback)>(req, req->errorno?error(req->errorno):error());
+                internal::invoke_from_req<decltype(callback)>(req, req->result < 0?error(req->result):error());
                 internal::delete_req(req);
             })) {
                 internal::delete_req(req);
@@ -245,7 +246,7 @@ namespace native
             auto req = internal::create_req(callback);
             if(uv_fs_mkdir(uv_default_loop(), req, path.c_str(), mode, [](uv_fs_t* req){
                 assert(req->fs_type == UV_FS_MKDIR);
-                internal::invoke_from_req<decltype(callback)>(req, req->errorno?error(req->errorno):error());
+                internal::invoke_from_req<decltype(callback)>(req, req->result < 0?error(req->result):error());
                 internal::delete_req(req);
             })) {
                 internal::delete_req(req);
@@ -259,7 +260,7 @@ namespace native
             auto req = internal::create_req(callback);
             if(uv_fs_rmdir(uv_default_loop(), req, path.c_str(), [](uv_fs_t* req){
                 assert(req->fs_type == UV_FS_RMDIR);
-                internal::invoke_from_req<decltype(callback)>(req, req->errorno?error(req->errorno):error());
+                internal::invoke_from_req<decltype(callback)>(req, req->result < 0?error(req->result):error());
                 internal::delete_req(req);
             })) {
                 internal::delete_req(req);
@@ -273,7 +274,7 @@ namespace native
             auto req = internal::create_req(callback);
             if(uv_fs_rename(uv_default_loop(), req, path.c_str(), new_path.c_str(), [](uv_fs_t* req){
                 assert(req->fs_type == UV_FS_RENAME);
-                internal::invoke_from_req<decltype(callback)>(req, req->errorno?error(req->errorno):error());
+                internal::invoke_from_req<decltype(callback)>(req, req->result<0?error(req->result):error());
                 internal::delete_req(req);
             })) {
                 internal::delete_req(req);
@@ -287,7 +288,7 @@ namespace native
             auto req = internal::create_req(callback);
             if(uv_fs_chmod(uv_default_loop(), req, path.c_str(), mode, [](uv_fs_t* req){
                 assert(req->fs_type == UV_FS_CHMOD);
-                internal::invoke_from_req<decltype(callback)>(req, req->errorno?error(req->errorno):error());
+                internal::invoke_from_req<decltype(callback)>(req, req->result<0?error(req->result):error());
                 internal::delete_req(req);
             })) {
                 internal::delete_req(req);
@@ -301,7 +302,7 @@ namespace native
             auto req = internal::create_req(callback);
             if(uv_fs_chown(uv_default_loop(), req, path.c_str(), uid, gid, [](uv_fs_t* req){
                 assert(req->fs_type == UV_FS_CHOWN);
-                internal::invoke_from_req<decltype(callback)>(req, req->errorno?error(req->errorno):error());
+                internal::invoke_from_req<decltype(callback)>(req, req->result<0?error(req->result):error());
                 internal::delete_req(req);
             })) {
                 internal::delete_req(req);
@@ -316,7 +317,7 @@ namespace native
             auto req = internal::create_req(callback);
             if(uv_fs_readdir(uv_default_loop(), req, path.c_str(), flags, [](uv_fs_t* req){
                 assert(req->fs_type == UV_FS_READDIR);
-                internal::invoke_from_req<decltype(callback)>(req, req->errorno?error(req->errorno):error());
+                internal::invoke_from_req<decltype(callback)>(req, req->result<0?error(req->result):error());
                 internal::delete_req(req);
             })) {
                 internal::delete_req(req);
@@ -330,7 +331,7 @@ namespace native
             auto req = internal::create_req(callback);
             if(uv_fs_stat(uv_default_loop(), req, path.c_str(), [](uv_fs_t* req){
                 assert(req->fs_type == UV_FS_STAT);
-                internal::invoke_from_req<decltype(callback)>(req, req->errorno?error(req->errorno):error());
+                internal::invoke_from_req<decltype(callback)>(req, req->result<0?error(req->result):error());
                 internal::delete_req(req);
             })) {
                 internal::delete_req(req);
@@ -344,7 +345,7 @@ namespace native
             auto req = internal::create_req(callback);
             if(uv_fs_fstat(uv_default_loop(), req, path.c_str(), [](uv_fs_t* req){
                 assert(req->fs_type == UV_FS_FSTAT);
-                internal::invoke_from_req<decltype(callback)>(req, req->errorno?error(req->errorno):error());
+                internal::invoke_from_req<decltype(callback)>(req, req->result<0?error(req->result):error());
                 internal::delete_req(req);
             })) {
                 internal::delete_req(req);
@@ -370,7 +371,9 @@ namespace native
                     if(!fs::read_to_end(fd, callback))
                     {
                         // failed to initiate read_to_end()
-                        callback(std::string(), error(uv_last_error(uv_default_loop())));
+                        //TODO: this should not happen for async (callback provided). Temporary return unknown error. To resolve this.
+                        //callback(std::string(), error(uv_last_error(uv_default_loop())));
+                        callback(std::string(), error(UV__UNKNOWN));
                     }
                 }
             });
@@ -388,7 +391,9 @@ namespace native
                     if(!fs::write(fd, str.c_str(), str.length(), 0, callback))
                     {
                         // failed to initiate read_to_end()
-                        callback(0, error(uv_last_error(uv_default_loop())));
+                        //TODO: this should not happen for async (callback provided). Temporary return unknown error. To resolve this.
+                        //callback(0, error(uv_last_error(uv_default_loop())));
+                        callback(0, error(UV__UNKNOWN));
                     }
                 }
             });

@@ -67,6 +67,7 @@ namespace native
         template<typename callback_t>
         static void store(void* target, int cid, const callback_t& callback, void* data=nullptr)
         {
+            //TODO: remove new operator to pass directly as parameter. May cause memory leak
             reinterpret_cast<callbacks*>(target)->lut_[cid] = callback_object_ptr(new internal::callback_object<callback_t>(callback, data));
         }
 
