@@ -226,7 +226,7 @@ namespace native
                 case 415: return "Unsupported Media Type";
                 case 416: return "Requested Range Not Satisfiable";
                 case 417: return "Expectation Faiiled";
-                case 418 "I'm a teapot" //RFC2324. Too silly to include.
+                case 418: return "I'm a teapot"; //RFC2324.
                 case 422: return "Unprocessable Entity";       // RFC 4918
                 case 423: return "Locked";                     // RFC 4918
                 case 424: return "Failed Dependency";          // RFC 4918
