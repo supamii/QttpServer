@@ -34,9 +34,13 @@ To compile included sample application(webserver.cpp) first run the following co
 ```bash
 git submodule update --init
 ```
+only first time download build dependecies (gyp):
+```bash
+make dependencies
+```
 then,
 ```bash
-make
+make native
 ```
 alternatively you can set custom paths to http-parser and libuv if you dont want to use the submodules.
 
