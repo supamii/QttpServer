@@ -111,8 +111,9 @@ namespace native
                     ctx->result.append(std::string(ctx->buf, req->result));
 
                     uv_fs_req_cleanup(req);
+                    const uv_buf_t iov = uv_buf_init(ctx->buf, rte_context::buflen);
 
-                    error err(uv_fs_read(uv_default_loop(), req, ctx->file, ctx->buf, rte_context::buflen, ctx->result.length(), rte_cb<callback_t>));
+                    error err(uv_fs_read(uv_default_loop(), req, ctx->file, &iov, 1, ctx->result.length(), rte_cb<callback_t>));
                     if(err)
                     {
                         invoke_from_req<callback_t>(req, std::string(), err);
@@ -145,7 +146,8 @@ namespace native
         {
             auto buf = new char[len];
             auto req = internal::create_req(callback, buf);
-            if(uv_fs_read(uv_default_loop(), req, fd, buf, len, offset, [](uv_fs_t* req){
+            const uv_buf_t iov = uv_buf_init(buf, len);
+            if(uv_fs_read(uv_default_loop(), req, fd, &iov, 1, offset, [](uv_fs_t* req){
                 assert(req->fs_type == UV_FS_READ);
 
                 if(req->result < 0)
@@ -176,9 +178,10 @@ namespace native
         bool write(file_handle fd, const char* buf, size_t len, off_t offset, std::function<void(int nwritten, error e)> callback)
         {
             auto req = internal::create_req(callback);
+            const uv_buf_t iov = uv_buf_init(const_cast<char*>(buf), len);
 
             // TODO: const_cast<> !!
-            if(uv_fs_write(uv_default_loop(), req, fd, const_cast<char*>(buf), len, offset, [](uv_fs_t* req){
+            if(uv_fs_write(uv_default_loop(), req, fd, &iov, 1, offset, [](uv_fs_t* req){
                 assert(req->fs_type == UV_FS_WRITE);
 
                 if(req->result)
@@ -204,8 +207,9 @@ namespace native
             auto ctx = new internal::rte_context;
             ctx->file = fd;
             auto req = internal::create_req(callback, ctx);
+            const uv_buf_t iov = uv_buf_init(ctx->buf, internal::rte_context::buflen);
 
-            if(uv_fs_read(uv_default_loop(), req, fd, ctx->buf, internal::rte_context::buflen, 0, internal::rte_cb<decltype(callback)>)) {
+            if(uv_fs_read(uv_default_loop(), req, fd, &iov, 1, 0, internal::rte_cb<decltype(callback)>)) {
                 // failed to initiate uv_fs_read()
                 internal::delete_req<decltype(callback), internal::rte_context>(req);
                 return false;

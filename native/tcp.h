@@ -51,7 +51,8 @@ namespace native
              */
             bool bind(const sockaddr* iAddr, error& oError)
             {
-                oError = uv_tcp_bind(get<uv_tcp_t>(), iAddr);
+                //TODO: add flags
+                oError = uv_tcp_bind(get<uv_tcp_t>(), iAddr, 0);
                 return !oError;
             }
 
