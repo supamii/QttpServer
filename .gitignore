@@ -3,6 +3,7 @@
 .settings/*
 out/*
 *.swp
+samples/*.swp
 
 doc/html/*
 doc/latex/*
