@@ -12,10 +12,12 @@ int main(int argc, const char** argv, const char** envptr)
 {
     std::vector<std::string> argsList;
     std::map<std::string, std::string> envMap;
+    //TODO: add debug future
+    bool debug(false);
     for(int i = 0; i < argc; ++i)
     {
         std::string argStr(argv[i]);
-        std::cout<<"adding arg: "<<argStr<<"\n";
+        debug && std::cout<<"adding arg: "<<argStr<<"\n";
         argsList.push_back(argStr);
     };
     
@@ -33,7 +35,7 @@ int main(int argc, const char** argv, const char** envptr)
             ++envItemPtr;
         }
         std::string varVal(envItemPtr);
-        std::cout<<"adding env: "<<envName<<"=\""<<varVal<<"\"\n";
+        debug && std::cout<<"adding env: "<<envName<<"=\""<<varVal<<"\"\n";
         envMap.insert(std::make_pair(envName, varVal));
     }
     http server;
