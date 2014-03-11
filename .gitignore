@@ -1,9 +1,8 @@
 .cproject
 .project
 .settings/*
-out/*
-*.swp
-samples/*.swp
+out/**
+**/*.swp
 
 doc/html/*
 doc/latex/*
