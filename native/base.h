@@ -31,6 +31,12 @@ namespace native
             uv_cid_max
         };
     }
+
+    // TODO to finish this class
+    class BaseObject
+    {
+
+    }
 }
 
 #endif
