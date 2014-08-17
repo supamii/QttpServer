@@ -486,16 +486,11 @@ namespace native
             }
 
         public:
-            static std::shared_ptr<http> create_server(const std::string& ip, int port, std::function<void(request&, response&)> callback)
-            {
-                auto server = std::shared_ptr<http>(new http);
-                if(server->listen(ip, port, callback)) return server;
-                return nullptr;
-            }
-
             bool listen(const std::string& ip, int port, std::function<void(request&, response&)> callback)
             {
-                if(!socket_->bind(ip, port)) return false;
+                if(!socket_->bind(ip, port)) {
+                    return false;
+                }
 
                 if(!socket_->listen([=](error e) {
                     if(e)

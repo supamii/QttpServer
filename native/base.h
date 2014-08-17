@@ -36,7 +36,7 @@ namespace native
     class BaseObject
     {
 
-    }
+    };
 }
 
 #endif
