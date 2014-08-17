@@ -5,6 +5,7 @@
     'host_arch%': 'ia32',            # set v8's host architecture
     'library%': 'static_library',    # allow override to 'shared_library' for DLL/.so builds
     'uv_library': 'static_library',  # allow override to 'shared_library' for DLL/.so builds
+    'native_library': 'static_library',
     'component%': 'static_library',  # NB. these names match with what V8 expects
     'msvs_multi_core_compile': '0',  # we do enable multicore compiles, but not using the V8 way
     'gcc_version%': 'unknown',
@@ -16,7 +17,12 @@
     'configurations': {
       'Debug': {
         'defines': [ 'DEBUG', '_DEBUG' ],
-        'cflags': [ '-g', '-O0', '-fwrapv' ],
+        'cflags': [
+            '-g',
+            '-O0',
+            '-fwrapv'#,
+            #'-std=c++11'
+        ],
         'msvs_settings': {
           'VCCLCompilerTool': {
             'target_conditions': [
@@ -52,7 +58,8 @@
           '-fstrict-aliasing',
           '-fomit-frame-pointer',
           '-fdata-sections',
-          '-ffunction-sections',
+          '-ffunction-sections'#,
+          #'-std=c++11'
         ],
         'msvs_settings': {
           'VCCLCompilerTool': {
