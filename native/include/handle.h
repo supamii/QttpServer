@@ -1,5 +1,5 @@
-#ifndef __HANDLE_H__
-#define __HANDLE_H__
+#ifndef __NATIVE_HANDLE_H__
+#define __NATIVE_HANDLE_H__
 
 #include "base.h"
 #include "callback.h"
@@ -66,24 +66,6 @@ namespace native
         protected:
             uv_handle_t* uv_handle_;
         };
-
-        void _delete_handle(uv_handle_t* h)
-        {
-            assert(h);
-
-            // clean up SCM
-            if(h->data)
-            {
-                delete reinterpret_cast<callbacks*>(h->data);
-                h->data = nullptr;
-            }
-
-            switch(h->type)
-            {
-                case UV_TCP: delete reinterpret_cast<uv_tcp_t*>(h); break;
-                default: assert(0); break;
-            }
-        }
     }
 }
 

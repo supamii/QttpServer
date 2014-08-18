@@ -6,6 +6,7 @@
 #include "base.h"
 #include "handle.h"
 #include "net.h"
+#include "tcp.h"
 #include "text.h"
 #include "callback.h"
 

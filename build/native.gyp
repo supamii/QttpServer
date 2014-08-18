@@ -14,13 +14,17 @@
                 '../native/include'
             ],
             'sources' : [
+                '../native/src/loop.cc',
+                '../native/src/handle.cc',
+                '../native/src/net.cc',
+                '../native/src/tcp.cc',
                 '../native/src/http.cc'
             ],
             'direct_dependent_settings' : {
                 'include_dirs' : [
+                    '../native/include',
                     '../libuv/include',
-                    '../http-parser',
-                    '../native/include'
+                    '../http-parser'
                 ]
             },
             'all_dependent_settings' : {

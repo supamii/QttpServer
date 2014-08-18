@@ -2,9 +2,10 @@
 #include <memory>
 #include <string>
 #include <native.h>
-using namespace native;
-
+#include <loop.h>
 #include <fcntl.h>
+
+using namespace native;
 
 int main() {
     auto client = net::tcp::create();
