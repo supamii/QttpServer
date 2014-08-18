@@ -69,7 +69,6 @@ namespace
             {
                 static int n = 0;
                 ++n;
-                std::cout << "request: ";//<<req;
                 std::string body = req.get_body(); // Now you can write a custom handler for the body content.
                 res.set_status(200);
                 res.set_header("Content-Type", "text/plain");
