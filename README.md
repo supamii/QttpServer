@@ -49,7 +49,9 @@ make -C out
 ```
 alternatively you can set custom paths to http-parser and libuv if you dont want to use the submodules.
 
-Tested on Ubuntu 11.10 and GCC 4.6.1. and OSX 10.8.2
+Tested on
+ - Ubuntu 11.10 and GCC 4.6.1. and OSX 10.8.2
+ - ArchLinux with GCC 4.9.1 and clang 3.6.0
 
 ## Other Resources
 
