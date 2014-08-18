@@ -28,7 +28,7 @@ int main() {
 ```
 ## Getting started
 
-<em>node.native</em> consists of header files(*.h) only, but requires [libuv](https://github.com/joyent/libuv) and [http-parser](https://github.com/joyent/http-parser) lib to use.
+<em>node.native</em> requires [libuv](https://github.com/joyent/libuv) and [http-parser](https://github.com/joyent/http-parser) lib to use.
 
 To compile included sample application(webserver.cpp) first run the following command in the project directory:
 ```bash
@@ -38,9 +38,14 @@ only first time download build dependecies (gyp):
 ```bash
 make dependencies
 ```
-then,
+theni:
 ```bash
 make native
+```
+or:
+```bash
+./build.py -f make
+make -C out
 ```
 alternatively you can set custom paths to http-parser and libuv if you dont want to use the submodules.
 

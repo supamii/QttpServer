@@ -2,7 +2,6 @@
 #include <memory>
 #include <string>
 #include <native.h>
-#include <loop.h>
 #include <fcntl.h>
 
 using namespace native;
