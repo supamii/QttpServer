@@ -1,4 +1,4 @@
-#include "stream.h"
+#include "native/stream.h"
 
 using namespace native;
 using namespace base;

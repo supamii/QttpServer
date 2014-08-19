@@ -1,4 +1,4 @@
-#include "native.h"
+#include "native/native.h"
 #include "gtest/gtest.h"
 
 TEST(TestGTest, EqConstInt)

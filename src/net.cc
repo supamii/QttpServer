@@ -1,6 +1,5 @@
-#include "net.h"
-
-#include "error.h"
+#include "native/net.h"
+#include "native/error.h"
 
 using namespace native;
 using namespace net;
