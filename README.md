@@ -30,6 +30,8 @@ int main() {
 
 <em>node.native</em> requires [libuv](https://github.com/joyent/libuv) and [http-parser](https://github.com/joyent/http-parser) lib to use.
 
+### Build
+
 To compile included sample application(webserver.cpp) first run the following command in the project directory:
 ```bash
 git submodule update --init
@@ -48,6 +50,23 @@ or:
 make -C out
 ```
 alternatively you can set custom paths to http-parser and libuv if you dont want to use the submodules.
+If it is build with make in debug mode, then executables are saved to out/Debug dir.
+
+### Run samples
+
+In samples dir you can see samples which use native library.
+
+To run `webserver` sample compiled by make in debug mode:
+```bash
+out/Debug/webserver
+```
+
+### Run tests
+
+To run `tests` compiled by make in debug mode:
+```bash
+out/Debug/test
+```
 
 Tested on
  - Ubuntu 11.10 and GCC 4.6.1. and OSX 10.8.2

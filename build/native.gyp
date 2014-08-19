@@ -15,6 +15,7 @@
             ],
             'sources' : [
                 '../native/src/loop.cc',
+                '../native/src/stream.cc',
                 '../native/src/handle.cc',
                 '../native/src/net.cc',
                 '../native/src/tcp.cc',

@@ -21,6 +21,18 @@
             'sources' : [
                 '../samples/webclient.cpp'
             ]
+        },
+        #test
+        {
+            'target_name' : 'test',
+            'type' : 'executable',
+            'dependencies': [
+                './native.gyp:node_native',
+                './gtest.gyp:gtest'
+            ],
+            'sources' : [
+                '../test/basic_test.cc'
+            ]
         }
     ]
 }
