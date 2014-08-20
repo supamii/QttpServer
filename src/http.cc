@@ -166,6 +166,7 @@ std::string http::response::get_status_text(int status)
     case 305: return "Use Proxy";
     //case 306: return "(reserved)";
     case 307: return "Temporary Redirect";
+    case 308: return "Permanent Redirect";         // RFC 7238
     case 400: return "Bad Request";
     case 401: return "Unauthorized";
     case 402: return "Payment Required";
