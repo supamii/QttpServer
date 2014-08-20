@@ -1,33 +1,32 @@
 #include "native/http.h"
 
 using namespace native;
-using namespace http;
 
-url_parse_exception::url_parse_exception(const std::string& message) :
+http::url_parse_exception::url_parse_exception(const std::string& message) :
         native::exception(message)
 {
 }
 
-response_exception::response_exception(const std::string& message) :
+http::response_exception::response_exception(const std::string& message) :
         native::exception(message)
 {
 }
 
-url_obj::url_obj() :
+http::url_obj::url_obj() :
         handle_(),
         buf_()
 {
     //printf("url_obj() %x\n", this);
 }
 
-url_obj::url_obj(const url_obj& c) :
+http::url_obj::url_obj(const url_obj& c) :
         handle_(c.handle_),
         buf_(c.buf_)
 {
     //printf("url_obj(const url_obj&) %x\n", this);
 }
 
-url_obj& url_obj::operator =(const url_obj& c)
+http::url_obj& http::url_obj::operator =(const url_obj& c)
 {
     //printf("url_obj::operator =(const url_obj&) %x\n", this);
     handle_ = c.handle_;
@@ -35,49 +34,49 @@ url_obj& url_obj::operator =(const url_obj& c)
     return *this;
 }
 
-url_obj::~url_obj()
+http::url_obj::~url_obj()
 {
     //printf("~url_obj() %x\n", this);
 }
 
-std::string url_obj::schema() const
+std::string http::url_obj::schema() const
 {
     if(has_schema()) return buf_.substr(handle_.field_data[UF_SCHEMA].off, handle_.field_data[UF_SCHEMA].len);
     return "HTTP";
 }
 
-std::string url_obj::host() const
+std::string http::url_obj::host() const
 {
     // TODO: if not specified, use host name
     if(has_schema()) return buf_.substr(handle_.field_data[UF_HOST].off, handle_.field_data[UF_HOST].len);
     return std::string("localhost");
 }
 
-int url_obj::port() const
+int http::url_obj::port() const
 {
     if(has_path()) return static_cast<int>(handle_.port);
     return (schema() == "HTTP" ? 80 : 443);
 }
 
-std::string url_obj::path() const
+std::string http::url_obj::path() const
 {
     if(has_path()) return buf_.substr(handle_.field_data[UF_PATH].off, handle_.field_data[UF_PATH].len);
     return std::string("/");
 }
 
-std::string url_obj::query() const
+std::string http::url_obj::query() const
 {
     if(has_query()) return buf_.substr(handle_.field_data[UF_QUERY].off, handle_.field_data[UF_QUERY].len);
     return std::string();
 }
 
-std::string url_obj::fragment() const
+std::string http::url_obj::fragment() const
 {
     if(has_query()) return buf_.substr(handle_.field_data[UF_FRAGMENT].off, handle_.field_data[UF_FRAGMENT].len);
     return std::string();
 }
 
-void url_obj::from_buf(const char* buf, std::size_t len, bool is_connect)
+void http::url_obj::from_buf(const char* buf, std::size_t len, bool is_connect)
 {
     // TODO: validate input parameters
 
@@ -90,7 +89,7 @@ void url_obj::from_buf(const char* buf, std::size_t len, bool is_connect)
     }
 }
 
-response::response(client_context* client, native::net::tcp* socket) :
+http::response::response(client_context* client, native::net::tcp* socket) :
     client_(client),
     socket_(socket),
     headers_(),
@@ -99,11 +98,11 @@ response::response(client_context* client, native::net::tcp* socket) :
     headers_["Content-Type"] = "text/html";
 }
 
-response::~response()
+http::response::~response()
 {
 }
 
-bool response::end(const std::string& body)
+bool http::response::end(const std::string& body)
 {
     // Content-Length
     if(headers_.find("Content-Length") == headers_.end())
@@ -134,17 +133,17 @@ bool response::end(const std::string& body)
     });
 }
 
-void response::set_status(int status_code)
+void http::response::set_status(int status_code)
 {
     status_ = status_code;
 }
 
-void response::set_header(const std::string& key, const std::string& value)
+void http::response::set_header(const std::string& key, const std::string& value)
 {
     headers_[key] = value;
 }
 
-std::string response::get_status_text(int status)
+std::string http::response::get_status_text(int status)
 {
     switch(status)
     {
@@ -212,26 +211,26 @@ std::string response::get_status_text(int status)
     }
 }
 
-request::request() :
+http::request::request() :
     url_(),
     headers_(),
     body_("")
 {
 }
 
-request::~request()
+http::request::~request()
 {
     //printf("~request() %x\n", this);
 }
 
-const std::string& request::get_header(const std::string& key) const
+const std::string& http::request::get_header(const std::string& key) const
 {
     auto it = headers_.find(key);
     if(it != headers_.end()) return it->second;
     return default_value_;
 }
 
-bool request::get_header(const std::string& key, std::string& value) const
+bool http::request::get_header(const std::string& key, std::string& value) const
 {
     auto it = headers_.find(key);
     if(it != headers_.end())
@@ -242,7 +241,7 @@ bool request::get_header(const std::string& key, std::string& value) const
     return false;
 }
 
-client_context::client_context(native::net::tcp* server):
+http::client_context::client_context(native::net::tcp* server):
     parser_(),
     parser_settings_(),
     was_header_value_(true),
@@ -261,7 +260,7 @@ client_context::client_context(native::net::tcp* server):
     server->accept(socket_.get());
 }
 
-client_context::~client_context()
+http::client_context::~client_context()
 {
     if(request_)
     {
@@ -287,7 +286,7 @@ client_context::~client_context()
     }
 }
 
-bool client_context::parse(std::function<void(request&, response&)> callback)
+bool http::client_context::parse(std::function<void(request&, response&)> callback)
 {
     request_ = new request;
     response_ = new response(this, socket_.get());
