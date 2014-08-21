@@ -28,7 +28,7 @@
             'type' : 'executable',
             'dependencies': [
                 './native.gyp:node_native',
-                './gtest.gyp:gtest'
+                './gmock.gyp:gmock_main'
             ],
             'sources' : [
                 '../test/basic_test.cc'

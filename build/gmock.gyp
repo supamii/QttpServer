@@ -2,34 +2,39 @@
     'targets' : [
         #test
         {
-            'target_name' : 'gtest',
+            'target_name' : 'gmock',
             'type' : 'static_library',
+            'dependencies': [
+                './gtest.gyp:gtest'
+            ],
             'include_dirs' : [
-                '../deps/gmock/gtest/include',
-                '../deps/gmock/gtest'
+                '../deps/gmock/include',
+                '../deps/gmock'
             ],
             'sources' : [
-                '../deps/gmock/gtest/src/gtest-all.cc'
+                '../deps/gmock/src/gmock-all.cc'
             ],
             'direct_dependent_settings' : {
                 'include_dirs' : [
-                    '../deps/gmock/gtest/include'
+                    '../deps/gmock/gtest/include',
+                    '../deps/gmock/include'
                 ]
             }
         },
         #main
         {
-            'target_name' : 'gtest_main',
+            'target_name' : 'gmock_main',
             'type' : 'static_library',
             'dependencies': [
-                'gtest'
+                'gmock'
             ],
             'sources' : [
-                '../deps/gmock/gtest/src/gtest_main.cc'
+                '../deps/gmock/src/gmock_main.cc'
             ],
             'direct_dependent_settings' : {
                 'include_dirs' : [
-                    '../deps/gmock/gtest/include'
+                    '../deps/gmock/gtest/include',
+                    '../deps/gmock/include'
                 ]
             }
         }
