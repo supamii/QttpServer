@@ -4,8 +4,6 @@
 
 Please note that node.native project is <em>under heavy development</em>.
 
-<b>I'm working on the first release at [v0.1.0](https://github.com/d5/node.native/tree/v0.1.0) branch.</b>
-
 ## Sample code
 
 Simplest web-server example using node.native.
