@@ -30,17 +30,17 @@
             },
             'all_dependent_settings' : {
                 'cflags':[
-                    '-std=c++11'
+                    '-std=c++1y'
                 ]
             },
             'cflags':[
-                '-std=c++11'
+                '-std=c++1y'
             ],
             'conditions' : [
                 ['OS=="mac"', {
                     'xcode_settings': {
-                        'OTHER_CPLUSPLUSFLAGS' : ['-std=c++11', '-stdlib=libc++'],
-                        #'OTHER_LDFLAGS': ['-std=c++11', '-stdlib=libc++']
+                        'OTHER_CPLUSPLUSFLAGS' : ['-std=c++1y', '-stdlib=libc++'],
+                        #'OTHER_LDFLAGS': ['-stdlib=libc++']
                         #'ARCHS': '$(ARCHS_STANDARD_64_BIT)'
                     },
                     'link_settings': {
@@ -54,8 +54,8 @@
                     ],
                     'all_dependent_settings': {
                         'xcode_settings': {
-                            'OTHER_CPLUSPLUSFLAGS' : ['-std=c++11', '-stdlib=libc++'],
-                            #'OTHER_LDFLAGS': ['-std=c++11', '-stdlib=libc++']
+                            'OTHER_CPLUSPLUSFLAGS' : ['-std=c++1y', '-stdlib=libc++'],
+                            #'OTHER_LDFLAGS': ['-stdlib=libc++']
                             #'ARCHS': '$(ARCHS_STANDARD_64_BIT)'
                         },
                         'link_settings': {
