@@ -1,6 +1,6 @@
 # node.native 
 
-<b>node.native</b> is a [C++14](http://en.wikipedia.org/wiki/C%2B%2B14) (aka C++0y) port for [node.js](https://github.com/joyent/node). 
+<b>node.native</b> is a [C++14](http://en.wikipedia.org/wiki/C%2B%2B14) (aka C++1y) port for [node.js](https://github.com/joyent/node). 
 
 Please note that node.native project is <em>under heavy development</em>.
 
