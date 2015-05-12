@@ -1,7 +1,7 @@
 {
     'targets' : [
         #server
-        { 
+        {
             'target_name' : 'webserver',
             'type' : 'executable',
             'dependencies': [
@@ -11,8 +11,8 @@
                 '../samples/webserver.cpp'
             ]
         },
-        #client  
-        { 
+        #client
+        {
             'target_name' : 'webclient',
             'type' : 'executable',
             'dependencies': [

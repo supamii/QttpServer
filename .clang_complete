@@ -1,0 +1,5 @@
+-I ./include
+-I ./libuv/include
+-I ./http-parser
+-I ./deps/gmock/include
+-I ./deps/openssl/openssl/include

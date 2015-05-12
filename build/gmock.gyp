@@ -16,10 +16,12 @@
             ],
             'direct_dependent_settings' : {
                 'include_dirs' : [
-                    '../deps/gmock/gtest/include',
                     '../deps/gmock/include'
                 ]
-            }
+            },
+            'export_dependent_settings' : [
+                './gtest.gyp:gtest'
+            ]
         },
         #main
         {
