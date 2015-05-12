@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+# source https://github.com/libuv/libuv/blob/master/gyp_uv.py
 import glob
 import platform
 import os
@@ -18,13 +19,28 @@ project_root = os.path.normpath(script_dir)
 gyps_dir = os.path.join(project_root, 'build')
 output_dir = os.path.join(os.path.abspath(project_root), 'out')
 
-sys.path.insert(0, os.path.join(project_root, 'build', 'gyp', 'pylib'))
+root_gyp_lib = os.path.join(project_root, 'build', 'gyp')
+
+if(not os.path.exists(root_gyp_lib)):
+    try:
+        print('build/gyp is missing, trying to clone from https://chromium.googlesource.com/external/gyp.git ...')
+        proc = subprocess.Popen(['git', 'clone', 'https://chromium.googlesource.com/external/gyp.git', root_gyp_lib], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        res = proc.communicate();
+        if(res[1] and 'error' in res[1]):
+            print('error when trying to clone build/gyp:' + res[1])
+            sys.exit(42)
+        print('build/gyp imported')
+    except OSError:
+        print('You need to install gyp in build/gyp first. See the README.')
+        sys.exit(42)
+
+sys.path.insert(0, os.path.join(root_gyp_lib, 'pylib'))
 
 try:
     import gyp
 except ImportError:
-    print('You need to install gyp in build/gyp first. See the README.')
-    sys.exit(42)
+    print('error to import gyp')
+    exit(42)
 
 def host_arch():
     machine = platform.machine()
@@ -62,8 +78,8 @@ if __name__ == '__main__':
         # we force vs 2013 over others which would otherwise be the default for
         # gyp.
         # TODO: to decide
-        #if not os.environ.get('GYP_MSVS_VERSION'):
-        #    os.environ['GYP_MSVS_VERSION'] = '2013'
+        if not os.environ.get('GYP_MSVS_VERSION'):
+            os.environ['GYP_MSVS_VERSION'] = '2013'
     else:
         args.append(os.path.join(os.path.abspath(gyps_dir), 'all.gyp'))
         common_fn  = os.path.join(os.path.abspath(gyps_dir), 'common.gypi')
@@ -116,4 +132,3 @@ if __name__ == '__main__':
     gyp_args = list(args)
     print gyp_args
     run_gyp(gyp_args)
-    
