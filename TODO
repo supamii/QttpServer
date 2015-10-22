@@ -1,0 +1,3 @@
+ - To compile the current projects
+ - Remove new operator and pass directly as parameter. it may cause memory leaks.
+ - Add vm (virtual machine) to run c++ sourcecode as script by using clang and LLVM MCJIT (pure JIT is obsolete tool). Good example is cling and google native client.
