@@ -17,6 +17,7 @@ webclient.dSYM
 file_test.dSYM
 *.xcodeproj
 core.*
+/build/gyp
 build/gyp/*
 
 deps/gtest_build/*

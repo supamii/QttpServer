@@ -31,7 +31,7 @@ int startServer() {
 
 int main(int argc, char** argv) {
     QCoreApplication app(argc, argv);
-    std::thread webSvr(startServer);
+    thread webSvr(startServer);
     webSvr.detach();
     return app.exec();
 }
