@@ -18,21 +18,8 @@ int startServer() {
     // TODO: Ip interface should be configurable (later).
 
     auto result = server.listen("0.0.0.0", port, [](request& req, response& resp) {
-        QString url = QString::fromStdString(req.url().path());
-        if(url.startsWith("/test"))
-        {
-          qDebug() << "Sending event";
-
-          HttpEvent* event = new HttpEvent(&req, &resp);
-          QCoreApplication::postEvent(HttpEventHandler::getInstance(), event);
-
-        } else {
-
-          resp.set_status(400);
-          resp.set_header("Content-Type", "text/plain");
-          resp.end("Not allowed\n");
-          qDebug() << "Rejected" << url;
-        }
+        HttpEvent* event = new HttpEvent(&req, &resp);
+        QCoreApplication::postEvent(HttpEventHandler::getInstance(), event);
     });
 
     if(!result)
