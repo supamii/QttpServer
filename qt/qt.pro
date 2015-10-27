@@ -4,11 +4,15 @@ CONFIG += c++14
 
 QMAKE_CXXFLAGS += -std=gnu++0x -stdlib=libc++ -g -O0 -lm -lpthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 
-QT += core
+QT += core network
 
-HEADERS +=
+HEADERS += \
+    httpevent.h \
+    httpeventhandler.h
 
-SOURCES += $$PWD/main.cpp
+SOURCES += $$PWD/main.cpp \
+    httpevent.cpp \
+    httpeventhandler.cpp
 
 OBJECTS +=
 
