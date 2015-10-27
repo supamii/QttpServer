@@ -20,6 +20,7 @@ core.*
 /build/gyp
 build/gyp/*
 
+*.swp
 deps/gtest_build/*
 /build-qt-Desktop_Qt_5_4_0_clang_64bit-Debug/
 /.settings/
