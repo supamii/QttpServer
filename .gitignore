@@ -25,4 +25,4 @@ deps/gtest_build/*
 /.settings/
 *.o
 *.a
-/.DS_Store
+*.DS_Store
