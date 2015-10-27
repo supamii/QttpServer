@@ -38,6 +38,11 @@ bool HttpEventHandler::eventFilter(QObject* /* object */, QEvent* event)
     request* req = httpEvent->getData().first;
     response* resp = httpEvent->getData().second;
 
+    if(!req || !resp)
+    {
+    	qWarning() << "Request or response is NULL";
+    }
+
     QString url = QString::fromStdString(req->url().path());
     if(url.startsWith("/test"))
     {
