@@ -7,7 +7,7 @@
 
 class HttpEvent : public QEvent
 {
-public:
+  public:
     HttpEvent();
     HttpEvent(std::pair<native::http::request*, native::http::response*>);
     HttpEvent(native::http::request*, native::http::response*);
@@ -17,8 +17,8 @@ public:
     std::pair<native::http::request*, native::http::response*>& getData();
     std::pair<native::http::request*, native::http::response*> getData() const;
 
-private:
-    std::pair<native::http::request*, native::http::response*> data;
+  private:
+    std::pair<native::http::request*, native::http::response*> m_Data;
 };
 
 #endif // HTTPEVENT_H

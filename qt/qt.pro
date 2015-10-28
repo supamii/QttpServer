@@ -8,11 +8,11 @@ QT += core network
 
 HEADERS += \
     httpevent.h \
-    httpeventhandler.h
+    httpserver.h
 
 SOURCES += $$PWD/main.cpp \
     httpevent.cpp \
-    httpeventhandler.cpp
+    httpserver.cpp
 
 OBJECTS +=
 

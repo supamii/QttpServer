@@ -364,6 +364,8 @@ bool http::client_context::parse(std::function<void(request&, response&)> callba
     parser_settings_.on_message_complete = [](http_parser* parser) {
         //printf("on_message_complete, so invoke the callback.\n");
         auto client = reinterpret_cast<client_context*>(parser->data);
+        std::string method = http_method_str((http_method)parser->method);
+        client->request_->method_.swap(method);
         // invoke stored callback object
         callbacks::invoke<decltype(callback)>(client->callback_lut_, 0, *client->request_, *client->response_);
         return 1; // 0 or 1?
@@ -379,7 +381,7 @@ bool http::client_context::parse(std::function<void(request&, response&)> callba
 
     return true;
 }
-            
+
 http::http::http() : socket_(new native::net::tcp)
 {
 }
