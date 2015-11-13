@@ -96,13 +96,14 @@ namespace native
             const url_obj& url() const { return url_; }
             const std::string& get_header(const std::string& key) const;
             bool get_header(const std::string& key, std::string& value) const;
-            std::string get_body (void) {return body_; }
+            std::string get_body (void) const { return body_.str(); }
+            std::stringstream& get_raw_body (void) { return body_; }
             const std::string& get_method (void) const {return method_; }
 
         private:
             url_obj url_;
             std::map<std::string, std::string, native::text::ci_less> headers_;
-            std::string body_;
+            std::stringstream body_;
             std::string default_value_;
             std::string method_;
         };

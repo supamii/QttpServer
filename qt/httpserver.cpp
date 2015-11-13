@@ -62,14 +62,14 @@ function<void(request*, response*)> HttpServer::defaultCallback() const
     {
       qDebug() << "Sending event";
 
-      // const auto body = req->get_body();
       resp->set_status(200);
       resp->set_header("Content-Type", "text/plain");
 
       QNetworkAccessManager* netMgr = new QNetworkAccessManager();
       QObject::connect(netMgr, &QNetworkAccessManager::finished, [req, resp](QNetworkReply* reply)
       {
-        qDebug() << "QNetworkAccessManager::finished" << reply->readAll();
+        const auto body = req->get_body();
+        qDebug() << "QNetworkAccessManager::finished" << body.c_str();
         resp->end("C++ FTW\n");
       });
       netMgr->get(QNetworkRequest(QUrl("http://www.qt.io")));
@@ -86,7 +86,7 @@ function<void(request*, response*)> HttpServer::defaultCallback() const
 
 bool HttpServer::eventFilter(QObject* /* object */, QEvent* event)
 {
-  if (!event || event->type() != QEvent::None)
+  if(!event || event->type() != QEvent::None)
   {
     return false;
   }

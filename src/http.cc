@@ -215,7 +215,7 @@ std::string http::response::get_status_text(int status)
 http::request::request() :
     url_(),
     headers_(),
-    body_("")
+    body_()
 {
 }
 
@@ -358,7 +358,7 @@ bool http::client_context::parse(std::function<void(request&, response&)> callba
     parser_settings_.on_body = [](http_parser* parser, const char* at, size_t len) {
         //printf("on_body, len of 'char* at' is %d\n", len);
         auto client = reinterpret_cast<client_context*>(parser->data);
-        client->request_->body_ = std::string(at, len);
+        client->request_->body_.write(at, len);
         return 0;
     };
     parser_settings_.on_message_complete = [](http_parser* parser) {
