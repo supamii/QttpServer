@@ -7,6 +7,7 @@ QMAKE_CXXFLAGS += -std=gnu++0x -stdlib=libc++ -g -O0 -lm -lpthread -D_LARGEFILE_
 QT += core network
 
 include($$PWD/qttp/qttp.pri)
+include($$PWD/config/config.pri)
 
 HEADERS +=
 
