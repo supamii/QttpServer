@@ -12,11 +12,14 @@ int main(int argc, char** argv)
 {
   QCoreApplication app(argc, argv);
 
-  // Make sure we initialize in the main thread.
+  // Always initialize in the main thread.
   HttpServer::getInstance();
 
   thread webSvr(HttpServer::start);
   webSvr.detach();
 
-  return app.exec();
+  auto result = app.exec();
+
+  // TODO: Shutdown the webserver.
+  return result;
 }

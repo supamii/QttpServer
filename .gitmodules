@@ -1,6 +1,9 @@
 [submodule "libuv"]
-	path = libuv
+	path = deps/libuv
 	url = https://github.com/libuv/libuv.git
 [submodule "http-parser"]
-	path = http-parser
-	url = http://github.com/joyent/http-parser.git
+	path = deps/http-parser
+	url = https://github.com/nodejs/http-parser.git
+[submodule "mongo-cxx-driver"]
+	path = deps/mongo
+	url = https://github.com/mongodb/mongo-cxx-driver.git
