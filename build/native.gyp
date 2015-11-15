@@ -5,27 +5,27 @@
             'target_name' : 'node_native',
             'type' : 'static_library',
             'dependencies': [
-                '../libuv/uv.gyp:libuv',
-                '../http-parser/http_parser.gyp:http_parser'
+                '../deps/libuv/uv.gyp:libuv',
+                '../deps/http-parser/http_parser.gyp:http_parser'
             ],
             'include_dirs' : [
-                '../libuv/include',
-                '../http-parser',
-                '../http/include'
+                '../deps/libuv/include',
+                '../deps/http-parser',
+                '../deps/http/include'
             ],
             'sources' : [
-                '../http/src/loop.cc',
-                '../http/src/stream.cc',
-                '../http/src/handle.cc',
-                '../http/src/net.cc',
-                '../http/src/tcp.cc',
-                '../http/src/http.cc'
+                '../deps/http/src/loop.cc',
+                '../deps/http/src/stream.cc',
+                '../deps/http/src/handle.cc',
+                '../deps/http/src/net.cc',
+                '../deps/http/src/tcp.cc',
+                '../deps/http/src/http.cc'
             ],
             'direct_dependent_settings' : {
                 'include_dirs' : [
-                    '../http/include',
-                    '../libuv/include',
-                    '../http-parser'
+                    '../deps/http/include',
+                    '../deps/libuv/include',
+                    '../deps/http-parser'
                 ]
             },
             'all_dependent_settings' : {
