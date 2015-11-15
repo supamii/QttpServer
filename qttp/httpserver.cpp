@@ -56,9 +56,15 @@ void HttpServer::setEventCallback(function<void(request*, response*)> eventCallb
 
 function<void(request*, response*)> HttpServer::defaultCallback() const
 {
-  return [](request* req, response* resp) {
-    QString url = QString::fromStdString(req->url().path());
+  return [](request* /* req */, response* resp) {
+
+    resp->set_status(200);
+    resp->set_header("Content-Type", "text/plain");
+    resp->end("C++ FTW\n");
+
+    /*
     qDebug() << "http method" << req->get_method().c_str();
+    QString url = QString::fromStdString(req->url().path());
     if(url.startsWith("/test"))
     {
       qDebug() << "Sending event";
@@ -82,6 +88,7 @@ function<void(request*, response*)> HttpServer::defaultCallback() const
       resp->end("Not allowed\n");
       qDebug() << "Rejected" << url;
     }
+    /**/
   };
 }
 
