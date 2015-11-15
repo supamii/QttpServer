@@ -11,19 +11,19 @@
             'include_dirs' : [
                 '../libuv/include',
                 '../http-parser',
-                '../include'
+                '../http/include'
             ],
             'sources' : [
-                '../src/loop.cc',
-                '../src/stream.cc',
-                '../src/handle.cc',
-                '../src/net.cc',
-                '../src/tcp.cc',
-                '../src/http.cc'
+                '../http/src/loop.cc',
+                '../http/src/stream.cc',
+                '../http/src/handle.cc',
+                '../http/src/net.cc',
+                '../http/src/tcp.cc',
+                '../http/src/http.cc'
             ],
             'direct_dependent_settings' : {
                 'include_dirs' : [
-                    '../include',
+                    '../http/include',
                     '../libuv/include',
                     '../http-parser'
                 ]
