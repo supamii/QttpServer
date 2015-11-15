@@ -2,17 +2,26 @@
 
 <b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/node.native).  Intended as an alternative to [QHttpServer](https://github.com/nikhilm/qhttpserver), this is ideal for those who want the benefits of libuv with basic Qt libraries.
 
-### Build
+### Start
 
-To compile included sample application(webserver.cpp) first run the following command in the project directory:
 ```bash
+git clone https://github.com/supamii/QttpServer
+```
+
+Git submodules/dependencies:
+```base
 git submodule update --init
 ```
-then generate the build files and compile:
-```bash
+
+Generate build files and compile to ./out/ folder
+```base
 ./build.py
 make -C out
 ```
+
+Launch `qttp.pro` with Qt Creator
+
+### Notes
 build.py will try to download build dependencies (gyp) if missing.
 If you prefer to download manually you can do:
 ```bash
