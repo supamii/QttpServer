@@ -5,15 +5,15 @@
             'target_name' : 'gtest',
             'type' : 'static_library',
             'include_dirs' : [
-                '../deps/gmock/gtest/include',
-                '../deps/gmock/gtest'
+                '../lib/gmock/gtest/include',
+                '../lib/gmock/gtest'
             ],
             'sources' : [
-                '../deps/gmock/gtest/src/gtest-all.cc'
+                '../lib/gmock/gtest/src/gtest-all.cc'
             ],
             'direct_dependent_settings' : {
                 'include_dirs' : [
-                    '../deps/gmock/gtest/include'
+                    '../lib/gmock/gtest/include'
                 ]
             }
         },
@@ -25,11 +25,11 @@
                 'gtest'
             ],
             'sources' : [
-                '../deps/gmock/gtest/src/gtest_main.cc'
+                '../lib/gmock/gtest/src/gtest_main.cc'
             ],
             'direct_dependent_settings' : {
                 'include_dirs' : [
-                    '../deps/gmock/gtest/include'
+                    '../lib/gmock/gtest/include'
                 ]
             }
         }

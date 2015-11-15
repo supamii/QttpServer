@@ -8,15 +8,15 @@
                 './gtest.gyp:gtest'
             ],
             'include_dirs' : [
-                '../deps/gmock/include',
-                '../deps/gmock'
+                '../lib/gmock/include',
+                '../lib/gmock'
             ],
             'sources' : [
-                '../deps/gmock/src/gmock-all.cc'
+                '../lib/gmock/src/gmock-all.cc'
             ],
             'direct_dependent_settings' : {
                 'include_dirs' : [
-                    '../deps/gmock/include'
+                    '../lib/gmock/include'
                 ]
             },
             'export_dependent_settings' : [
@@ -31,12 +31,12 @@
                 'gmock'
             ],
             'sources' : [
-                '../deps/gmock/src/gmock_main.cc'
+                '../lib/gmock/src/gmock_main.cc'
             ],
             'direct_dependent_settings' : {
                 'include_dirs' : [
-                    '../deps/gmock/gtest/include',
-                    '../deps/gmock/include'
+                    '../lib/gmock/gtest/include',
+                    '../lib/gmock/include'
                 ]
             }
         }

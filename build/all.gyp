@@ -8,7 +8,7 @@
                 './native.gyp:node_native'
             ],
             'sources' : [
-                '../deps/http/samples/webserver.cpp'
+                '../lib/http/samples/webserver.cpp'
             ]
         },
         #client
@@ -19,7 +19,7 @@
                 './native.gyp:node_native'
             ],
             'sources' : [
-                '../deps/http/samples/webclient.cpp'
+                '../lib/http/samples/webclient.cpp'
             ]
         },
         #test
@@ -31,7 +31,7 @@
                 './gmock.gyp:gmock_main'
             ],
             'sources' : [
-                '../deps/http/test/basic_test.cc'
+                '../lib/http/test/basic_test.cc'
             ]
         }
     ]

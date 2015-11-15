@@ -18,11 +18,11 @@ OBJECTS +=
 LIBS += -luv -lhttp_parser -lnode_native
 
 INCLUDEPATH += \
-    $$PWD/http-parser \
-    $$PWD/libuv/ \
-    $$PWD/libuv/include \
-    $$PWD/http/include \
-    $$PWD/http/include/native \
+    $$PWD/lib/http-parser \
+    $$PWD/lib/libuv/ \
+    $$PWD/lib/libuv/include \
+    $$PWD/lib/http/include \
+    $$PWD/lib/http/include/native \
     $$PWD/qttp/
 
 unix:!macx {
