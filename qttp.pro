@@ -14,11 +14,7 @@ SOURCES += $$PWD/main.cpp
 
 OBJECTS +=
 
-LIBS += -framework CoreFoundation -framework CoreServices
-
-LIBS += -L$$PWD/out/Debug -luv -lhttp_parser -lnode_native
-
-PRE_TARGETDEPS += $$PWD/out/Debug/libuv.a
+LIBS += -luv -lhttp_parser -lnode_native
 
 INCLUDEPATH += \
     $$PWD/http-parser \
@@ -28,6 +24,26 @@ INCLUDEPATH += \
     $$PWD/http/include/native \
     $$PWD/qttp/
 
-DEPENDPATH += $$PWD/out/Debug
+unix:!macx {
 
+}
 
+macx: {
+    LIBS += -framework CoreFoundation -framework CoreServices
+}
+
+win {
+
+}
+
+CONFIG(debug, debug|release) {
+    LIBS += -L$$PWD/out/Debug
+    PRE_TARGETDEPS += $$PWD/out/Debug/libuv.a
+    DEPENDPATH += $$PWD/out/Debug
+    DESTDIR = $$PWD/out/qtdebug
+} else {
+    LIBS += -L$$PWD/out/Release
+    PRE_TARGETDEPS += $$PWD/out/Release/libuv.a
+    DEPENDPATH += $$PWD/out/Release
+    DESTDIR = $$PWD/out/qtrelease
+}

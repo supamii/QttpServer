@@ -6,7 +6,8 @@ using namespace native::http;
 
 unique_ptr<HttpServer> HttpServer::m_Instance(nullptr);
 
-HttpServer* HttpServer::getInstance() {
+HttpServer* HttpServer::getInstance()
+{
   if(m_Instance.get() == nullptr) {
       m_Instance.reset(new HttpServer());
   }
