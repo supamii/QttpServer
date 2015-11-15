@@ -6,7 +6,7 @@
 
 1. [git](http://git-scm.com/)
 2. [python 2.x](https://www.python.org/)
-4. [scons](http://www.scons.org/)
+3. TBD - [scons](http://www.scons.org/) (Only for mongodb driver)
 
 ### Start
 
@@ -33,7 +33,9 @@ build.py will try to download build dependencies (gyp) if missing.
 If you prefer to download manually you can do:
 ```bash
 $ git clone https://chromium.googlesource.com/external/gyp.git build/gyp
+```
 OR
+```bash
 $ svn co http://gyp.googlecode.com/svn/trunk build/gyp
 ```
 by default will generate for make file. if you want to generate for a specific build tool use `-f <buildtool>`. e.x:
