@@ -2,13 +2,20 @@
 
 <b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/node.native).  Intended as an alternative to [QHttpServer](https://github.com/nikhilm/qhttpserver), this is ideal for those who want the benefits of libuv with basic Qt libraries.
 
+### Prerequisites
+
+1. [git](http://git-scm.com/)
+2. [python 2.x](https://www.python.org/)
+4. [scons](http://www.scons.org/)
+
 ### Start
 
 ```bash
 git clone https://github.com/supamii/QttpServer
+cd QttpServer
 ```
 
-Git submodules/dependencies:
+Git submodules/dependencies automatically pulls in mongodb-drivers, boost, libuv, http-parser
 ```base
 git submodule update --init
 ```
