@@ -6,7 +6,6 @@
 
 1. [git](http://git-scm.com/)
 2. [python 2.x](https://www.python.org/)
-3. TBD - [scons](http://www.scons.org/) (Only for mongodb driver)
 
 ### Start
 
@@ -27,6 +26,18 @@ make -C out
 ```
 
 Launch `qttp.pro` with Qt Creator
+
+### Optional
+
+Build MongoDb driver
+
+1. Install [scons](http://www.scons.org/) `brew install scons`
+2. Install [boost](https://github.com/mongodb/mongo-cxx-driver/wiki/Download-and-Compile-the-Legacy-Driver) - Recommend using brew, apt-get, or the binary installer.  e.g. `brew search boost`  `brew install homebrew/versions/boost155`
+3. Build driver
+```bash
+cd QttpServer/lib/mongo-cxx-driver
+scons --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/include
+```
 
 ### Notes
 build.py will try to download build dependencies (gyp) if missing.

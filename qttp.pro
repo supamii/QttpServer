@@ -1,5 +1,8 @@
 TEMPLATE = app
 
+#LDFLAGS:  -L/usr/local/opt/boost155/lib
+#CPPFLAGS: -I/usr/local/opt/boost155/include
+
 CONFIG += c++14
 
 QMAKE_CXXFLAGS += -std=gnu++0x -stdlib=libc++ -g -O0 -lm -lpthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
