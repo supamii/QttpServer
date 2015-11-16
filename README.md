@@ -31,12 +31,13 @@ Launch `qttp.pro` with Qt Creator
 
 Build MongoDb driver
 
-1. Install [scons](http://www.scons.org/) `brew install scons`
-2. Install [boost](https://github.com/mongodb/mongo-cxx-driver/wiki/Download-and-Compile-the-Legacy-Driver) - Recommend using brew, apt-get, or the binary installer.  e.g. `brew search boost`  `brew install homebrew/versions/boost155`
-3. Build driver
+1. Install [scons](http://www.scons.org/) - e.g. `brew install scons`
+2. Install [boost](https://github.com/mongodb/mongo-cxx-driver/wiki/Download-and-Compile-the-Legacy-Driver) - e.g. `brew search boost`  `brew install homebrew/versions/boost155` Generally recommend using brew, apt-get, or the binary installer
+3. Build the driver!
 ```bash
 cd QttpServer/lib/mongo-cxx-driver
 scons --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/include
+# On mac contents may be under QttpServer/lib/mongo-cxx-driver/build/darwin/normal
 ```
 
 ### Notes
