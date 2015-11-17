@@ -1,2 +1,4 @@
-HEADERS += $$PWD/*.h
-SOURCES += $$PWD/*.cpp
+HEADERS += $$PWD/*.h \
+    $$PWD/configuration.h
+SOURCES += $$PWD/*.cpp \
+    $$PWD/configuration.cpp

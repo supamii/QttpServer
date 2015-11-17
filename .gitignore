@@ -64,6 +64,10 @@ Thumbs.db
 *.rc
 /.qmake.cache
 /.qmake.stash
+.qmake.cache*
+.qmake.stash*
+
+/build-test-Desktop*
 
 # qtcreator generated files
 *.pro.user*

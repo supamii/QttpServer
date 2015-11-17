@@ -37,5 +37,6 @@ cd QttpServer/lib/mongo-cxx-driver
 scons --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/include
 # On mac contents may be under QttpServer/lib/mongo-cxx-driver/build/darwin/normal
 ```
-4. For more information visit the [mongodb site](https://docs.mongodb.org/getting-started/cpp/client/)
+
+For more information visit the [mongodb site](https://docs.mongodb.org/getting-started/cpp/client/)
 

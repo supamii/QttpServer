@@ -7,6 +7,7 @@
 #include "httpserver.h"
 
 using namespace std;
+using namespace qttp;
 using namespace native::http;
 
 int main(int argc, char** argv)

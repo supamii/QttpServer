@@ -6,13 +6,16 @@
 #include <http.h>
 #include <functional>
 
+namespace qttp
+{
+
 class HttpServer : public QObject
 {
   Q_OBJECT
 
   public:
     static HttpServer* getInstance();
-    ~HttpServer();
+    virtual ~HttpServer();
 
     /**
      * @brief A statically accessible function to kick off the libuv event loop.
@@ -52,5 +55,7 @@ class HttpServer : public QObject
     static std::unique_ptr<HttpServer> m_Instance;
     std::function<void(native::http::request*, native::http::response*)> m_EventCallback;
 };
+
+} // End namespace qttp
 
 #endif // HTTPSERVER_H

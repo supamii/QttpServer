@@ -1,6 +1,7 @@
 #include "httpevent.h"
 
 using namespace std;
+using namespace qttp;
 using namespace native::http;
 
 HttpEvent::HttpEvent() : QEvent(QEvent::None), m_Data()
@@ -17,7 +18,6 @@ HttpEvent::HttpEvent(request* req, response* resp) : QEvent(QEvent::None), m_Dat
 
 HttpEvent::~HttpEvent()
 {
-
 }
 
 void HttpEvent::setData(const pair<request*, response*>& data)

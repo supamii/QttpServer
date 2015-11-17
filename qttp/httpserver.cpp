@@ -2,6 +2,7 @@
 #include "httpserver.h"
 
 using namespace std;
+using namespace qttp;
 using namespace native::http;
 
 unique_ptr<HttpServer> HttpServer::m_Instance(nullptr);
@@ -27,16 +28,14 @@ int HttpServer::start()
 {
   http server;
 
-  // TODO: Ip interface should be configurable (later).
+  // TODO: Ip interface should be configurable using globals.json
 
   auto ip = "0.0.0.0";
   auto port = 8080;
 
   auto result = server.listen(ip, port, [](request& req, response& resp) {
-
     HttpEvent* event = new HttpEvent(&req, &resp);
     QCoreApplication::postEvent(HttpServer::getInstance(), event);
-
   });
 
   if(!result)
@@ -56,39 +55,15 @@ void HttpServer::setEventCallback(function<void(request*, response*)> eventCallb
 
 function<void(request*, response*)> HttpServer::defaultCallback() const
 {
+  // TODO:
+  // Route mapping scheme
+  // Pre and Post processors
+
   return [](request* /* req */, response* resp) {
 
     resp->set_status(200);
     resp->set_header("Content-Type", "text/plain");
     resp->end("C++ FTW\n");
-
-    /*
-    qDebug() << "http method" << req->get_method().c_str();
-    QString url = QString::fromStdString(req->url().path());
-    if(url.startsWith("/test"))
-    {
-      qDebug() << "Sending event";
-
-      resp->set_status(200);
-      resp->set_header("Content-Type", "text/plain");
-
-      QNetworkAccessManager* netMgr = new QNetworkAccessManager();
-      QObject::connect(netMgr, &QNetworkAccessManager::finished, [req, resp](QNetworkReply* reply)
-      {
-        const auto body = req->get_body();
-        qDebug() << "QNetworkAccessManager::finished" << body.c_str();
-        resp->end("C++ FTW\n");
-      });
-      netMgr->get(QNetworkRequest(QUrl("http://www.qt.io")));
-
-    } else {
-
-      resp->set_status(400);
-      resp->set_header("Content-Type", "text/plain");
-      resp->end("Not allowed\n");
-      qDebug() << "Rejected" << url;
-    }
-    /**/
   };
 }
 
@@ -116,6 +91,3 @@ bool HttpServer::eventFilter(QObject* /* object */, QEvent* event)
   m_EventCallback(req, resp);
   return true;
 }
-
-// Route mapping scheme
-// Pre and Post processors
