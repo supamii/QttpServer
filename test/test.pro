@@ -12,7 +12,7 @@ include($$PWD/../qttp/qttp.pri)
 HEADERS +=
 
 SOURCES += \
-    test.cpp
+    testHttpServer.cpp
 
 OBJECTS +=
 
