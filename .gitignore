@@ -68,6 +68,7 @@ Thumbs.db
 .qmake.stash*
 
 /build-test-Desktop*
+/lib/build-qredisclient*
 
 # qtcreator generated files
 *.pro.user*

@@ -1,4 +1,4 @@
-# Qttp Server
+# QttpServer
 
 <b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/node.native).  Intended as an alternative to [QHttpServer](https://github.com/nikhilm/qhttpserver), this is ideal for those who want the benefits of libuv with basic Qt libraries.
 
@@ -38,5 +38,5 @@ scons --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/in
 # On mac contents may be under QttpServer/lib/mongo-cxx-driver/build/darwin/normal
 ```
 
-For more information visit the [mongodb site](https://docs.mongodb.org/getting-started/cpp/client/)
+For more information visit [mongodb.org](https://docs.mongodb.org/getting-started/cpp/client/)
 
