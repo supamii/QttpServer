@@ -6,6 +6,7 @@
 
 1. [git](http://git-scm.com/)
 2. [python 2.x](https://www.python.org/)
+3. [qt installer](http://www.qt.io/download/) or [from source](http://doc.qt.io/qt-5/linux-building.html)
 
 ## Start
 
