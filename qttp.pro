@@ -1,7 +1,5 @@
 TEMPLATE = app
 
-QMAKE_CXXFLAGS += -std=gnu++0x -stdlib=libc++ -g -O0 -lm -lpthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
-
 QT += core network
 
 include($$PWD/config/config.pri)
@@ -34,16 +32,20 @@ INCLUDEPATH += \
     $$PWD/lib/http/include/native \
     $$PWD/qttp
 
+QMAKE_CXXFLAGS += -stdlib=libc++ -g -O0 -lm -lpthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+
 unix: {
 }
 
 macx: {
     LIBS += -framework CoreFoundation -framework CoreServices
     CONFIG += c++14
+    QMAKE_CXXFLAGS += -std=gnu++0x
 }
 
 unix:!macx {
-	CONFIG += c++0x
+    CONFIG += c++0x
+    QMAKE_CXXFLAGS += -std=c++0x
 }
 
 win {
