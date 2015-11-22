@@ -32,7 +32,7 @@ INCLUDEPATH += \
     $$PWD/lib/http/include/native \
     $$PWD/qttp
 
-QMAKE_CXXFLAGS += -stdlib=libc++ -g -O0 -lm -lpthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+QMAKE_CXXFLAGS += -g -O0 -lm -lpthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 
 unix: {
 }
@@ -40,12 +40,12 @@ unix: {
 macx: {
     LIBS += -framework CoreFoundation -framework CoreServices
     CONFIG += c++14
-    QMAKE_CXXFLAGS += -std=gnu++0x
+    QMAKE_CXXFLAGS += -std=gnu++0x -stdlib=libc++
 }
 
 unix:!macx {
     CONFIG += c++0x
-    QMAKE_CXXFLAGS += -std=c++0x
+    QMAKE_CXXFLAGS += -std=c++0x -stdlib=libc++0x
 }
 
 win {
