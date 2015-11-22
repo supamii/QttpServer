@@ -1,7 +1,5 @@
 TEMPLATE = app
 
-CONFIG += c++14
-
 QMAKE_CXXFLAGS += -std=gnu++0x -stdlib=libc++ -g -O0 -lm -lpthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 
 QT += core network
@@ -41,9 +39,11 @@ unix: {
 
 macx: {
     LIBS += -framework CoreFoundation -framework CoreServices
+    CONFIG += c++14
 }
 
 unix:!macx {
+	CONFIG += c++0x
 }
 
 win {
@@ -53,8 +53,16 @@ CONFIG(debug, debug|release) {
     LIBS += -L$$PWD/out/Debug
     DEPENDPATH += $$PWD/out/Debug
     DESTDIR = $$PWD/out/qtdebug
+    OBJECT_DIRS = $$PWD/out/qtdebug
+    MOC_DIR = $$PWD/out/qtdebug
+    RCC_DIR = $$PWD/out/qtdebug
+    UI_DIR = $$PWD/out/qtdebug
 } else {
     LIBS += -L$$PWD/out/Release
     DEPENDPATH += $$PWD/out/Release
     DESTDIR = $$PWD/out/qtrelease
+    OBJECT_DIRS = $$PWD/out/qtrelease
+    MOC_DIR = $$PWD/out/qtrelease
+    RCC_DIR = $$PWD/out/qtrelease
+    UI_DIR = $$PWD/out/qtrelease
 }
