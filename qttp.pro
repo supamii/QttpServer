@@ -43,13 +43,8 @@ macx: {
 
 unix:!macx {
     CONFIG += c++0x
-
     # This supports GCC 4.7
     QMAKE_CXXFLAGS += -std=c++0x
-
-    # For some reason Ubuntu 12 LTS doesn't jive with only the static lib
-    debug:OBJECTS += $$PWD/out/Debug/obj.target/http_parser/lib/http-parser/http_parser.o
-    release:OBJECTS += $$PWD/out/Release/obj.target/http_parser/lib/http-parser/http_parser.o
 }
 
 win {
@@ -64,6 +59,10 @@ CONFIG(debug, debug|release) {
     MOC_DIR = $$PWD/out/qtdebug
     RCC_DIR = $$PWD/out/qtdebug
     UI_DIR = $$PWD/out/qtdebug
+    unix:!macx {
+        # For some reason Ubuntu 12 LTS doesn't jive with only the static lib
+        OBJECTS += $$PWD/out/Debug/obj.target/http_parser/lib/http-parser/http_parser.o
+    }
 } else {
     LIBS += -L$$PWD/out/Release
     DEPENDPATH += $$PWD/out/Release
@@ -72,4 +71,7 @@ CONFIG(debug, debug|release) {
     MOC_DIR = $$PWD/out/qtrelease
     RCC_DIR = $$PWD/out/qtrelease
     UI_DIR = $$PWD/out/qtrelease
+    unix:!macx {
+        OBJECTS += $$PWD/out/Release/obj.target/http_parser/lib/http-parser/http_parser.o
+    }
 }
