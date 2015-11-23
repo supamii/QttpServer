@@ -54,17 +54,17 @@ win {
 CONFIG(debug, debug|release) {
     LIBS += -L$$PWD/out/Debug
     DEPENDPATH += $$PWD/out/Debug
-    DESTDIR = $$PWD/out/qtdebug
-    OBJECTS_DIR = $$PWD/out/qtdebug
-    MOC_DIR = $$PWD/out/qtdebug
-    RCC_DIR = $$PWD/out/qtdebug
-    UI_DIR = $$PWD/out/qtdebug
+    DESTDIR = $$PWD/out/Debug
+    OBJECTS_DIR = $$PWD/out/Debug
+    MOC_DIR = $$PWD/out/Debug
+    RCC_DIR = $$PWD/out/Debug
+    UI_DIR = $$PWD/out/Debug
 } else {
     LIBS += -L$$PWD/out/Release
     DEPENDPATH += $$PWD/out/Release
-    DESTDIR = $$PWD/out/qtrelease
-    OBJECTS_DIR = $$PWD/out/qtrelease
-    MOC_DIR = $$PWD/out/qtrelease
-    RCC_DIR = $$PWD/out/qtrelease
-    UI_DIR = $$PWD/out/qtrelease
+    DESTDIR = $$PWD/out/Release
+    OBJECTS_DIR = $$PWD/out/Release
+    MOC_DIR = $$PWD/out/Release
+    RCC_DIR = $$PWD/out/Release
+    UI_DIR = $$PWD/out/Release
 }
