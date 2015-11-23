@@ -30,11 +30,11 @@
             },
             'all_dependent_settings' : {
                 'cflags':[
-                    '-std=c++1y'
+                    '-std=c++0x'
                 ]
             },
             'cflags':[
-                '-std=c++1y'
+                '-std=c++0x'
             ],
             'conditions' : [
                 ['OS=="mac"', {

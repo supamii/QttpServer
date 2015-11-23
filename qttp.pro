@@ -12,8 +12,6 @@ SOURCES += \
     $$PWD/main.cpp \
     $$PWD/src/*.cpp
 
-OBJECTS +=
-
 LIBS += -luv -lhttp_parser -lnode_native
 
 #LIBS += -mongoclient -L$$PWD/lib/mongo-cxx-driver/build/darwin/normal
@@ -45,26 +43,33 @@ macx: {
 
 unix:!macx {
     CONFIG += c++0x
+
+    # This supports GCC 4.7
     QMAKE_CXXFLAGS += -std=c++0x
+
+    # For some reason Ubuntu 12 LTS doesn't jive with only the static lib
+    debug:OBJECTS += $$PWD/out/Debug/obj.target/http_parser/lib/http-parser/http_parser.o
+    release:OBJECTS += $$PWD/out/Release/obj.target/http_parser/lib/http-parser/http_parser.o
 }
 
 win {
+	# We need some TLC later in this section
 }
 
 CONFIG(debug, debug|release) {
     LIBS += -L$$PWD/out/Debug
     DEPENDPATH += $$PWD/out/Debug
-    DESTDIR = $$PWD/out/Debug
-    OBJECTS_DIR = $$PWD/out/Debug
-    MOC_DIR = $$PWD/out/Debug
-    RCC_DIR = $$PWD/out/Debug
-    UI_DIR = $$PWD/out/Debug
+    DESTDIR = $$PWD/out/qtdebug
+    OBJECTS_DIR = $$PWD/out/qtdebug
+    MOC_DIR = $$PWD/out/qtdebug
+    RCC_DIR = $$PWD/out/qtdebug
+    UI_DIR = $$PWD/out/qtdebug
 } else {
     LIBS += -L$$PWD/out/Release
     DEPENDPATH += $$PWD/out/Release
-    DESTDIR = $$PWD/out/Release
-    OBJECTS_DIR = $$PWD/out/Release
-    MOC_DIR = $$PWD/out/Release
-    RCC_DIR = $$PWD/out/Release
-    UI_DIR = $$PWD/out/Release
+    DESTDIR = $$PWD/out/qtrelease
+    OBJECTS_DIR = $$PWD/out/qtrelease
+    MOC_DIR = $$PWD/out/qtrelease
+    RCC_DIR = $$PWD/out/qtrelease
+    UI_DIR = $$PWD/out/qtrelease
 }
