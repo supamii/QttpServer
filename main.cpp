@@ -17,7 +17,12 @@ int main(int argc, char** argv)
   // mongo::client::initialize();
 
   // Always initialize in the main thread.
-  HttpServer::getInstance();
+  HttpServer* httpSvr = HttpServer::getInstance();
+
+  // Uses prototype pattern to instantiate obj.
+  // httpSvr->addAction<Class>();
+  // httpSvr->addAction("actionName", std::function);
+  // httpSvr->registerRoute("myroute/here", "actionName");
 
   thread webSvr(HttpServer::start);
   webSvr.detach();

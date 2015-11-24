@@ -25,6 +25,7 @@ Generate build files and compile to ./out/ folder
 ./build.py
 make -C out
 ```
+
 Generate makefile and compile to ./out/qtdebug/ or ./out/qtrelease/ or launch `qttp.pro` with Qt Creator
 ```bash
 qmake CONFIG+=debug qttp.pro
