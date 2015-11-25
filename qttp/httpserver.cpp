@@ -55,31 +55,34 @@ void HttpServer::setEventCallback(function<void(request*, response*)> eventCallb
 
 function<void(request*, response*)> HttpServer::defaultCallback() const
 {
-  // TODO:
-  // Pre and Post processors
-
+  // TODO: Pre and Post processors?
   // TODO: Perhaps should lock/wrap m_Routes to guarantee atomicity.
+  // TODO: We could optimize by reducing a double-lookup on routes to actions.
+
   return [this](request* req, response* resp)
   {
-    auto callback = this->m_ActionCallbacks.find(req->url().path());
-    if(callback != this->m_ActionCallbacks.end())
+    auto lookup = m_Routes.find(req->url().path());
+    if(lookup != m_Routes.end())
     {
-      callback->second(req, resp);
-      return;
-    }
+      auto callback = this->m_ActionCallbacks.find(lookup->second);
+      if(callback != this->m_ActionCallbacks.end())
+      {
+        callback->second(req, resp);
+        return;
+      }
 
-    auto action = this->m_Actions.find(req->url().path());
-    if(action != this->m_Actions.end() && action->second.get() != nullptr)
-    {
-      action->second->onAction(req, resp);
-      return;
+      auto action = this->m_Actions.find(lookup->second);
+      if(action != this->m_Actions.end() && action->second.get() != nullptr)
+      {
+        action->second->onAction(req, resp);
+        return;
+      }
     }
     else
     {
       resp->set_status(200);
       resp->set_header("Content-Type", "text/plain");
       resp->end("C++ FTW\n");
-      return;
     }
   };
 }
