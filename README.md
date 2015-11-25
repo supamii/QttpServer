@@ -32,7 +32,37 @@ qmake CONFIG+=debug qttp.pro
 make
 ```
 
-##### Build MongoDb driver (optional)
+## Example
+
+```c++
+  HttpServer* httpSvr = HttpServer::getInstance();
+
+  // Example 1 - Uses a raw std::function based callback.
+  httpSvr->addAction("test", [](native::http::request*, native::http::response* resp) {
+    resp->set_status(200);
+    resp->set_header("Content-Type", "text/plain");
+    resp->end("Test C++ FTW\n");
+  });
+
+  // Bind routes and actions together.
+  httpSvr->registerRoute("/test", "test");
+  httpSvr->registerRoute("/test2", "test");
+  
+  // Example 2 - Uses the action interface.
+  httpSvr->addAction<Sample>();
+  
+  class Sample : public Action {
+    void onAction(native::http::request* req, native::http::response* resp) {
+      resp->set_status(200);
+      resp->set_header("Content-Type", "text/plain");
+      resp->end("Sample C++ FTW");
+    }
+    std::string getActionName() { return "sample"; }
+  };
+```
+
+## Optional components
+##### Build MongoDb driver
 
 1. Install [scons](http://www.scons.org/) - e.g. `brew install scons`
 2. Install [boost](https://github.com/mongodb/mongo-cxx-driver/wiki/Download-and-Compile-the-Legacy-Driver) - e.g. `brew search boost`  `brew install homebrew/versions/boost155` Generally recommend using brew, apt-get, or the pre-built binary installer
@@ -45,20 +75,3 @@ scons --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/in
 
 For more information visit [mongodb.org](https://docs.mongodb.org/getting-started/cpp/client/)
 
-## Example
-
-```c++
-  // Example 1 - Uses the action interface.
-  httpSvr->addAction<Sample>();
-
-  // Example 2 - Uses a raw std::function based callback.
-  httpSvr->addAction("test", [](native::http::request*, native::http::response* resp) {
-    resp->set_status(200);
-    resp->set_header("Content-Type", "text/plain");
-    resp->end("Test C++ FTW\n");
-  });
-
-  // Example 3 - Bind routes and actions together.
-  httpSvr->registerRoute("/test", "test");
-  httpSvr->registerRoute("/test2", "test");
-```
