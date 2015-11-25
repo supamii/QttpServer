@@ -80,11 +80,6 @@ CONFIG(debug, debug|release) {
     }
 }
 
-contains(CONFIG, example) {
-    message('Compiling example')
-    include($$PWD/example/example.pri)
-}
-
 INCLUDEPATH = $$unique(INCLUDEPATH)
 HEADERS = $$unique(HEADERS)
 SOURCES = $$unique(SOURCES)

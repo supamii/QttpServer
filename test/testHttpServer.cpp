@@ -7,6 +7,8 @@
 
 #include <QtTest/QtTest>
 
+#include "sample.h"
+
 using namespace std;
 using namespace qttp;
 using namespace native::http;
@@ -20,11 +22,41 @@ class TestHttpServer: public QObject
     void testGET_DefaultResponse();
     void testGET_RandomLocalhostUrl();
     void testPOST_RandomLocalhostUrl();
+
+    void testGET_TestResponse();
+    void testGET_SampleResponse();
 };
 
 void TestHttpServer::initTestCase()
 {
-  Q_ASSERT(HttpServer::getInstance() != nullptr);
+  HttpServer* httpSvr = HttpServer::getInstance();
+
+  Q_ASSERT(httpSvr != nullptr);
+
+  // Uses the action interface.
+  bool result = httpSvr->addAction<Sample>();
+  Q_ASSERT(result == true);
+
+  result = httpSvr->registerRoute("/sample", "sample");
+  Q_ASSERT(result == true);
+
+  result = httpSvr->registerRoute("/sample2", "sample");
+  Q_ASSERT(result == true);
+
+  // Uses a raw std::function based callback.
+  result = httpSvr->addAction("test", [](native::http::request*, native::http::response* resp) {
+    resp->set_status(200);
+    resp->set_header("Content-Type", "text/plain");
+    resp->end("Test C++ FTW\n");
+  });
+  Q_ASSERT(result == true);
+
+  result = httpSvr->registerRoute("/test", "test");
+  Q_ASSERT(result == true);
+
+  result = httpSvr->registerRoute("/test2", "test");
+  Q_ASSERT(result == true);
+
   std::thread webSvr(HttpServer::start);
   webSvr.detach();
 }
@@ -71,6 +103,34 @@ void TestHttpServer::testPOST_RandomLocalhostUrl()
   Q_ASSERT(result.isEmpty());
   QTest::qWait(1000);
   Q_ASSERT(result == "C++ FTW");
+}
+
+void TestHttpServer::testGET_TestResponse()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080/test")));
+  Q_ASSERT(result.isEmpty());
+  QTest::qWait(1000);
+  Q_ASSERT(result == "Test C++ FTW");
+}
+
+void TestHttpServer::testGET_SampleResponse()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080/sample")));
+  Q_ASSERT(result.isEmpty());
+  QTest::qWait(1000);
+  Q_ASSERT(result == "Sample C++ FTW");
 }
 
 QTEST_MAIN(TestHttpServer)

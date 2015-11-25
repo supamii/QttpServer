@@ -1,16 +1,16 @@
-#ifndef SAMPLE_H
-#define SAMPLE_H
+#ifndef QTTPSAMPLE_H
+#define QTTPSAMPLE_H
 
 #include <QtCore>
 
 #include <action.h>
 
+namespace qttp
+{
+
 class Sample: public qttp::Action
 {
   public:
-    Sample();
-    virtual ~Sample();
-
     void onAction(native::http::request* req, native::http::response* resp)
     {
       resp->set_status(200);
@@ -24,4 +24,6 @@ class Sample: public qttp::Action
     }
 };
 
-#endif // SAMPLE_H
+}
+
+#endif // QTTPSAMPLE_H
