@@ -40,7 +40,7 @@ class HttpServer : public QObject
     {
       T* t = new T();
       bool containsKey = (m_Actions.find(t->getActionName()) != m_Actions.end());
-      m_Actions[t->actionName] = std::shared_ptr<Action>(t);
+      m_Actions[t->getActionName()] = std::shared_ptr<Action>(t);
       // Let the caller know that we kicked out another action handler.
       return !containsKey;
     }
@@ -92,6 +92,7 @@ class HttpServer : public QObject
     std::unordered_map<std::string, std::shared_ptr<Action>> m_Actions;
     std::unordered_map<std::string, std::function<void(native::http::request*, native::http::response*)>> m_ActionCallbacks;
     std::unordered_map<std::string, std::string> m_Routes;
+    // TODO: We could optimize by reducing a double-lookup on routes to actions;
 };
 
 } // End namespace qttp

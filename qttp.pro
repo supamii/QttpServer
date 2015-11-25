@@ -28,8 +28,7 @@ INCLUDEPATH += \
     $$PWD/lib/libuv/ \
     $$PWD/lib/libuv/include \
     $$PWD/lib/http/include \
-    $$PWD/lib/http/include/native \
-    $$PWD/qttp
+    $$PWD/lib/http/include/native
 
 QMAKE_CXXFLAGS += -g -O0 -lm -lpthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 
@@ -86,5 +85,6 @@ contains(CONFIG, example) {
     include($$PWD/example/example.pri)
 }
 
+INCLUDEPATH = $$unique(INCLUDEPATH)
 HEADERS = $$unique(HEADERS)
 SOURCES = $$unique(SOURCES)
