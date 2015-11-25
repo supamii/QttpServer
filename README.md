@@ -47,10 +47,17 @@ make
   // Bind routes and actions together.
   httpSvr->registerRoute("/test", "test");
   httpSvr->registerRoute("/test2", "test");
-  
+```
+
+```c++
+  HttpServer* httpSvr = HttpServer::getInstance();
+
   // Example 2 - Uses the action interface.
   httpSvr->addAction<Sample>();
-  
+
+  httpSvr->registerRoute("/sample", "sample");
+  httpSvr->registerRoute("/sampleAgain", "sample");
+
   class Sample : public Action {
     void onAction(native::http::request* req, native::http::response* resp) {
       resp->set_status(200);
