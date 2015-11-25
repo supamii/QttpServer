@@ -45,3 +45,20 @@ scons --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/in
 
 For more information visit [mongodb.org](https://docs.mongodb.org/getting-started/cpp/client/)
 
+## Example
+
+```c++
+  // Example 1 - Uses the action interface.
+  httpSvr->addAction<Sample>();
+
+  // Example 2 - Uses a raw std::function based callback.
+  httpSvr->addAction("test", [](native::http::request*, native::http::response* resp) {
+    resp->set_status(200);
+    resp->set_header("Content-Type", "text/plain");
+    resp->end("Test C++ FTW\n");
+  });
+
+  // Example 3 - Bind routes and actions together.
+  httpSvr->registerRoute("/test", "test");
+  httpSvr->registerRoute("/test2", "test");
+```
