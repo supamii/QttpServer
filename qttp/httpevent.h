@@ -1,5 +1,5 @@
-#ifndef HTTPEVENT_H
-#define HTTPEVENT_H
+#ifndef QTTPHTTPEVENT_H
+#define QTTPHTTPEVENT_H
 
 #include <QObject>
 #include <QEvent>
@@ -26,4 +26,4 @@ class HttpEvent : public QEvent
 
 } // End namespace qttp
 
-#endif // HTTPEVENT_H
+#endif // QTTPHTTPEVENT_H

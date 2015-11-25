@@ -1,5 +1,5 @@
-#ifndef CONFIGURATION_H
-#define CONFIGURATION_H
+#ifndef QTTPCONFIGURATION_H
+#define QTTPCONFIGURATION_H
 
 #include <QtCore>
 
@@ -18,4 +18,4 @@ class Config
 
 } // End namespace qttp
 
-#endif // CONFIGURATION_H
+#endif // QTTPCONFIGURATION_H

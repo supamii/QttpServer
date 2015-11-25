@@ -91,3 +91,17 @@ bool HttpServer::eventFilter(QObject* /* object */, QEvent* event)
   m_EventCallback(req, resp);
   return true;
 }
+
+bool HttpServer::addAction(const std::string& actionName, function<void(native::http::request*, native::http::response*)> callback)
+{
+  bool containsKey = (m_ActionCallbacks.find(actionName) != m_ActionCallbacks.end());
+  m_ActionCallbacks[actionName] = callback;
+  return !containsKey;
+}
+
+bool HttpServer::registerRoute(const std::string& routeName, const std::string& actionName)
+{
+  bool containsKey = (m_Routes.find(routeName) != m_Routes.end());
+  m_Routes[routeName] = actionName;
+  return !containsKey;
+}
