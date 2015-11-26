@@ -17,7 +17,7 @@ int main(int argc, char** argv)
   // mongo::client::initialize();
 
   // Always initialize in the main thread.
-  HttpServer* httpSvr = HttpServer::getInstance();
+  HttpServer::getInstance()->initialize();
 
   thread webSvr(HttpServer::start);
   webSvr.detach();

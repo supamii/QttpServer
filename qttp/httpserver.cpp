@@ -24,11 +24,20 @@ HttpServer::~HttpServer()
 {
 }
 
+void HttpServer::initialize()
+{
+  m_GlobalsConfig = Utils::readJson(QDir("config/global.json").absolutePath());
+  m_RoutesConfig = Utils::readJson(QDir("config/routes.json").absolutePath());
+}
+
 int HttpServer::start()
 {
   http server;
 
   // TODO: Ip interface should be configurable using globals.json
+
+//  auto ip = m_GlobalsConfig["bindIp"].isUndefined() ? "0.0.0.0" : m_GlobalsConfig["bindIp"].toString().toStdString();
+//  auto port = m_GlobalsConfig["bindPort"].isUndefined() ? 8080 : m_GlobalsConfig["bindPort"].toInt();
 
   auto ip = "0.0.0.0";
   auto port = 8080;

@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include "action.h"
+#include "utils.h"
 
 namespace qttp
 {
@@ -65,6 +66,11 @@ class HttpServer : public QObject
 
     bool registerRoute(const std::string&, const std::string&);
 
+    /**
+     * @brief initialize
+     */
+    void initialize();
+
   protected:
 
     /**
@@ -92,6 +98,8 @@ class HttpServer : public QObject
     std::unordered_map<std::string, std::shared_ptr<Action>> m_Actions;
     std::unordered_map<std::string, std::function<void(native::http::request*, native::http::response*)>> m_ActionCallbacks;
     std::unordered_map<std::string, std::string> m_Routes;
+    QJsonObject m_GlobalsConfig;
+    QJsonObject m_RoutesConfig;
 };
 
 } // End namespace qttp

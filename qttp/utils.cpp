@@ -17,7 +17,7 @@ QJsonObject Utils::readJson(const QString& path)
   {
     return QJsonObject();
   }
-  QJsonDocument doc = QJsonDocument::fromBinaryData(file.readAll());
+  QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
   if(doc.isNull())
   {
     return QJsonObject();
