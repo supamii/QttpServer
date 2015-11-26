@@ -98,7 +98,7 @@ class HttpServer : public QObject
     std::unordered_map<std::string, std::shared_ptr<Action>> m_Actions;
     std::unordered_map<std::string, std::function<void(native::http::request*, native::http::response*)>> m_ActionCallbacks;
     std::unordered_map<std::string, std::string> m_Routes;
-    QJsonObject m_GlobalsConfig;
+    QJsonObject m_GlobalConfig;
     QJsonObject m_RoutesConfig;
 };
 

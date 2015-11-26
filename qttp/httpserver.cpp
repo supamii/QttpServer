@@ -26,7 +26,7 @@ HttpServer::~HttpServer()
 
 void HttpServer::initialize()
 {
-  m_GlobalsConfig = Utils::readJson(QDir("config/global.json").absolutePath());
+  m_GlobalConfig = Utils::readJson(QDir("config/global.json").absolutePath());
   m_RoutesConfig = Utils::readJson(QDir("config/routes.json").absolutePath());
 }
 
@@ -34,15 +34,11 @@ int HttpServer::start()
 {
   http server;
 
-  // TODO: Ip interface should be configurable using globals.json
+  HttpServer* svr = HttpServer::getInstance();
+  QString ip = svr->m_GlobalConfig["bindIp"].isUndefined() ? "0.0.0.0" : svr->m_GlobalConfig["bindIp"].toString();
+  auto port = svr->m_GlobalConfig["bindPort"].isUndefined() ? 8080 : svr->m_GlobalConfig["bindPort"].toInt();
 
-//  auto ip = m_GlobalsConfig["bindIp"].isUndefined() ? "0.0.0.0" : m_GlobalsConfig["bindIp"].toString().toStdString();
-//  auto port = m_GlobalsConfig["bindPort"].isUndefined() ? 8080 : m_GlobalsConfig["bindPort"].toInt();
-
-  auto ip = "0.0.0.0";
-  auto port = 8080;
-
-  auto result = server.listen(ip, port, [](request& req, response& resp) {
+  auto result = server.listen(ip.toStdString(), port, [](request& req, response& resp) {
     HttpEvent* event = new HttpEvent(&req, &resp);
     QCoreApplication::postEvent(HttpServer::getInstance(), event);
   });

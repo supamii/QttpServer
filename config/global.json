@@ -1,4 +1,4 @@
 {
     "bindIp": "127.0.0.1",
-    "bindPort": "8080"
+    "bindPort": 8080
 }
