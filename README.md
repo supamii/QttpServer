@@ -32,16 +32,19 @@ qmake CONFIG+=debug qttp.pro
 make
 ```
 
-## Example
+## Examples
 
+Example 1: Using a raw std::function based callback
 ```c++
+  using namespace qttp;
+
   HttpServer* httpSvr = HttpServer::getInstance();
 
-  // Example 1 - Uses a raw std::function based callback.
-  httpSvr->addAction("test", [](native::http::request*, native::http::response* resp) {
-    resp->set_status(200);
-    resp->set_header("Content-Type", "text/plain");
-    resp->end("Test C++ FTW\n");
+  
+  httpSvr->addAction("test", [](HttpData& data) {
+    data.getResponse().set_status(200);
+    data.getResponse().set_header("Content-Type", "text/plain");
+    data.getResponse().end("Test C++ FTW\n");
   });
 
   // Bind routes and actions together.
@@ -49,20 +52,23 @@ make
   httpSvr->registerRoute("/test2", "test");
 ```
 
+Example 2: Using the action interface
 ```c++
+  using namespace qttp;
+
   HttpServer* httpSvr = HttpServer::getInstance();
 
-  // Example 2 - Uses the action interface.
+  // Adds the action interface via template method.
   httpSvr->addAction<Sample>();
 
   httpSvr->registerRoute("/sample", "sample");
   httpSvr->registerRoute("/sampleAgain", "sample");
 
   class Sample : public Action {
-    void onAction(native::http::request* req, native::http::response* resp) {
-      resp->set_status(200);
-      resp->set_header("Content-Type", "text/plain");
-      resp->end("Sample C++ FTW");
+    void onAction(HttpData& data) {
+      data.getResponse().set_status(200);
+      data.getResponse().set_header("Content-Type", "text/plain");
+      data.getResponse().end("Sample C++ FTW");
     }
     std::string getActionName() { return "sample"; }
   };

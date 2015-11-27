@@ -30,6 +30,7 @@ class TestHttpServer: public QObject
 void TestHttpServer::initTestCase()
 {
   HttpServer* httpSvr = HttpServer::getInstance();
+  httpSvr->initialize();
 
   Q_ASSERT(httpSvr != nullptr);
 
@@ -44,10 +45,10 @@ void TestHttpServer::initTestCase()
   Q_ASSERT(result == true);
 
   // Uses a raw std::function based callback.
-  result = httpSvr->addAction("test", [](native::http::request*, native::http::response* resp) {
-    resp->set_status(200);
-    resp->set_header("Content-Type", "text/plain");
-    resp->end("Test C++ FTW\n");
+  result = httpSvr->addAction("test", [](HttpData& data) {
+    data.getResponse().set_status(200);
+    data.getResponse().set_header("Content-Type", "text/plain");
+    data.getResponse().end("Test C++ FTW\n");
   });
   Q_ASSERT(result == true);
 
@@ -68,10 +69,11 @@ void TestHttpServer::testGET_DefaultResponse()
   QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
   {
     result = QString(reply->readAll()).trimmed();
+    qDebug() << result;
   });
   netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080")));
   Q_ASSERT(result.isEmpty());
-  QTest::qWait(1000);
+  QTest::qWait(3000);
   Q_ASSERT(result == "C++ FTW");
 }
 

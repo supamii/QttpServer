@@ -15,7 +15,7 @@ HttpServer* HttpServer::getInstance()
   return m_Instance.get();
 }
 
-HttpServer::HttpServer() : QObject(), m_EventCallback(this->defaultCallback())
+HttpServer::HttpServer() : QObject(), m_EventCallback(this->defaultEventCallback())
 {
   this->installEventFilter(this);
 }
@@ -58,36 +58,37 @@ void HttpServer::setEventCallback(function<void(request*, response*)> eventCallb
   m_EventCallback = eventCallback;
 }
 
-function<void(request*, response*)> HttpServer::defaultCallback() const
+function<void(request*, response*)> HttpServer::defaultEventCallback() const
 {
   // TODO: Pre and Post processors?
   // TODO: Perhaps should lock/wrap m_Routes to guarantee atomicity.
-  // TODO: We could optimize by reducing a double-lookup on routes to actions.
 
   return [this](request* req, response* resp)
   {
+    HttpData data(req, resp);
+
     auto lookup = m_Routes.find(req->url().path());
     if(lookup != m_Routes.end())
     {
       auto callback = this->m_ActionCallbacks.find(lookup->second);
       if(callback != this->m_ActionCallbacks.end())
       {
-        callback->second(req, resp);
+        callback->second(data);
         return;
       }
 
       auto action = this->m_Actions.find(lookup->second);
       if(action != this->m_Actions.end() && action->second.get() != nullptr)
       {
-        action->second->onAction(req, resp);
+        action->second->onAction(data);
         return;
       }
     }
     else
     {
-      resp->set_status(200);
-      resp->set_header("Content-Type", "text/plain");
-      resp->end("C++ FTW\n");
+      data.getResponse().set_status(200);
+      data.getResponse().set_header("Content-Type", "text/plain");
+      data.getResponse().end("C++ FTW\n");
     }
   };
 }
@@ -117,14 +118,14 @@ bool HttpServer::eventFilter(QObject* /* object */, QEvent* event)
   return true;
 }
 
-bool HttpServer::addAction(const std::string& actionName, function<void(native::http::request*, native::http::response*)> callback)
+bool HttpServer::addAction(const string& actionName, function<void(HttpData& data)> callback)
 {
   bool containsKey = (m_ActionCallbacks.find(actionName) != m_ActionCallbacks.end());
   m_ActionCallbacks[actionName] = callback;
   return !containsKey;
 }
 
-bool HttpServer::registerRoute(const std::string& routeName, const std::string& actionName)
+bool HttpServer::registerRoute(const string& routeName, const string& actionName)
 {
   bool containsKey = (m_Routes.find(routeName) != m_Routes.end());
   m_Routes[routeName] = actionName;

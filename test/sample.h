@@ -11,11 +11,11 @@ namespace qttp
 class Sample: public qttp::Action
 {
   public:
-    void onAction(native::http::request* req, native::http::response* resp)
+    void onAction(HttpData& data)
     {
-      resp->set_status(200);
-      resp->set_header("Content-Type", "text/plain");
-      resp->end("Sample C++ FTW");
+      data.getResponse().set_status(200);
+      data.getResponse().set_header("Content-Type", "text/plain");
+      data.getResponse().end("Sample C++ FTW\n");
     }
 
     std::string getActionName()

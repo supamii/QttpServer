@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include "action.h"
+#include "httpdata.h"
 #include "utils.h"
 
 namespace qttp
@@ -62,7 +63,7 @@ class HttpServer : public QObject
      * action.
      * @return boolean false if a previous route was replaced, false otherwise
      */
-    bool addAction(const std::string&, std::function<void(native::http::request*, native::http::response*)>);
+    bool addAction(const std::string&, std::function<void(HttpData& data)>);
 
     bool registerRoute(const std::string&, const std::string&);
 
@@ -78,7 +79,7 @@ class HttpServer : public QObject
      * @param req
      * @param resp
      */
-    std::function<void(native::http::request*, native::http::response*)> defaultCallback() const;
+    std::function<void(native::http::request*, native::http::response*)> defaultEventCallback() const;
 
     /**
      * @brief Initial entry point for all incomming http requests from libuv.
@@ -96,7 +97,7 @@ class HttpServer : public QObject
     /// @brief This callback allows the caller to intercept all responses.
     std::function<void(native::http::request*, native::http::response*)> m_EventCallback;
     std::unordered_map<std::string, std::shared_ptr<Action>> m_Actions;
-    std::unordered_map<std::string, std::function<void(native::http::request*, native::http::response*)>> m_ActionCallbacks;
+    std::unordered_map<std::string, std::function<void(HttpData& data)>> m_ActionCallbacks;
     std::unordered_map<std::string, std::string> m_Routes;
     QJsonObject m_GlobalConfig;
     QJsonObject m_RoutesConfig;

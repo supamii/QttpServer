@@ -6,6 +6,8 @@
 #include <http.h>
 #include <functional>
 
+#include "httpdata.h"
+
 namespace qttp
 {
 
@@ -14,7 +16,7 @@ class Action
   public:
     Action();
     virtual ~Action();
-    virtual void onAction(native::http::request*, native::http::response*) = 0;
+    virtual void onAction(HttpData& data) = 0;
     virtual std::string getActionName() = 0;
 };
 
