@@ -6,6 +6,18 @@ using namespace qttp;
 
 HttpData::HttpData(request* req, response* resp): m_Request(req), m_Response(resp), m_Json()
 {
+  if(m_Request == nullptr)
+  {
+    stringstream ss;
+    ss << __FUNCTION__ << " unexpected NULL ptr @ " << __LINE__;
+    throw runtime_error(ss.str());
+  }
+  if(m_Response == nullptr)
+  {
+    stringstream ss;
+    ss << __FUNCTION__ << " unexpected NULL ptr @ " << __LINE__;
+    throw runtime_error(ss.str());
+  }
 }
 
 HttpData::~HttpData()
@@ -14,23 +26,11 @@ HttpData::~HttpData()
 
 request& HttpData::getRequest() const
 {
-  if(m_Request == nullptr)
-  {
-    stringstream ss;
-    ss << __FUNCTION__ << " unexpected NULL ptr @ " << __LINE__;
-    throw runtime_error(ss.str());
-  }
   return *m_Request;
 }
 
 response& HttpData::getResponse() const
 {
-  if(m_Response == nullptr)
-  {
-    stringstream ss;
-    ss << __FUNCTION__ << " unexpected NULL ptr @ " << __LINE__;
-    throw runtime_error(ss.str());
-  }
   return *m_Response;
 }
 

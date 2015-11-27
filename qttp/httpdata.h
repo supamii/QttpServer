@@ -11,6 +11,7 @@ namespace qttp
 class HttpData
 {
   public:
+    /// @brief Throws an exception if arguments are NULL.
     HttpData(native::http::request*, native::http::response*);
     virtual ~HttpData();
 
