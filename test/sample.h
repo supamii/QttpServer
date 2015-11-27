@@ -18,7 +18,7 @@ class Sample: public qttp::Action
       data.getResponse().end("Sample C++ FTW\n");
     }
 
-    std::string getActionName()
+    const std::string getActionName() const
     {
       return "sample";
     }

@@ -32,17 +32,17 @@ void TestHttpServer::initTestCase()
   HttpServer* httpSvr = HttpServer::getInstance();
   httpSvr->initialize();
 
-  Q_ASSERT(httpSvr != nullptr);
+  QVERIFY(httpSvr != nullptr);
 
   // Uses the action interface.
   bool result = httpSvr->addAction<Sample>();
-  Q_ASSERT(result == true);
+  QVERIFY(result == true);
 
   result = httpSvr->registerRoute("/sample", "sample");
-  Q_ASSERT(result == true);
+  QVERIFY(result == true);
 
   result = httpSvr->registerRoute("/sample2", "sample");
-  Q_ASSERT(result == true);
+  QVERIFY(result == true);
 
   // Uses a raw std::function based callback.
   result = httpSvr->addAction("test", [](HttpData& data) {
@@ -50,13 +50,13 @@ void TestHttpServer::initTestCase()
     data.getResponse().set_header("Content-Type", "text/plain");
     data.getResponse().end("Test C++ FTW\n");
   });
-  Q_ASSERT(result == true);
+  QVERIFY(result == true);
 
   result = httpSvr->registerRoute("/test", "test");
-  Q_ASSERT(result == true);
+  QVERIFY(result == true);
 
   result = httpSvr->registerRoute("/test2", "test");
-  Q_ASSERT(result == true);
+  QVERIFY(result == true);
 
   std::thread webSvr(HttpServer::start);
   webSvr.detach();
@@ -72,9 +72,9 @@ void TestHttpServer::testGET_DefaultResponse()
     qDebug() << result;
   });
   netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080")));
-  Q_ASSERT(result.isEmpty());
-  QTest::qWait(3000);
-  Q_ASSERT(result == "C++ FTW");
+  QVERIFY(result.isEmpty());
+  QTest::qWait(1000);
+  QVERIFY(result == "C++ FTW");
 }
 
 void TestHttpServer::testGET_RandomLocalhostUrl()
@@ -86,9 +86,9 @@ void TestHttpServer::testGET_RandomLocalhostUrl()
     result = QString(reply->readAll()).trimmed();
   });
   netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080/wjlekwjfklje")));
-  Q_ASSERT(result.isEmpty());
+  QVERIFY(result.isEmpty());
   QTest::qWait(1000);
-  Q_ASSERT(result == "C++ FTW");
+  QVERIFY(result == "C++ FTW");
 }
 
 void TestHttpServer::testPOST_RandomLocalhostUrl()
@@ -102,9 +102,9 @@ void TestHttpServer::testPOST_RandomLocalhostUrl()
   QNetworkRequest networkRequest(QUrl("http://127.0.0.1:8080/wjlekwjfklje"));
   networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");
   netMgr->post(networkRequest, QByteArray());
-  Q_ASSERT(result.isEmpty());
+  QVERIFY(result.isEmpty());
   QTest::qWait(1000);
-  Q_ASSERT(result == "C++ FTW");
+  QVERIFY(result == "C++ FTW");
 }
 
 void TestHttpServer::testGET_TestResponse()
@@ -116,9 +116,9 @@ void TestHttpServer::testGET_TestResponse()
     result = QString(reply->readAll()).trimmed();
   });
   netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080/test")));
-  Q_ASSERT(result.isEmpty());
+  QVERIFY(result.isEmpty());
   QTest::qWait(1000);
-  Q_ASSERT(result == "Test C++ FTW");
+  QVERIFY(result == "Test C++ FTW");
 }
 
 void TestHttpServer::testGET_SampleResponse()
@@ -130,9 +130,9 @@ void TestHttpServer::testGET_SampleResponse()
     result = QString(reply->readAll()).trimmed();
   });
   netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080/sample")));
-  Q_ASSERT(result.isEmpty());
+  QVERIFY(result.isEmpty());
   QTest::qWait(1000);
-  Q_ASSERT(result == "Sample C++ FTW");
+  QVERIFY(result == "Sample C++ FTW");
 }
 
 QTEST_MAIN(TestHttpServer)

@@ -17,7 +17,7 @@ class Action
     Action();
     virtual ~Action();
     virtual void onAction(HttpData& data) = 0;
-    virtual std::string getActionName() = 0;
+    virtual const std::string getActionName() const = 0;
 };
 
 }
