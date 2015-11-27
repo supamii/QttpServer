@@ -39,7 +39,6 @@ Example 1: Using a raw std::function based callback
   using namespace qttp;
 
   HttpServer* httpSvr = HttpServer::getInstance();
-
   
   httpSvr->addAction("test", [](HttpData& data) {
     data.getResponse().set_status(200);
