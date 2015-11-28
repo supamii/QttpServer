@@ -62,11 +62,21 @@ class HttpData
      */
     bool isFinished() const;
 
+    /// @brief Sets a flag to indicate if the action should continue processing.
+    void setControlFlag(bool shouldContinue);
+
+    bool getControlFlag() const;
+
   private:
     native::http::request* m_Request;
     native::http::response* m_Response;
     QJsonObject m_Json;
+
+    /// TODO Consolidate with control flag.
     bool m_IsFinished;
+
+    /// TODO Create enum flags.
+    bool m_ControlFlag;
 };
 
 }

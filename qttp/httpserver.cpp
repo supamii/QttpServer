@@ -15,7 +15,7 @@ HttpServer* HttpServer::getInstance()
   return m_Instance.get();
 }
 
-HttpServer::HttpServer() : QObject(), m_EventCallback(this->defaultEventCallback())
+HttpServer::HttpServer() : QObject(), m_EventCallback(this->defaultEventCallback()), m_Actions(), m_ActionCallbacks(), m_Routes(), m_Processors(), m_GlobalConfig(), m_RoutesConfig()
 {
   this->installEventFilter(this);
 }
@@ -60,7 +60,6 @@ void HttpServer::setEventCallback(function<void(request*, response*)> eventCallb
 
 function<void(request*, response*)> HttpServer::defaultEventCallback() const
 {
-  // TODO: Pre and Post processors?
   // TODO: Perhaps should lock/wrap m_Routes to guarantee atomicity.
 
   return [=](request* req, response* resp)
@@ -73,27 +72,66 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
       auto callback = m_ActionCallbacks.find(lookup->second);
       if(callback != m_ActionCallbacks.end())
       {
-        callback->second(data);
-        return;
+        preprocessAction(data);
+        if(data.getControlFlag()) callback->second(data);
+        if(data.getControlFlag()) postprocessAction(data);
       }
-
-      auto action = m_Actions.find(lookup->second);
-      if(action != m_Actions.end() && action->second.get() != nullptr)
+      else
       {
-        action->second->onAction(data);
-        return;
+        auto action = m_Actions.find(lookup->second);
+        if(action != m_Actions.end() && action->second.get() != nullptr)
+        {
+          preprocessAction(data);
+          if(data.getControlFlag()) action->second->onAction(data);
+          if(data.getControlFlag()) postprocessAction(data);
+        }
       }
     }
     else
     {
-      QJsonObject& json = data.getJson();
-      json["response"] = "C++ FTW";
-      if(!data.finishResponse())
+      preprocessAction(data);
+
+      if(data.getControlFlag())
       {
-        qWarning() << "Failed to finish default response";
+        QJsonObject& json = data.getJson();
+        json["response"] = "C++ FTW";
+
+        postprocessAction(data);
       }
     }
+
+    if(!data.getJson().isEmpty() && !data.isFinished() && !data.finishResponse())
+    {
+      qWarning() << "Failed to finish response";
+    }
   };
+}
+
+void HttpServer::preprocessAction(HttpData &data) const
+{
+  for(auto& processor : m_Processors)
+  {
+    if(processor.get())
+    {
+      processor->preprocess(data);
+    }
+  }
+}
+
+void HttpServer::postprocessAction(HttpData &data) const
+{
+  auto processor = m_Processors.rbegin();
+  auto end = m_Processors.rend();
+
+  while(processor != end)
+  {
+    Processor* p = processor->get();
+    if(p)
+    {
+      p->postprocess(data);
+    }
+    ++processor;
+  }
 }
 
 bool HttpServer::eventFilter(QObject* /* object */, QEvent* event)
@@ -121,6 +159,14 @@ bool HttpServer::eventFilter(QObject* /* object */, QEvent* event)
   return true;
 }
 
+bool HttpServer::addAction(std::shared_ptr<Action>& action)
+{
+  bool containsKey = (m_Actions.find(action->getActionName()) != m_Actions.end());
+  m_Actions[action->getActionName()] = action;
+  // Let the caller know that we kicked out another action handler.
+  return !containsKey;
+}
+
 bool HttpServer::addAction(const string& actionName, function<void(HttpData& data)> callback)
 {
   bool containsKey = (m_ActionCallbacks.find(actionName) != m_ActionCallbacks.end());
@@ -133,4 +179,14 @@ bool HttpServer::registerRoute(const string& routeName, const string& actionName
   bool containsKey = (m_Routes.find(routeName) != m_Routes.end());
   m_Routes[routeName] = actionName;
   return !containsKey;
+}
+
+bool HttpServer::addProcessor(std::shared_ptr<Processor>& processor)
+{
+  if(processor.get() == nullptr)
+  {
+    return false;
+  }
+  m_Processors.push_back(processor);
+  return true;
 }

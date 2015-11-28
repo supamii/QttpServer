@@ -25,6 +25,7 @@ class TestHttpServer: public QObject
 
     void testGET_TestResponse();
     void testGET_SampleResponse();
+    void testGET_TerminateResponse();
 };
 
 void TestHttpServer::initTestCase()
@@ -34,8 +35,10 @@ void TestHttpServer::initTestCase()
 
   QVERIFY(httpSvr != nullptr);
 
+  httpSvr->addProcessor<SampleProcessor>();
+
   // Uses the action interface.
-  bool result = httpSvr->addAction<Sample>();
+  bool result = httpSvr->addAction<SampleAction>();
   QVERIFY(result == true);
 
   result = httpSvr->registerRoute("/sample", "sample");
@@ -48,6 +51,8 @@ void TestHttpServer::initTestCase()
   result = httpSvr->addAction("test", [](HttpData& data) {
     QJsonObject& json = data.getJson();
     json["response"] = "Test C++ FTW";
+
+    // NOTE: This terminates early so we should not expect any post-processing.
     data.finishResponse();
   });
   QVERIFY(result == true);
@@ -56,6 +61,17 @@ void TestHttpServer::initTestCase()
   QVERIFY(result == true);
 
   result = httpSvr->registerRoute("/test2", "test");
+  QVERIFY(result == true);
+
+  result = httpSvr->addAction("terminates", [](HttpData& data) {
+    QJsonObject& json = data.getJson();
+    json["response"] = "Test C++ FTW";
+    // NOTE: This terminates early so we should not expect any post-processing.
+    data.setControlFlag(false);
+  });
+  QVERIFY(result == true);
+
+  result = httpSvr->registerRoute("/terminates", "terminates");
   QVERIFY(result == true);
 
   std::thread webSvr(HttpServer::start);
@@ -74,7 +90,7 @@ void TestHttpServer::testGET_DefaultResponse()
   QVERIFY(result.isEmpty());
   QTest::qWait(1000);
   QJsonDocument expected;
-  expected = QJsonDocument::fromJson(QString("{\"response\":\"C++ FTW\"}").toLatin1());
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"C++ FTW\",\"postprocess\":true}").toLatin1());
   QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
 }
 
@@ -90,7 +106,7 @@ void TestHttpServer::testGET_RandomLocalhostUrl()
   QVERIFY(result.isEmpty());
   QTest::qWait(1000);
   QJsonDocument expected;
-  expected = QJsonDocument::fromJson(QString("{\"response\":\"C++ FTW\"}").toLatin1());
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"C++ FTW\",\"postprocess\":true}").toLatin1());
   QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
 }
 
@@ -108,7 +124,7 @@ void TestHttpServer::testPOST_RandomLocalhostUrl()
   QVERIFY(result.isEmpty());
   QTest::qWait(1000);
   QJsonDocument expected;
-  expected = QJsonDocument::fromJson(QString("{\"response\":\"C++ FTW\"}").toLatin1());
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"C++ FTW\",\"postprocess\":true}").toLatin1());
   QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
 }
 
@@ -124,7 +140,7 @@ void TestHttpServer::testGET_TestResponse()
   QVERIFY(result.isEmpty());
   QTest::qWait(1000);
   QJsonDocument expected;
-  expected = QJsonDocument::fromJson(QString("{\"response\":\"Test C++ FTW\"}").toLatin1());
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"Test C++ FTW\"}").toLatin1());
   QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
 }
 
@@ -140,7 +156,23 @@ void TestHttpServer::testGET_SampleResponse()
   QVERIFY(result.isEmpty());
   QTest::qWait(1000);
   QJsonDocument expected;
-  expected = QJsonDocument::fromJson(QString("{\"response\":\"Sample C++ FTW\"}").toLatin1());
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"Sample C++ FTW\",\"postprocess\":true}").toLatin1());
+  QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
+}
+
+void TestHttpServer::testGET_TerminateResponse()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080/terminates")));
+  QVERIFY(result.isEmpty());
+  QTest::qWait(1000);
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"Test C++ FTW\"}").toLatin1());
   QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
 }
 

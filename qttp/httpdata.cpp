@@ -4,7 +4,7 @@ using namespace std;
 using namespace native::http;
 using namespace qttp;
 
-HttpData::HttpData(request* req, response* resp): m_Request(req), m_Response(resp), m_Json(), m_IsFinished(false)
+HttpData::HttpData(request* req, response* resp): m_Request(req), m_Response(resp), m_Json(), m_IsFinished(false), m_ControlFlag(true)
 {
   Q_ASSERT(m_Request != nullptr);
   Q_ASSERT(m_Response != nullptr);
@@ -54,4 +54,14 @@ bool HttpData::finishResponse()
 bool HttpData::isFinished() const
 {
   return m_IsFinished;
+}
+
+void HttpData::setControlFlag(bool shouldContinue)
+{
+  m_ControlFlag = shouldContinue;
+}
+
+bool HttpData::getControlFlag() const
+{
+  return m_ControlFlag;
 }
