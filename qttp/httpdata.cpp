@@ -42,7 +42,7 @@ bool HttpData::finishResponse(const std::string& body)
   return m_Response->end(body);
 }
 
-bool HttpData::finishJsonResponse()
+bool HttpData::finishResponse()
 {
   m_IsFinished = true;
 

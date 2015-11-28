@@ -15,7 +15,7 @@ class Sample: public qttp::Action
     {
       QJsonObject& json = data.getJson();
       json["response"] = "Sample C++ FTW";
-      data.finishJsonResponse();
+      data.finishResponse();
     }
 
     const std::string getActionName() const

@@ -57,7 +57,7 @@ int main(int argc, char** argv)
   httpSvr->addAction("test", [](HttpData& data) {
     QJsonObject& json = data.getJson();
     json["response"] = "Test C++ FTW";
-    data.completeJsonResponse();
+    data.finishResponse();
   });
 
   // Bind routes and actions together.
@@ -86,7 +86,7 @@ Example 2: Using the action interface
     void onAction(HttpData& data) {
       QJsonObject& json = data.getJson();
       json["response"] = "Sample C++ FTW";
-      data.completeJsonResponse();
+      data.finishResponse();
     }
     std::string getActionName() { return "sample"; }
   };

@@ -24,6 +24,10 @@ class HttpData
      */
     native::http::response& getResponse() const;
 
+    /**
+     * @brief The preferred way to build/access a json response - complete the
+     * transaction with finishResponse().
+     */
     QJsonObject& getJson();
     const QJsonObject& getJson() const;
 
@@ -37,7 +41,7 @@ class HttpData
     /**
      * @brief Preferred method when working with the json object.  TBD.
      */
-    bool finishJsonResponse();
+    bool finishResponse();
 
     bool isFinished() const;
 

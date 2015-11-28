@@ -7,7 +7,7 @@
 
 #include <QtTest/QtTest>
 
-#include "sample.h"
+#include "sampleAction.h"
 
 using namespace std;
 using namespace qttp;
@@ -48,7 +48,7 @@ void TestHttpServer::initTestCase()
   result = httpSvr->addAction("test", [](HttpData& data) {
     QJsonObject& json = data.getJson();
     json["response"] = "Test C++ FTW";
-    data.finishJsonResponse();
+    data.finishResponse();
   });
   QVERIFY(result == true);
 

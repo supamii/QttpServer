@@ -9,7 +9,7 @@ message('Including qttp source files')
 include($$PWD/../qttp/qttp.pri)
 
 HEADERS += \
-    sample.h
+    sampleAction.h
 
 SOURCES += \
     testHttpServer.cpp
