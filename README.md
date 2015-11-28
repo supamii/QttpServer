@@ -36,10 +36,24 @@ make
 
 Example 1: Using a raw std::function based callback
 ```c++
-  using namespace qttp;
+#include <native.h>
+#include <QCoreApplication>
+#include <QtCore>
+#include <thread>
+#include "httpserver.h"
 
+using namespace std;
+using namespace qttp;
+using namespace native::http;
+
+int main(int argc, char** argv)
+{
+  QCoreApplication app(argc, argv);
+
+  // Always initialize in the main thread.
   HttpServer* httpSvr = HttpServer::getInstance();
-  
+  httpSvr->initialize();
+
   httpSvr->addAction("test", [](HttpData& data) {
     QJsonObject& json = data.getJson();
     json["response"] = "Test C++ FTW";
@@ -49,12 +63,17 @@ Example 1: Using a raw std::function based callback
   // Bind routes and actions together.
   httpSvr->registerRoute("/test", "test");
   httpSvr->registerRoute("/test2", "test");
+
+  thread webSvr(HttpServer::start);
+  webSvr.detach();
+
+  auto result = app.exec();
+  return result;
+}
 ```
 
 Example 2: Using the action interface
 ```c++
-  using namespace qttp;
-
   HttpServer* httpSvr = HttpServer::getInstance();
 
   // Adds the action interface via template method.

@@ -48,7 +48,7 @@ void TestHttpServer::initTestCase()
   result = httpSvr->addAction("test", [](HttpData& data) {
     QJsonObject& json = data.getJson();
     json["response"] = "Test C++ FTW";
-    data.completeJsonResponse();
+    data.finishJsonResponse();
   });
   QVERIFY(result == true);
 

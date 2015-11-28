@@ -34,7 +34,7 @@ const QJsonObject& HttpData::getJson() const
   return m_Json;
 }
 
-bool HttpData::completeResponse(const std::string& body)
+bool HttpData::finishResponse(const std::string& body)
 {
   m_IsFinished = true;
 
@@ -42,15 +42,16 @@ bool HttpData::completeResponse(const std::string& body)
   return m_Response->end(body);
 }
 
-bool HttpData::completeJsonResponse()
+bool HttpData::finishJsonResponse()
 {
   m_IsFinished = true;
 
   m_Response->set_status(200);
   m_Response->set_header("Content-Type", "application/json");
 
-  QJsonDocument body(m_Json);
-  return m_Response->end(body.toJson().toStdString());
+  QJsonDocument doc(m_Json);
+  QByteArray body = doc.toJson();
+  return m_Response->end(body.length(), body.data());
 }
 
 bool HttpData::isFinished() const

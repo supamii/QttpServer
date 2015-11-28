@@ -18,7 +18,7 @@ class HttpData
     native::http::request& getRequest() const;
 
     /**
-     * @brief Returns the response object, note that the end() method is
+     * @brief Returns the response object, note that response::end() method is
      * ABSOLUTELY DISCOURAGED from direct invocation since the we have no way of
      * tracking the state of the response socket.
      */
@@ -32,12 +32,12 @@ class HttpData
      * helps track the state of the response - i.e. if the response was written
      * to the socket already.  This enables isFinished().
      */
-    bool completeResponse(const std::string&);
+    bool finishResponse(const std::string&);
 
     /**
      * @brief Preferred method when working with the json object.  TBD.
      */
-    bool completeJsonResponse();
+    bool finishJsonResponse();
 
     bool isFinished() const;
 

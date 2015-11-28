@@ -73,6 +73,7 @@ namespace native
 
         public:
             bool end(const std::string& body);
+            bool end(int length, const char* body);
 
             void set_status(int status_code);
             int get_status() const;

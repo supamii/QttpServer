@@ -100,11 +100,15 @@ http::response::~response()
 
 bool http::response::end(const std::string& body)
 {
-    // Content-Length
+    return end(body.length(), body.c_str());
+}
+
+bool http::response::end(int length, const char* body)
+{
     if(headers_.find("Content-Length") == headers_.end())
     {
         std::stringstream ss;
-        ss << body.length();
+        ss << (length > 0 && body != nullptr ? length : 0);
         headers_["Content-Length"] = ss.str();
     }
 
@@ -116,7 +120,10 @@ bool http::response::end(const std::string& body)
         response_text << h.first << ": " << h.second << "\r\n";
     }
     response_text << "\r\n";
-    response_text << body;
+    if(length > 0 && body != nullptr)
+    {
+        response_text.write(body, length);
+    }
 
     auto str = response_text.str();
     return socket_->write(str.c_str(), static_cast<int>(str.length()), [=](native::error e) {

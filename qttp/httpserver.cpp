@@ -88,8 +88,10 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
     {
       QJsonObject& json = data.getJson();
       json["response"] = "C++ FTW";
-
-      data.completeJsonResponse();
+      if(!data.finishJsonResponse())
+      {
+        qWarning() << "Failed to finish default response";
+      }
     }
   };
 }
