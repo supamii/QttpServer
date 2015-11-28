@@ -86,9 +86,10 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
     }
     else
     {
-      data.getResponse().set_status(200);
-      data.getResponse().set_header("Content-Type", "text/plain");
-      data.getResponse().end("C++ FTW\n");
+      QJsonObject& json = data.getJson();
+      json["response"] = "C++ FTW";
+
+      data.completeJsonResponse();
     }
   };
 }

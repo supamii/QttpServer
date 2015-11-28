@@ -73,8 +73,13 @@ namespace native
 
         public:
             bool end(const std::string& body);
+
             void set_status(int status_code);
+            int get_status() const;
+
             void set_header(const std::string& key, const std::string& value);
+            const std::map<std::string, std::string, native::text::ci_less>& get_headers() const;
+
             static std::string get_status_text(int status);
 
         private:
@@ -94,9 +99,12 @@ namespace native
 
         public:
             const url_obj& url() const { return url_; }
+
             const std::string& get_header(const std::string& key) const;
             bool get_header(const std::string& key, std::string& value) const;
+
             std::string get_body (void) const { return body_.str(); }
+
             std::stringstream& get_raw_body (void) { return body_; }
             const std::string& get_method (void) const {return method_; }
 

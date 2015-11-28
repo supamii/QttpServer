@@ -16,14 +16,36 @@ class HttpData
     virtual ~HttpData();
 
     native::http::request& getRequest() const;
+
+    /**
+     * @brief Returns the response object, note that the end() method is
+     * ABSOLUTELY DISCOURAGED from direct invocation since the we have no way of
+     * tracking the state of the response socket.
+     */
     native::http::response& getResponse() const;
+
     QJsonObject& getJson();
     const QJsonObject& getJson() const;
+
+    /**
+     * @brief A wrapper for response::end().  This is highly encouraged as it
+     * helps track the state of the response - i.e. if the response was written
+     * to the socket already.  This enables isFinished().
+     */
+    bool completeResponse(const std::string&);
+
+    /**
+     * @brief Preferred method when working with the json object.  TBD.
+     */
+    bool completeJsonResponse();
+
+    bool isFinished() const;
 
   private:
     native::http::request* m_Request;
     native::http::response* m_Response;
     QJsonObject m_Json;
+    bool m_IsFinished;
 };
 
 }

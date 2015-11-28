@@ -41,9 +41,9 @@ Example 1: Using a raw std::function based callback
   HttpServer* httpSvr = HttpServer::getInstance();
   
   httpSvr->addAction("test", [](HttpData& data) {
-    data.getResponse().set_status(200);
-    data.getResponse().set_header("Content-Type", "text/plain");
-    data.getResponse().end("Test C++ FTW\n");
+    QJsonObject& json = data.getJson();
+    json["response"] = "Test C++ FTW";
+    data.completeJsonResponse();
   });
 
   // Bind routes and actions together.
@@ -65,9 +65,9 @@ Example 2: Using the action interface
 
   class Sample : public Action {
     void onAction(HttpData& data) {
-      data.getResponse().set_status(200);
-      data.getResponse().set_header("Content-Type", "text/plain");
-      data.getResponse().end("Sample C++ FTW");
+      QJsonObject& json = data.getJson();
+      json["response"] = "Sample C++ FTW";
+      data.completeJsonResponse();
     }
     std::string getActionName() { return "sample"; }
   };

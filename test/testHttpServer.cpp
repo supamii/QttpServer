@@ -46,9 +46,9 @@ void TestHttpServer::initTestCase()
 
   // Uses a raw std::function based callback.
   result = httpSvr->addAction("test", [](HttpData& data) {
-    data.getResponse().set_status(200);
-    data.getResponse().set_header("Content-Type", "text/plain");
-    data.getResponse().end("Test C++ FTW\n");
+    QJsonObject& json = data.getJson();
+    json["response"] = "Test C++ FTW";
+    data.completeJsonResponse();
   });
   QVERIFY(result == true);
 
@@ -69,12 +69,13 @@ void TestHttpServer::testGET_DefaultResponse()
   QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
   {
     result = QString(reply->readAll()).trimmed();
-    qDebug() << result;
   });
   netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080")));
   QVERIFY(result.isEmpty());
   QTest::qWait(1000);
-  QVERIFY(result == "C++ FTW");
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"response\":\"C++ FTW\"}").toLatin1());
+  QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
 }
 
 void TestHttpServer::testGET_RandomLocalhostUrl()
@@ -88,7 +89,9 @@ void TestHttpServer::testGET_RandomLocalhostUrl()
   netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080/wjlekwjfklje")));
   QVERIFY(result.isEmpty());
   QTest::qWait(1000);
-  QVERIFY(result == "C++ FTW");
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"response\":\"C++ FTW\"}").toLatin1());
+  QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
 }
 
 void TestHttpServer::testPOST_RandomLocalhostUrl()
@@ -104,7 +107,9 @@ void TestHttpServer::testPOST_RandomLocalhostUrl()
   netMgr->post(networkRequest, QByteArray());
   QVERIFY(result.isEmpty());
   QTest::qWait(1000);
-  QVERIFY(result == "C++ FTW");
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"response\":\"C++ FTW\"}").toLatin1());
+  QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
 }
 
 void TestHttpServer::testGET_TestResponse()
@@ -118,7 +123,9 @@ void TestHttpServer::testGET_TestResponse()
   netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080/test")));
   QVERIFY(result.isEmpty());
   QTest::qWait(1000);
-  QVERIFY(result == "Test C++ FTW");
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"response\":\"Test C++ FTW\"}").toLatin1());
+  QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
 }
 
 void TestHttpServer::testGET_SampleResponse()
@@ -132,7 +139,9 @@ void TestHttpServer::testGET_SampleResponse()
   netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080/sample")));
   QVERIFY(result.isEmpty());
   QTest::qWait(1000);
-  QVERIFY(result == "Sample C++ FTW");
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"response\":\"Sample C++ FTW\"}").toLatin1());
+  QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
 }
 
 QTEST_MAIN(TestHttpServer)

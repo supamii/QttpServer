@@ -13,9 +13,9 @@ class Sample: public qttp::Action
   public:
     void onAction(HttpData& data)
     {
-      data.getResponse().set_status(200);
-      data.getResponse().set_header("Content-Type", "text/plain");
-      data.getResponse().end("Sample C++ FTW\n");
+      QJsonObject& json = data.getJson();
+      json["response"] = "Sample C++ FTW";
+      data.completeJsonResponse();
     }
 
     const std::string getActionName() const

@@ -4,7 +4,7 @@ using namespace std;
 using namespace native::http;
 using namespace qttp;
 
-HttpData::HttpData(request* req, response* resp): m_Request(req), m_Response(resp), m_Json()
+HttpData::HttpData(request* req, response* resp): m_Request(req), m_Response(resp), m_Json(), m_IsFinished(false)
 {
   Q_ASSERT(m_Request != nullptr);
   Q_ASSERT(m_Response != nullptr);
@@ -32,4 +32,28 @@ QJsonObject& HttpData::getJson()
 const QJsonObject& HttpData::getJson() const
 {
   return m_Json;
+}
+
+bool HttpData::completeResponse(const std::string& body)
+{
+  m_IsFinished = true;
+
+  // TODO: Handle error response codes and possibly infer other details.
+  return m_Response->end(body);
+}
+
+bool HttpData::completeJsonResponse()
+{
+  m_IsFinished = true;
+
+  m_Response->set_status(200);
+  m_Response->set_header("Content-Type", "application/json");
+
+  QJsonDocument body(m_Json);
+  return m_Response->end(body.toJson().toStdString());
+}
+
+bool HttpData::isFinished() const
+{
+  return m_IsFinished;
 }

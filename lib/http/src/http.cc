@@ -16,19 +16,16 @@ http::url_obj::url_obj() :
         handle_(),
         buf_()
 {
-    //printf("url_obj() %x\n", this);
 }
 
 http::url_obj::url_obj(const url_obj& c) :
         handle_(c.handle_),
         buf_(c.buf_)
 {
-    //printf("url_obj(const url_obj&) %x\n", this);
 }
 
 http::url_obj& http::url_obj::operator =(const url_obj& c)
 {
-    //printf("url_obj::operator =(const url_obj&) %x\n", this);
     handle_ = c.handle_;
     buf_ = c.buf_;
     return *this;
@@ -36,7 +33,6 @@ http::url_obj& http::url_obj::operator =(const url_obj& c)
 
 http::url_obj::~url_obj()
 {
-    //printf("~url_obj() %x\n", this);
 }
 
 std::string http::url_obj::schema() const
@@ -138,9 +134,19 @@ void http::response::set_status(int status_code)
     status_ = status_code;
 }
 
+int http::response::get_status() const
+{
+    return status_;
+}
+
 void http::response::set_header(const std::string& key, const std::string& value)
 {
     headers_[key] = value;
+}
+
+const std::map<std::string, std::string, native::text::ci_less>& native::http::response::get_headers() const
+{
+    return headers_;
 }
 
 std::string http::response::get_status_text(int status)
