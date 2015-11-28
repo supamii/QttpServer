@@ -63,22 +63,22 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
   // TODO: Pre and Post processors?
   // TODO: Perhaps should lock/wrap m_Routes to guarantee atomicity.
 
-  return [this](request* req, response* resp)
+  return [=](request* req, response* resp)
   {
     HttpData data(req, resp);
 
     auto lookup = m_Routes.find(req->url().path());
     if(lookup != m_Routes.end())
     {
-      auto callback = this->m_ActionCallbacks.find(lookup->second);
-      if(callback != this->m_ActionCallbacks.end())
+      auto callback = m_ActionCallbacks.find(lookup->second);
+      if(callback != m_ActionCallbacks.end())
       {
         callback->second(data);
         return;
       }
 
-      auto action = this->m_Actions.find(lookup->second);
-      if(action != this->m_Actions.end() && action->second.get() != nullptr)
+      auto action = m_Actions.find(lookup->second);
+      if(action != m_Actions.end() && action->second.get() != nullptr)
       {
         action->second->onAction(data);
         return;

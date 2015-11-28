@@ -75,6 +75,10 @@ namespace native
             bool end(const std::string& body);
             bool end(int length, const char* body);
 
+            void write(const std::string& body);
+            void write(int length, const char* body);
+            bool close();
+
             void set_status(int status_code);
             int get_status() const;
 
@@ -88,6 +92,8 @@ namespace native
             native::net::tcp* socket_;
             std::map<std::string, std::string, native::text::ci_less> headers_;
             int status_;
+            std::stringstream response_text_;
+            bool is_response_written_;
         };
 
         class request

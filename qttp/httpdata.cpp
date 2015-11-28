@@ -29,17 +29,13 @@ QJsonObject& HttpData::getJson()
   return m_Json;
 }
 
-const QJsonObject& HttpData::getJson() const
-{
-  return m_Json;
-}
-
 bool HttpData::finishResponse(const std::string& body)
 {
   m_IsFinished = true;
 
   // TODO: Handle error response codes and possibly infer other details.
-  return m_Response->end(body);
+  m_Response->write(body);
+  return m_Response->close();
 }
 
 bool HttpData::finishResponse()
@@ -51,7 +47,8 @@ bool HttpData::finishResponse()
 
   QJsonDocument doc(m_Json);
   QByteArray body = doc.toJson();
-  return m_Response->end(body.length(), body.data());
+  m_Response->write(body.length(), body.data());
+  return m_Response->close();
 }
 
 bool HttpData::isFinished() const

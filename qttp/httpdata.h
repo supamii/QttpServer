@@ -8,13 +8,24 @@
 namespace qttp
 {
 
+// Forward declaration
+class HttpServer;
+
 class HttpData
 {
-  public:
-    /// @brief Throws an exception if arguments are NULL.
-    HttpData(native::http::request*, native::http::response*);
-    virtual ~HttpData();
+    friend class HttpServer;
 
+  private:
+    /**
+     * @brief Private constructor because the underlying native::http::request
+     * and native::http::response objects are privately managed as well.
+     *
+     * Throws an exception if arguments are NULL.
+     */
+    HttpData(native::http::request*, native::http::response*);
+    ~HttpData();
+
+  public:
     native::http::request& getRequest() const;
 
     /**
@@ -25,6 +36,15 @@ class HttpData
     native::http::response& getResponse() const;
 
     /**
+     * @brief A wrapper for native::http::response::end() and writes directly
+     * to the response socket.  For direct writes, this is highly encouraged
+     * since it helps track the state of the response - i.e. if the response was
+     * written to the socket already.
+     * @see isFinished()
+     */
+    bool finishResponse(const std::string&);
+
+    /**
      * @brief The preferred way to build/access a json response - complete the
      * transaction with finishResponse().
      */
@@ -32,17 +52,14 @@ class HttpData
     const QJsonObject& getJson() const;
 
     /**
-     * @brief A wrapper for response::end().  This is highly encouraged as it
-     * helps track the state of the response - i.e. if the response was written
-     * to the socket already.  This enables isFinished().
-     */
-    bool finishResponse(const std::string&);
-
-    /**
-     * @brief Preferred method when working with the json object.  TBD.
+     * @brief Preferred method when working with the json object.  Populate
+     * response data using getJson() and then invoke this method to send it off.
      */
     bool finishResponse();
 
+    /**
+     * @return Boolean indicating if finishResponse() has been called.
+     */
     bool isFinished() const;
 
   private:

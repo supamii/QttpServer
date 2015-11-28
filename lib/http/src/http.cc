@@ -89,7 +89,9 @@ http::response::response(client_context* client, native::net::tcp* socket) :
     client_(client),
     socket_(socket),
     headers_(),
-    status_(200)
+    status_(200),
+	response_text_(),
+	is_response_written_(false)
 {
     headers_["Content-Type"] = "text/html";
 }
@@ -105,27 +107,52 @@ bool http::response::end(const std::string& body)
 
 bool http::response::end(int length, const char* body)
 {
-    if(headers_.find("Content-Length") == headers_.end())
+    write(length, body);
+    return close();
+}
+
+void http::response::write(const std::string& body)
+{
+    return write(body.length(), body.c_str());
+}
+
+void http::response::write(int length, const char* body)
+{
+    if(!is_response_written_)
     {
-        std::stringstream ss;
-        ss << (length > 0 && body != nullptr ? length : 0);
-        headers_["Content-Length"] = ss.str();
+        is_response_written_ = true;
+        if(headers_.find("Content-Length") == headers_.end())
+        {
+            std::stringstream ss;
+            ss << (length > 0 && body != nullptr ? length : 0);
+            headers_["Content-Length"] = ss.str();
+        }
+
+        response_text_ << "HTTP/1.1 ";
+        response_text_ << status_ << " " << get_status_text(status_) << "\r\n";
+        for(auto h : headers_)
+        {
+            response_text_ << h.first << ": " << h.second << "\r\n";
+        }
+        response_text_ << "\r\n";
+        if(length > 0 && body != nullptr)
+        {
+            response_text_.write(body, length);
+        }
+    }
+    else
+    {
+        if(length > 0 && body != nullptr)
+        {
+            response_text_.write(body, length);
+        }
     }
 
-    std::stringstream response_text;
-    response_text << "HTTP/1.1 ";
-    response_text << status_ << " " << get_status_text(status_) << "\r\n";
-    for(auto h : headers_)
-    {
-        response_text << h.first << ": " << h.second << "\r\n";
-    }
-    response_text << "\r\n";
-    if(length > 0 && body != nullptr)
-    {
-        response_text.write(body, length);
-    }
+}
 
-    auto str = response_text.str();
+bool http::response::close()
+{
+    auto str = response_text_.str();
     return socket_->write(str.c_str(), static_cast<int>(str.length()), [=](native::error e) {
         if(e)
         {
