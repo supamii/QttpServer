@@ -36,9 +36,18 @@ int HttpServer::start()
   http server;
 
   HttpServer* svr = HttpServer::getInstance();
-  QString ip = svr->m_GlobalConfig["bindIp"].isUndefined() ? "0.0.0.0" : svr->m_GlobalConfig["bindIp"].toString();
+  QString ip = svr->m_GlobalConfig["bindIp"].isUndefined() ? "0.0.0.0" : svr->m_GlobalConfig["bindIp"].toString().trimmed();
+  if(ip.isEmpty())
+  {
+    ip = "0.0.0.0";
+    qWarning() << "Bind ip is invalid, defaulting to" << ip;
+  }
   auto port = svr->m_GlobalConfig["bindPort"].isUndefined() ? 8080 : svr->m_GlobalConfig["bindPort"].toInt();
-
+  if(port <= 0)
+  {
+    port = 8080;
+    qWarning() << "Bind port is invalid, defaulting to" << port;
+  }
   auto result = server.listen(ip.toStdString(), port, [](request& req, response& resp) {
     HttpEvent* event = new HttpEvent(&req, &resp);
     QCoreApplication::postEvent(HttpServer::getInstance(), event);
