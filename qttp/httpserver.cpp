@@ -18,6 +18,7 @@ HttpServer* HttpServer::getInstance()
 HttpServer::HttpServer() : QObject(), m_EventCallback(this->defaultEventCallback()), m_Actions(), m_ActionCallbacks(), m_Routes(), m_Processors(), m_GlobalConfig(), m_RoutesConfig()
 {
   this->installEventFilter(this);
+  this->initialize();
 }
 
 HttpServer::~HttpServer()
@@ -174,7 +175,7 @@ bool HttpServer::addAction(const string& actionName, function<void(HttpData& dat
   return !containsKey;
 }
 
-bool HttpServer::registerRoute(const string& routeName, const string& actionName)
+bool HttpServer::registerRoute(const string& actionName, const string& routeName)
 {
   bool containsKey = (m_Routes.find(routeName) != m_Routes.end());
   m_Routes[routeName] = actionName;

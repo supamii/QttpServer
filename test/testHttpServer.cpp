@@ -31,7 +31,6 @@ class TestHttpServer: public QObject
 void TestHttpServer::initTestCase()
 {
   HttpServer* httpSvr = HttpServer::getInstance();
-  httpSvr->initialize();
 
   QVERIFY(httpSvr != nullptr);
 
@@ -41,10 +40,10 @@ void TestHttpServer::initTestCase()
   bool result = httpSvr->addAction<SampleAction>();
   QVERIFY(result == true);
 
-  result = httpSvr->registerRoute("/sample", "sample");
+  result = httpSvr->registerRoute("sample", "/sample");
   QVERIFY(result == true);
 
-  result = httpSvr->registerRoute("/sample2", "sample");
+  result = httpSvr->registerRoute("sample", "/sample2");
   QVERIFY(result == true);
 
   // Uses a raw std::function based callback.
@@ -57,10 +56,10 @@ void TestHttpServer::initTestCase()
   });
   QVERIFY(result == true);
 
-  result = httpSvr->registerRoute("/test", "test");
+  result = httpSvr->registerRoute("test", "/test");
   QVERIFY(result == true);
 
-  result = httpSvr->registerRoute("/test2", "test");
+  result = httpSvr->registerRoute("test", "/test2");
   QVERIFY(result == true);
 
   result = httpSvr->addAction("terminates", [](HttpData& data) {
@@ -71,7 +70,7 @@ void TestHttpServer::initTestCase()
   });
   QVERIFY(result == true);
 
-  result = httpSvr->registerRoute("/terminates", "terminates");
+  result = httpSvr->registerRoute("terminates", "/terminates");
   QVERIFY(result == true);
 
   std::thread webSvr(HttpServer::start);

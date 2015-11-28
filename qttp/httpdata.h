@@ -42,7 +42,7 @@ class HttpData
      * written to the socket already.
      * @see isFinished()
      */
-    bool finishResponse(const std::string&);
+    bool finishResponse(const std::string& body);
 
     /**
      * @brief The preferred way to build/access a json response - complete the
@@ -56,6 +56,7 @@ class HttpData
      * response data using getJson() and then invoke this method to send it off.
      */
     bool finishResponse();
+    bool finishResponse(const QJsonObject& json);
 
     /**
      * @return Boolean indicating if finishResponse() has been called.

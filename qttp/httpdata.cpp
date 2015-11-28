@@ -40,12 +40,19 @@ bool HttpData::finishResponse(const std::string& body)
 
 bool HttpData::finishResponse()
 {
+  return finishResponse(m_Json);
+}
+
+bool HttpData::finishResponse(const QJsonObject& json)
+{
   m_IsFinished = true;
+
+  // TODO: We'll want to dynamically update the status code, 400, 500?
 
   m_Response->set_status(200);
   m_Response->set_header("Content-Type", "application/json");
 
-  QJsonDocument doc(m_Json);
+  QJsonDocument doc(json);
   QByteArray body = doc.toJson();
   m_Response->write(body.length(), body.data());
   return m_Response->close();

@@ -46,7 +46,7 @@ class HttpServer : public QObject
     }
 
     /**
-     * @brief Takes ownership of the pointer passed in, do not delete.
+     * @brief Takes ownership of the pointer passed in, do not delete!
      */
     bool addAction(std::shared_ptr<Action>& action);
 
@@ -57,22 +57,29 @@ class HttpServer : public QObject
      */
     bool addAction(const std::string&, std::function<void(HttpData& data)>);
 
-    bool registerRoute(const std::string&, const std::string&);
+    /**
+     * @brief More of an association than a registration - binds an action name
+     * to a route name.
+     */
+    bool registerRoute(const std::string& actionName, const std::string& routeName);
 
     /**
-     * @brief initialize
+     * @brief A template method to register a processor via the Processor interface.
      */
-    void initialize();
-
     template<class T> bool addProcessor()
     {
       std::shared_ptr<Processor> processor(new T());
       return addProcessor(processor);
     }
 
+    /**
+     * @brief Takes ownership of the pointer passed in, do not delete!
+     */
     bool addProcessor(std::shared_ptr<Processor>& processor);
 
   private:
+
+    void initialize();
 
     /**
      * @brief defaultCallback
