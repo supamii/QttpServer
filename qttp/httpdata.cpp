@@ -64,7 +64,6 @@ bool HttpData::finishResponse(const QJsonObject& json)
 
   // TODO: We'll want to dynamically update the status code, 400, 500?
 
-  m_Response->set_status(200);
   m_Response->set_header("Content-Type", "application/json");
 
   QJsonDocument doc(json);

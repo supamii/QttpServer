@@ -111,4 +111,5 @@ For more information visit [mongodb.org](https://docs.mongodb.org/getting-starte
 6. Setup utilities for MongoDB and Redis access
 7. Add pre and post processor callbacks instead of the interface
 8. Make available a metrics pre/post processor
+9. Design an error response mechanism
 
