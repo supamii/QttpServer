@@ -21,11 +21,21 @@ HttpData::~HttpData()
 
 request& HttpData::getRequest() const
 {
+  if(m_IsFinished || m_Request == nullptr)
+  {
+    // Prevent dereferencing null
+    throw runtime_error("native::http::request is no longer valid");
+  }
   return *m_Request;
 }
 
 response& HttpData::getResponse() const
 {
+  if(m_IsFinished || m_Response == nullptr)
+  {
+    // Prevent dereferencing null
+    throw runtime_error("native::http::response is no longer valid");
+  }
   return *m_Response;
 }
 

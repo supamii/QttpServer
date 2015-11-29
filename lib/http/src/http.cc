@@ -91,8 +91,7 @@ http::response::response(client_context* client, native::net::tcp* socket) :
     headers_(),
     status_(200),
     response_text_(),
-    is_response_written_(false),
-    is_closed_(false)
+    is_response_written_(false)
 {
     headers_["Content-Type"] = "text/html";
 }
@@ -153,13 +152,6 @@ void http::response::write(int length, const char* body)
 
 bool http::response::close()
 {
-    if(is_closed_)
-    {
-        client_.reset();
-        return false;
-    }
-
-    is_closed_ = true;
     auto str = response_text_.str();
     return socket_->write(str.c_str(), static_cast<int>(str.length()), [=](native::error e) {
         if(e)
@@ -171,9 +163,9 @@ bool http::response::close()
     });
 }
 
-bool http::response::is_closed() const
+void http::response::releaseClientContext(std::shared_ptr<client_context>& swapPtr)
 {
-    return is_closed_;
+    swapPtr.swap(client_);
 }
 
 void http::response::set_status(int status_code)

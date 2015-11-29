@@ -11,6 +11,9 @@ namespace qttp
 // Forward declaration
 class HttpServer;
 
+/**
+ * @brief
+ */
 class HttpData
 {
     friend class HttpServer;
@@ -26,12 +29,23 @@ class HttpData
     ~HttpData();
 
   public:
+
+    /**
+     * @brief Beware that accessing this after invoking finishResponse() will
+     * result in an exception since alloated memory will be NULL.  Also be sure
+     * NOT to save/use this reference outside of the lifetime of HttpData.
+     */
     native::http::request& getRequest() const;
 
     /**
      * @brief Returns the response object, note that response::end() method is
      * ABSOLUTELY DISCOURAGED from direct invocation since the we have no way of
      * tracking the state of the response socket.
+     *
+     * Similar to getRequest(), this method will raise an exception if
+     * finishResponse() has been invoked since memory too will be invalid.
+     *
+     * DO NOT to save/use this reference outside of the lifetime of HttpData.
      */
     native::http::response& getResponse() const;
 
@@ -60,6 +74,9 @@ class HttpData
 
     /**
      * @return Boolean indicating if finishResponse() has been called.
+     *
+     * It's important to actually avoid using any references to
+     * native::http::request and native::http::response if this returns true.
      */
     bool isFinished() const;
 
@@ -72,7 +89,6 @@ class HttpData
     native::http::request* m_Request;
     native::http::response* m_Response;
     QJsonObject m_Json;
-
     /// TODO Consolidate with control flag.
     bool m_IsFinished;
 

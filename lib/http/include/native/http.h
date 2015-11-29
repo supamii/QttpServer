@@ -79,7 +79,8 @@ namespace native
             void write(int length, const char* body);
 
             bool close();
-            bool is_closed() const;
+
+            void releaseClientContext(std::shared_ptr<client_context>& swapPtr);
 
             void set_status(int status_code);
             int get_status() const;
@@ -96,7 +97,6 @@ namespace native
             int status_;
             std::stringstream response_text_;
             bool is_response_written_;
-            bool is_closed_;
         };
 
         class request
