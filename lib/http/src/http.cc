@@ -90,8 +90,9 @@ http::response::response(client_context* client, native::net::tcp* socket) :
     socket_(socket),
     headers_(),
     status_(200),
-	response_text_(),
-	is_response_written_(false)
+    response_text_(),
+    is_response_written_(false),
+    is_closed_(false)
 {
     headers_["Content-Type"] = "text/html";
 }
@@ -152,6 +153,13 @@ void http::response::write(int length, const char* body)
 
 bool http::response::close()
 {
+    if(is_closed_)
+    {
+        client_.reset();
+        return false;
+    }
+
+    is_closed_ = true;
     auto str = response_text_.str();
     return socket_->write(str.c_str(), static_cast<int>(str.length()), [=](native::error e) {
         if(e)
@@ -161,6 +169,11 @@ bool http::response::close()
         // clean up
         client_.reset();
     });
+}
+
+bool http::response::is_closed() const
+{
+    return is_closed_;
 }
 
 void http::response::set_status(int status_code)
@@ -261,7 +274,6 @@ http::request::request() :
 
 http::request::~request()
 {
-    //printf("~request() %x\n", this);
 }
 
 const std::string& http::request::get_header(const std::string& key) const
@@ -293,7 +305,6 @@ http::client_context::client_context(native::net::tcp* server):
     response_(nullptr),
     callback_lut_(new callbacks(1))
 {
-    //printf("request() %x callback_=%x\n", this, callback_);
     assert(server);
 
     // TODO: check error

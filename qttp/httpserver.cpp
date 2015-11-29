@@ -15,7 +15,15 @@ HttpServer* HttpServer::getInstance()
   return m_Instance.get();
 }
 
-HttpServer::HttpServer() : QObject(), m_EventCallback(this->defaultEventCallback()), m_Actions(), m_ActionCallbacks(), m_Routes(), m_Processors(), m_GlobalConfig(), m_RoutesConfig()
+HttpServer::HttpServer() :
+    QObject(),
+    m_EventCallback(this->defaultEventCallback()),
+    m_Actions(),
+    m_ActionCallbacks(),
+    m_Routes(),
+    m_Processors(),
+    m_GlobalConfig(),
+    m_RoutesConfig()
 {
   this->installEventFilter(this);
   this->initialize();
@@ -117,7 +125,7 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
   };
 }
 
-void HttpServer::preprocessAction(HttpData &data) const
+void HttpServer::preprocessAction(HttpData& data) const
 {
   for(auto& processor : m_Processors)
   {
@@ -128,7 +136,7 @@ void HttpServer::preprocessAction(HttpData &data) const
   }
 }
 
-void HttpServer::postprocessAction(HttpData &data) const
+void HttpServer::postprocessAction(HttpData& data) const
 {
   auto processor = m_Processors.rbegin();
   auto end = m_Processors.rend();

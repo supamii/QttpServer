@@ -4,7 +4,12 @@ using namespace std;
 using namespace native::http;
 using namespace qttp;
 
-HttpData::HttpData(request* req, response* resp): m_Request(req), m_Response(resp), m_Json(), m_IsFinished(false), m_ControlFlag(true)
+HttpData::HttpData(request* req, response* resp):
+    m_Request(req),
+    m_Response(resp),
+    m_Json(),
+    m_IsFinished(false),
+    m_ControlFlag(true)
 {
   Q_ASSERT(m_Request != nullptr);
   Q_ASSERT(m_Response != nullptr);
