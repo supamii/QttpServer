@@ -52,7 +52,6 @@ int main(int argc, char** argv)
 
   // Always initialize in the main thread.
   HttpServer* httpSvr = HttpServer::getInstance();
-  httpSvr->initialize();
 
   httpSvr->addAction("test", [](HttpData& data) {
     QJsonObject& json = data.getJson();
@@ -73,8 +72,6 @@ int main(int argc, char** argv)
 
 Example 2: Using the action interface
 ```c++
-  HttpServer* httpSvr = HttpServer::getInstance();
-
   // Adds the action interface via template method.
   httpSvr->addAction<Sample>();
 
@@ -103,4 +100,15 @@ scons --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/in
 ```
 
 For more information visit [mongodb.org](https://docs.mongodb.org/getting-started/cpp/client/)
+
+# TODOs
+
+1. Address subtle techdebt surrounding references with native::http components
+2. Create default preprocessors for meta data for each incomming request guid generation
+3. Config parsing is still incomplete - action-routes should be configurable instead of being set in code
+4. Determine versioning support in the path e.g. /v1/ /v2/
+5. Clean up configuration deployment (make install files to the correct folder)
+6. Setup utilities for MongoDB and Redis access
+7. Add pre and post processor callbacks instead of the interface
+8. Make available a metrics pre/post processor
 
