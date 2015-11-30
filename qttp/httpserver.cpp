@@ -9,7 +9,8 @@ unique_ptr<HttpServer> HttpServer::m_Instance(nullptr);
 
 HttpServer* HttpServer::getInstance()
 {
-  if(m_Instance.get() == nullptr) {
+  if(m_Instance.get() == nullptr)
+  {
       m_Instance.reset(new HttpServer());
   }
   return m_Instance.get();
@@ -22,6 +23,8 @@ HttpServer::HttpServer() :
     m_ActionCallbacks(),
     m_Routes(),
     m_Processors(),
+    m_Preprocessors(),
+    m_Postprocessors(),
     m_GlobalConfig(),
     m_RoutesConfig()
 {
@@ -90,31 +93,31 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
       auto callback = m_ActionCallbacks.find(lookup->second);
       if(callback != m_ActionCallbacks.end())
       {
-        preprocessAction(data);
+        performPreprocessing(data);
         if(data.getControlFlag()) callback->second(data);
-        if(data.getControlFlag()) postprocessAction(data);
+        if(data.getControlFlag()) performPostprocessing(data);
       }
       else
       {
         auto action = m_Actions.find(lookup->second);
         if(action != m_Actions.end() && action->second.get() != nullptr)
         {
-          preprocessAction(data);
+          performPreprocessing(data);
           if(data.getControlFlag()) action->second->onAction(data);
-          if(data.getControlFlag()) postprocessAction(data);
+          if(data.getControlFlag()) performPostprocessing(data);
         }
       }
     }
     else
     {
-      preprocessAction(data);
+      performPreprocessing(data);
 
       if(data.getControlFlag())
       {
         QJsonObject& json = data.getJson();
         json["response"] = "C++ FTW";
 
-        postprocessAction(data);
+        performPostprocessing(data);
       }
     }
 
@@ -125,8 +128,13 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
   };
 }
 
-void HttpServer::preprocessAction(HttpData& data) const
+void HttpServer::performPreprocessing(HttpData& data) const
 {
+  for(auto& callback : m_Preprocessors)
+  {
+    callback(data);
+  }
+
   for(auto& processor : m_Processors)
   {
     if(processor.get())
@@ -136,7 +144,7 @@ void HttpServer::preprocessAction(HttpData& data) const
   }
 }
 
-void HttpServer::postprocessAction(HttpData& data) const
+void HttpServer::performPostprocessing(HttpData& data) const
 {
   auto processor = m_Processors.rbegin();
   auto end = m_Processors.rend();
@@ -149,6 +157,11 @@ void HttpServer::postprocessAction(HttpData& data) const
       p->postprocess(data);
     }
     ++processor;
+  }
+
+  for(auto& callback : m_Postprocessors)
+  {
+    callback(data);
   }
 }
 
@@ -207,4 +220,14 @@ bool HttpServer::addProcessor(std::shared_ptr<Processor>& processor)
   }
   m_Processors.push_back(processor);
   return true;
+}
+
+void HttpServer::addPreprocessor(std::function<void(HttpData& data)> callback)
+{
+  m_Preprocessors.push_back(callback);
+}
+
+void HttpServer::addPostprocessor(std::function<void(HttpData& data)> callback)
+{
+  m_Postprocessors.push_back(callback);
 }

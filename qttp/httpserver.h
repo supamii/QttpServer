@@ -74,8 +74,27 @@ class HttpServer : public QObject
 
     /**
      * @brief Takes ownership of the pointer passed in, do not delete!
+     *
+     * Pre-processor actions are performend in order and the post-processing
+     * is executed in the "reverse" order that the processor was added.
+     *
+     * May need to add some priority-queue (value) to help coordinate order.
      */
     bool addProcessor(std::shared_ptr<Processor>& processor);
+
+    /**
+     * @brief A quick way to add a preprocessor to operate on all actions.
+     *
+     * Pre-processors are executed in the order that they were added.
+     */
+    void addPreprocessor(std::function<void(HttpData& data)> callback);
+
+    /**
+     * @brief A quick way to add a postprocessor to operate on all actions.
+     *
+     * Post-processors are executed in the order that they were added.
+     */
+    void addPostprocessor(std::function<void(HttpData& data)> callback);
 
   private:
 
@@ -88,9 +107,9 @@ class HttpServer : public QObject
      */
     std::function<void(native::http::request*, native::http::response*)> defaultEventCallback() const;
 
-    void preprocessAction(HttpData& data) const;
+    void performPreprocessing(HttpData& data) const;
 
-    void postprocessAction(HttpData& data) const;
+    void performPostprocessing(HttpData& data) const;
 
     /**
      * @brief Initial entry point for all incomming http requests from libuv.
@@ -110,6 +129,8 @@ class HttpServer : public QObject
     std::unordered_map<std::string, std::function<void(HttpData& data)>> m_ActionCallbacks;
     std::unordered_map<std::string, std::string> m_Routes;
     std::vector<std::shared_ptr<Processor>> m_Processors;
+    std::vector<std::function<void(HttpData& data)>> m_Preprocessors;
+    std::vector<std::function<void(HttpData& data)>> m_Postprocessors;
     QJsonObject m_GlobalConfig;
     QJsonObject m_RoutesConfig;
 };

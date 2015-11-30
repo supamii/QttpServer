@@ -60,7 +60,7 @@ int main(int argc, char** argv)
 
   // Bind routes and actions together.
   httpSvr->registerRoute("test", "/test");
-  httpSvr->registerRoute("test2", "/test2");
+  httpSvr->registerRoute("test", "/test2");
 
   thread webSvr(HttpServer::start);
   webSvr.detach();
@@ -72,19 +72,19 @@ int main(int argc, char** argv)
 
 Example 2: Using the action interface
 ```c++
-  // Adds the action interface via template method.
-  httpSvr->addAction<Sample>();
+// Adds the action interface via template method.
+httpSvr->addAction<Sample>();
 
-  httpSvr->registerRoute("sample", "/sample");
-  httpSvr->registerRoute("sample", "/sampleAgain");
+httpSvr->registerRoute("sample", "/sample");
+httpSvr->registerRoute("sample", "/sampleAgain");
 
-  class Sample : public Action {
-    void onAction(HttpData& data) {
-      QJsonObject& json = data.getJson();
-      json["response"] = "Sample C++ FTW";
-    }
-    std::string getActionName() { return "sample"; }
-  };
+class Sample : public Action {
+  void onAction(HttpData& data) {
+    QJsonObject& json = data.getJson();
+    json["response"] = "Sample C++ FTW";
+  }
+  std::string getActionName() { return "sample"; }
+};
 ```
 
 ## Optional components
@@ -109,7 +109,7 @@ For more information visit [mongodb.org](https://docs.mongodb.org/getting-starte
 4. Determine versioning support in the path e.g. /v1/ /v2/
 5. Clean up configuration deployment (make install files to the correct folder)
 6. Setup utilities for MongoDB and Redis access
-7. Add pre and post processor callbacks as an alternative to the interface class
+7. ~~Add pre and post processor callbacks as an alternative to the interface class~~
 8. Make available a metrics pre/post processor
 9. Design an error response mechanism
 
