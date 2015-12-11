@@ -13,7 +13,12 @@ HEADERS +=
 SOURCES += \
     $$PWD/main.cpp
 
-LIBS += -luv -lhttp_parser -lnode_native
+win32 {
+    LIBS += -llibuv -lhttp_parser -lnode_native
+}
+!win32 {
+    LIBS += -luv -lhttp_parser -lnode_native
+}
 
 #LIBS += -mongoclient -L$$PWD/lib/mongo-cxx-driver/build/darwin/normal
 #INCLUDEPATH += \
@@ -47,8 +52,8 @@ unix:!macx {
     QMAKE_CXXFLAGS += -std=c++0x
 }
 
-win {
-  # We need some TLC later in this section
+win32 {
+  CONFIG += c++14
 }
 
 CONFIG(debug, debug|release) {
@@ -83,3 +88,5 @@ CONFIG(debug, debug|release) {
 INCLUDEPATH = $$unique(INCLUDEPATH)
 HEADERS = $$unique(HEADERS)
 SOURCES = $$unique(SOURCES)
+LIBS = $$unique(LIBS)
+OBJECTS = $$unique(OBJECTS)
