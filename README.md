@@ -158,12 +158,12 @@ Generate build files and compile to ./out/ folder
 
 Open solution build/all.sln with VS2015
 
-Individually configure each project to use MSVC 2015 tool-chain and BUILD individually
+Individually configure each project to use MSVC 2015 tool-chain and **BUILD individually**
 
-1. http_parser project
-2. uv project
-3. node_native project
-4. SKIP all other projects not listed
+1. `http_parser` project
+2. `uv project`
+3. `node_native` project
+4. **SKIP all other projects not listed**
 
 Copy lib and pdb files to /out/ folder
 ```bash
