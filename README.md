@@ -110,9 +110,9 @@ There is a considerable amount of work to support C++1y with MSVC 2015 since the
 #### Building Qt from source
 1. Download source zip (didn't bother with git, but beware zip is massive so don't use default windows extractor - I used cygwin's unzip or even jar to extract)
 2. Extract to C:\qt-5.5.0
-3. Create file `qt5vars.cmd`.  See below
-   I didn't bother specifying an <arch> value in qt5vars.cmd.  Also make sure to add python and perl to the PATH.  Finally, and most importantly make to update QMAKESPEC to point to MSVC 2015.  
-   
+3. Create file `c:\qt-5.5.0\qt5vars.cmd`.  See below
+   I didn't bother specifying an arch value in qt5vars.cmd.  Also make sure to add python and perl to the PATH.  Finally and most importantly make to update QMAKESPEC to `win32-msvc2015`
+
     ```batch
     REM Set up \Microsoft Visual Studio 2013, where <arch> is \c amd64, \c x86, etc.
     CALL "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
@@ -123,13 +123,17 @@ There is a considerable amount of work to support C++1y with MSVC 2015 since the
     SET QMAKESPEC=win32-msvc2015
     SET _ROOT=
     ```
-4. Execute the configuration script.  Below are configuration options worked well on my machine against MSVC 2015.  
+4. Launch MSVC developer console, `cd c:\qt-5.5.0\` and execute `qt5vars.cmd`
+5. In the same MSVC developer console, execute the configuration script.  Below are configuration options worked well on my machine against MSVC 2015.  
 
     ```batch
-    rem configure.bat -platform win32-msvc2015 -debug -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative
+    configure.bat -platform win32-msvc2015 -debug -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative
     ```
-5. Build with nmake or jom
-6. Add the MSVC 2015 tool-chain to QtCreator.  It's a little tricky as you'll need to create some empty project first.  Go to the `Projects > Manage Kits.. > Build & Run > Qt Versions > Add...` and select C:\qt-5.5.0\qtbase\bin\qmake and include somewhere in the label MSVC2015.  Then within `Projects > Manage Kits.. > Build & Run > Kits > Add` a new kit named "Qt 5.5.0 MSVC2015 32bit", choose the compiler that matches MSVC 2015 (Compiler v14), and lastly choose the Qt Version that was recently added.
+6. Build with `nmake` or `jom`
+7. Add the MSVC 2015 tool-chain to QtCreator: It's a little tricky but it should be straight forward. 
+   Create an empty project.
+   Go to the `Projects > Manage Kits.. > Build & Run > Qt Versions > Add...` and select C:\qt-5.5.0\qtbase\bin\qmake and include somewhere in the label MSVC2015.
+   Then within `Projects > Manage Kits.. > Build & Run > Kits > Add` a new kit named "Qt 5.5.0 MSVC2015 32bit", choose the compiler that matches MSVC 2015 (Compiler v14), and lastly choose the Qt version that we recently created.
 
 #### Finally building QttpServer
 
@@ -149,13 +153,14 @@ Generate build files and compile to ./out/ folder
 ./build.py
 ```
 
-Open solution build/all.sln
+Open solution build/all.sln with VS2015
 
-Individually build projects
+Individually configure each project to use MSVC 2015 tool-chain and BUILD individually
 
 1. http_parser project
 2. uv project
 3. node_native project
+4. SKIP all other projects not listed
 
 Copy lib and pdb files to /out/ folder
 ```bash

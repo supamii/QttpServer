@@ -27,9 +27,9 @@
           'VCCLCompilerTool': {
             'target_conditions': [
               ['library=="static_library"', {
-                'RuntimeLibrary': 1, # static debug
-              }, {
                 'RuntimeLibrary': 3, # DLL debug
+              }, {
+                'RuntimeLibrary': 2, # static debug
               }],
             ],
             'Optimization': 0, # /Od, no optimization
@@ -65,9 +65,9 @@
           'VCCLCompilerTool': {
             'target_conditions': [
               ['library=="static_library"', {
-                'RuntimeLibrary': 0, # static release
+                'RuntimeLibrary': 3, # dll release
               }, {
-                'RuntimeLibrary': 2, # debug release
+                'RuntimeLibrary': 2, # static release
               }],
             ],
             'Optimization': 3, # /Ox, full optimization
