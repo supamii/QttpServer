@@ -111,7 +111,8 @@ There is a considerable amount of work to support C++1y with MSVC 2015 since the
 1. Download source zip (didn't bother with git, but beware zip is massive so don't use default windows extractor - I used cygwin's unzip or even jar to extract)
 2. Extract to C:\qt-5.5.0
 3. Create file qt5vars.cmd.  See below
-> I didn't bother specifying an <arch> value in qt5vars.cmd.  Also make sure to add python and perl to the PATH.  Finally, and most importantly make to update QMAKESPEC to point to MSVC 2015.  ```batch
+> I didn't bother specifying an <arch> value in qt5vars.cmd.  Also make sure to add python and perl to the PATH.  Finally, and most importantly make to update QMAKESPEC to point to MSVC 2015.  
+```batch
 REM Set up \Microsoft Visual Studio 2013, where <arch> is \c amd64, \c x86, etc.
 CALL "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
 SET _ROOT=C:\qt-5.5.0
