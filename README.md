@@ -7,6 +7,7 @@
 1. [git](http://git-scm.com/)
 2. [python 2.x](https://www.python.org/)
 3. [qt installer](http://www.qt.io/download/) or [from source](http://doc.qt.io/qt-5/linux-building.html)
+4. For Windows (10), use the MSVC 2015 tool chain (due to C++1y feature support)
 
 ## Start
 
@@ -16,12 +17,12 @@ cd QttpServer
 ```
 
 Git submodules/dependencies automatically pulls in mongodb-drivers, boost, libuv, http-parser
-```base
+```bash
 git submodule update --init
 ```
 
 Generate build files and compile to ./out/ folder
-```base
+```bash
 ./build.py
 make -C out
 ```
@@ -100,6 +101,42 @@ scons --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/in
 ```
 
 For more information visit [mongodb.org](https://docs.mongodb.org/getting-started/cpp/client/)
+
+## Start Windows 10 only
+
+```bash
+git clone https://github.com/supamii/QttpServer
+cd QttpServer
+```
+
+Git submodules/dependencies automatically pulls in mongodb-drivers, boost, libuv, http-parser
+```bash
+git submodule update --init
+```
+
+Generate build files and compile to ./out/ folder
+```bash
+# Double-click in windows
+./build.py
+```
+
+Launch build/all.sln
+Individually build 
+1. http-parser project
+2. uv project
+3. node-native project
+
+Copy lib and pdb files
+```bash
+# Under the build/ directory, double-click
+./postbuild.sh
+```
+
+Generate makefile and compile to ./out/qtdebug/ or ./out/qtrelease/ or launch `qttp.pro` with Qt Creator
+```bash
+qmake CONFIG+=debug qttp.pro
+nmake
+```
 
 # TODOs
 
