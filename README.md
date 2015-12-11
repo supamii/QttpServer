@@ -123,7 +123,7 @@ There is a considerable amount of work to support C++1y with MSVC 2015 since the
     SET QMAKESPEC=win32-msvc2015
     SET _ROOT=
     ```
-4. Launch MSVC developer console, `cd c:\qt-5.5.0\` and execute `qt5vars.cmd` to load environment variables
+4. Launch MSVC 2015 developer console, `cd c:\qt-5.5.0\` and execute `qt5vars.cmd` to load environment variables
 5. In the same MSVC developer console, execute the configuration script.  Below are configuration options that worked well on my machine against MSVC 2015:
 
     ```batch
