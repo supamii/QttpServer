@@ -7,11 +7,9 @@
 1. [git](http://git-scm.com/)
 2. [python 2.x](https://www.python.org/)
 3. [qt installer](http://www.qt.io/download/) or [from source](http://doc.qt.io/qt-5/linux-building.html)
-4. For Windows (10), use the MSVC 2015 tool chain (due to C++1y feature support)
+4. [strawberry perl](http://strawberryperl.com/) for building Qt on Windows
 
-## Start 
-
-### *nix only
+## Build (*nix only)
 
 ```bash
 git clone https://github.com/supamii/QttpServer
@@ -33,42 +31,6 @@ Generate makefile and compile to ./out/qtdebug/ or ./out/qtrelease/ or launch `q
 ```bash
 qmake CONFIG+=debug qttp.pro
 make
-```
-
-### Windows 10 only - PRELIMINARY
-
-```bash
-git clone https://github.com/supamii/QttpServer
-cd QttpServer
-```
-
-Git submodules/dependencies automatically pulls in mongodb-drivers, boost, libuv, http-parser
-```bash
-git submodule update --init
-```
-
-Generate build files and compile to ./out/ folder
-```bash
-# Double-click in windows
-./build.py
-```
-
-Launch build/all.sln
-Individually build 
-1. http-parser project
-2. uv project
-3. node-native project
-
-Copy lib and pdb files
-```bash
-# Under the build/ directory, double-click
-./postbuild.sh
-```
-
-Generate makefile and compile to ./out/qtdebug/ or ./out/qtrelease/ or launch `qttp.pro` with Qt Creator
-```bash
-qmake CONFIG+=debug qttp.pro
-nmake
 ```
 
 ## Examples
@@ -139,6 +101,69 @@ scons --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/in
 ```
 
 For more information visit [mongodb.org](https://docs.mongodb.org/getting-started/cpp/client/)
+
+
+## Windows 10 Build
+
+There is a considerable amount of work to support C++1y with MSVC 2015 since the Qt installer does not yet support it.  We'll first need to (download sources)[http://doc.qt.io/qt-5/windows-building.html], build Qt5 with MSVC 2015.
+
+#### Building Qt from source
+1. Download source zip (didn't bother with git, but beware zip is massive so don't use default windows extractor - I used cygwin's unzip or even jar to extract)
+2. Extract to C:\qt-5.5.0
+3. Create file qt5vars.cmd.  See below
+> I didn't bother specifying an <arch> value in qt5vars.cmd.  Also make sure to add python and perl to the PATH.  Finally, and most importantly make to update QMAKESPEC to point to MSVC 2015.
+```batch
+REM Set up \Microsoft Visual Studio 2013, where <arch> is \c amd64, \c x86, etc.
+CALL "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
+SET _ROOT=C:\qt-5.5.0
+SET PATH=%_ROOT%\qtbase\bin;%_ROOT%\gnuwin32\bin;C:\Python27;C:\Strawberry\perl\bin;%PATH%
+REM Uncomment the below line when using a git checkout of the source repository
+REM SET PATH=%_ROOT%\qtrepotools\bin;%PATH%
+SET QMAKESPEC=win32-msvc2015
+SET _ROOT=
+```
+4. Execute the configuration script.  Below are configuration options worked well on my machine against MSVC 2015.
+```batch
+rem configure.bat -platform win32-msvc2015 -debug -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative
+```
+
+#### Finally building QttpServer
+
+```bash
+git clone https://github.com/supamii/QttpServer
+cd QttpServer
+```
+
+Git submodules/dependencies automatically pulls in mongodb-drivers, boost, libuv, http-parser
+```bash
+git submodule update --init
+```
+
+Generate build files and compile to ./out/ folder
+```bash
+# Double-click on build.py
+./build.py
+```
+
+Open solution build/all.sln
+
+Individually build projects
+
+1. http_parser project
+2. uv project
+3. node_native project
+
+Copy lib and pdb files to /out/ folder
+```bash
+# Under the build directory, double-click
+./postbuild.sh
+```
+
+Generate makefile and compile to ./out/qtdebug/ or ./out/qtrelease/ or launch `qttp.pro` with Qt Creator
+```bash
+qmake CONFIG+=debug qttp.pro
+nmake
+```
 
 # TODOs
 
