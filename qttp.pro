@@ -13,13 +13,6 @@ HEADERS +=
 SOURCES += \
     $$PWD/main.cpp
 
-win32 {
-    LIBS += -llibuv -lhttp_parser -lnode_native
-}
-!win32 {
-    LIBS += -luv -lhttp_parser -lnode_native
-}
-
 #LIBS += -mongoclient -L$$PWD/lib/mongo-cxx-driver/build/darwin/normal
 #INCLUDEPATH += \
 #    $$PWD/lib/mongo-cxx-driver/src \
@@ -35,9 +28,8 @@ INCLUDEPATH += \
     $$PWD/lib/http/include \
     $$PWD/lib/http/include/native
 
-QMAKE_CXXFLAGS += -g -O0 -lm -lpthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
-
 unix: {
+    QMAKE_CXXFLAGS += -g -O0 -lm -lpthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 }
 
 macx: {
@@ -53,7 +45,25 @@ unix:!macx {
 }
 
 win32 {
-  CONFIG += c++14
+    CONFIG += c++14
+    QMAKE_CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+}
+
+win32 {
+    LIBS += \
+        -llibuv \
+        -lhttp_parser \
+        -lnode_native \
+        -ladvapi32 \
+        -liphlpapi \
+        -lpsapi \
+        -lshell32 \
+        -lws2_32 \
+        -luserenv
+}
+
+!win32 {
+    LIBS += -luv -lhttp_parser -lnode_native
 }
 
 CONFIG(debug, debug|release) {
@@ -83,6 +93,18 @@ CONFIG(debug, debug|release) {
         message('Adding http_parser.o on linux')
         OBJECTS += $$PWD/out/Release/obj.target/http_parser/lib/http-parser/http_parser.o
     }
+}
+
+win32 {
+    #QMAKE_CFLAGS_RELEASE += -MT
+    #QMAKE_CXXFLAGS_RELEASE += -MT
+    #QMAKE_CFLAGS_RELEASE -= -MD
+    #QMAKE_CXXFLAGS_RELEASE -= -MD
+
+    #QMAKE_CFLAGS_DEBUG += -MTd
+    #QMAKE_CXXFLAGS_DEBUG += -MTd
+    #QMAKE_CFLAGS_DEBUG -= -MDd
+    #QMAKE_CXXFLAGS_DEBUG -= -MDd
 }
 
 INCLUDEPATH = $$unique(INCLUDEPATH)
