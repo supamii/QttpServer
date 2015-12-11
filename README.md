@@ -121,7 +121,8 @@ REM SET PATH=%_ROOT%\qtrepotools\bin;%PATH%
 SET QMAKESPEC=win32-msvc2015
 SET _ROOT=
 ```
-4. Execute the configuration script.  Below are configuration options worked well on my machine against MSVC 2015.  ```batch
+4. Execute the configuration script.  Below are configuration options worked well on my machine against MSVC 2015.  
+```batch
 rem configure.bat -platform win32-msvc2015 -debug -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative
 ```
 5. Build with nmake or jom
