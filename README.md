@@ -108,10 +108,10 @@ For more information visit [mongodb.org](https://docs.mongodb.org/getting-starte
 There is a considerable amount of work to support C++1y with MSVC 2015 since the Qt installer does not yet support it.  We'll first need to install Qt with MSVC 2013 for QtCreator, [download sources](http://doc.qt.io/qt-5/windows-building.html), and finally build Qt5 against MSVC 2015.
 
 #### Building Qt from source
-1. Download source zip (didn't bother with git, but beware zip is massive so don't use default windows extractor - I used cygwin's unzip or even jar to extract)
-2. Extract to C:\qt-5.5.0
+1. Download source zip - I didn't bother with Qt's Git components
+2. Extract to `C:\qt-5.5.0` - beware, zip is massive so don't use default windows extractor.  I used cygwin's unzip or jar to extract contents
 3. Create file `c:\qt-5.5.0\qt5vars.cmd`.  See below
-   I didn't bother specifying an arch value in qt5vars.cmd.  Also make sure to add python and perl to the PATH.  Finally and most importantly make to update QMAKESPEC to `win32-msvc2015`
+   I didn't specify an arch value in qt5vars.cmd since MSVC2015 is x86 anyway (Strange, I know).  Also make sure to add python and perl to the PATH.  Lastly and most importantly make to update QMAKESPEC to `win32-msvc2015`
 
     ```batch
     REM Set up \Microsoft Visual Studio 2013, where <arch> is \c amd64, \c x86, etc.
@@ -123,16 +123,16 @@ There is a considerable amount of work to support C++1y with MSVC 2015 since the
     SET QMAKESPEC=win32-msvc2015
     SET _ROOT=
     ```
-4. Launch MSVC developer console, `cd c:\qt-5.5.0\` and execute `qt5vars.cmd`
-5. In the same MSVC developer console, execute the configuration script.  Below are configuration options that worked well on my machine against MSVC 2015.  
+4. Launch MSVC developer console, `cd c:\qt-5.5.0\` and execute `qt5vars.cmd` to load environment variables
+5. In the same MSVC developer console, execute the configuration script.  Below are configuration options that worked well on my machine against MSVC 2015:
 
     ```batch
     configure.bat -platform win32-msvc2015 -debug -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative
     ```
 6. Build with `nmake` or `jom`
-7. Add the MSVC 2015 tool-chain to QtCreator: It's a little tricky but it should be straight forward. 
+7. Add the MSVC 2015 tool-chain to QtCreator - It's a little tricky but it should be straight forward. 
 
-   Create an empty project.
+   Create an empty project and load it in QtCreator
 
    Go to the `Projects > Manage Kits.. > Build & Run > Qt Versions > Add...` and select C:\qt-5.5.0\qtbase\bin\qmake and include somewhere in the label MSVC2015.
 
