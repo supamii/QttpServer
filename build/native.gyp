@@ -17,6 +17,7 @@
                 '../lib/http/src/loop.cc',
                 '../lib/http/src/stream.cc',
                 '../lib/http/src/handle.cc',
+				'../lib/http/src/fs.cc',
                 '../lib/http/src/net.cc',
                 '../lib/http/src/tcp.cc',
                 '../lib/http/src/http.cc'
