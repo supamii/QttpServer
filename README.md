@@ -110,8 +110,7 @@ There is a considerable amount of work to support C++1y with MSVC 2015 since the
 #### Building Qt from source
 1. Download source zip - I didn't bother with Qt's Git components
 2. Extract to `C:\qt-5.5.0` - beware, zip is massive so don't use default windows extractor.  I used cygwin's unzip or jar to extract contents
-3. Create file `c:\qt-5.5.0\qt5vars.cmd`.  See below
-   I didn't specify an arch value in qt5vars.cmd since MSVC2015 is x86 anyway (Strange, I know).  Also make sure to add python and perl to the PATH.  Lastly and most importantly make to update QMAKESPEC to `win32-msvc2015`
+3. Create file `c:\qt-5.5.0\qt5vars.cmd` with the contents below:
 
     ```batch
     REM Set up \Microsoft Visual Studio 2013, where <arch> is \c amd64, \c x86, etc.
@@ -123,6 +122,7 @@ There is a considerable amount of work to support C++1y with MSVC 2015 since the
     SET QMAKESPEC=win32-msvc2015
     SET _ROOT=
     ```
+   I didn't specify an arch value in qt5vars.cmd since MSVC2015 is x86 anyway (Strange, I know).  Also make sure to add python and perl to the PATH.  Lastly and most importantly make to update QMAKESPEC to `win32-msvc2015`
 4. Launch MSVC 2015 developer console, `cd c:\qt-5.5.0\` and execute `qt5vars.cmd` to load environment variables
 5. In the same MSVC developer console, execute the configuration script.  Below are configuration options that worked well on my machine against MSVC 2015:
 
@@ -160,9 +160,9 @@ Open solution build/all.sln with VS2015
 
 Individually configure each project to use MSVC 2015 tool-chain and **BUILD individually**
 
-1. `http_parser` project
-2. `uv project`
-3. `node_native` project
+1. `http_parser`
+2. `libuv`
+3. `node_native`
 4. **SKIP all other projects not listed**
 
 Copy lib and pdb files to /out/ folder
