@@ -50,7 +50,7 @@ namespace native
 
             return uv_read_start(get<uv_stream_t>(),
                 [](uv_handle_t*, size_t suggested_size, uv_buf_t* buf){
-                    auto size = std::max(suggested_size, max_alloc_size);
+                    auto size = (std::max)(suggested_size, max_alloc_size);
                     buf->base = new char[size];
                     buf->len = size;
                     if((buf->base == NULL) && (buf->len > 0))
