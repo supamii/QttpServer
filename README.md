@@ -7,7 +7,7 @@
 1. [git](http://git-scm.com/)
 2. [python 2.x](https://www.python.org/)
 3. [qt installer](http://www.qt.io/download/) or [from source](http://doc.qt.io/qt-5/linux-building.html)
-4. [strawberry perl](http://strawberryperl.com/) for building Qt on Windows
+4. Perl
 
 ## Build (*nix only)
 
@@ -103,9 +103,18 @@ scons --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/in
 For more information visit [mongodb.org](https://docs.mongodb.org/getting-started/cpp/client/)
 
 
-## Windows 10 Build
+## Build - Windows 10, MSVC 2015 only
+
+The MSVC 2012 and 2013 compilers don't support C++1y well enough so QttpServer is limited to  Windows 10 with Visual Studio 2015.
 
 There is a considerable amount of work to support C++1y with MSVC 2015 since the Qt installer does not yet support it.  We'll first need to install Qt with MSVC 2013 for QtCreator, [download sources](http://doc.qt.io/qt-5/windows-building.html), and finally build Qt5 against MSVC 2015.
+
+#### Prerequisites
+1. Visual Studio 2013 express (MSVC 2013 tool-chain) - C++ tools must be activated
+2. Visual Studio 2015 community (MSVC 2015 tool-chain
+3. Qt 5.x (Initially configure to match with MSVC 2013)
+4. [python 2.x](https://www.python.org/)
+5. [strawberry perl](http://strawberryperl.com/) - As a precaution
 
 #### Building Qt from source
 1. Download source zip - I didn't bother with Qt's Git components
@@ -171,11 +180,7 @@ Copy lib and pdb files to /out/ folder
 ./postbuild.sh
 ```
 
-Generate makefile and compile to ./out/qtdebug/ or ./out/qtrelease/ or launch `qttp.pro` with Qt Creator
-```bash
-qmake CONFIG+=debug qttp.pro
-nmake
-```
+Launch `qttp.pro` with Qt Creator and ENJOY a beer - you've earned it!
 
 # TODOs
 
