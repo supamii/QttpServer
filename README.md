@@ -107,7 +107,7 @@ For more information visit [mongodb.org](https://docs.mongodb.org/getting-starte
 
 The MSVC 2012 and 2013 compilers don't support C++1y well enough so QttpServer is limited to  Windows 10 with Visual Studio 2015.
 
-There is a considerable amount of work to support C++1y with MSVC 2015 since the Qt installer does not yet support it.  We'll first need to install Qt with MSVC 2013 for QtCreator, download sources, and finally build Qt5 against MSVC 2015.
+There is a considerable amount of work to support C++1y with MSVC 2015 since the Qt installer does not include MSVC 2015.  We'll first need to install Qt with MSVC 2013 for QtCreator, download sources, and finally build Qt5 against MSVC 2015.
 
 #### Prerequisites
 1. [git](http://git-scm.com/)
@@ -132,7 +132,7 @@ There is a considerable amount of work to support C++1y with MSVC 2015 since the
     SET QMAKESPEC=win32-msvc2015
     SET _ROOT=
     ```
-   I didn't specify an arch value in qt5vars.cmd since MSVC2015 is x86 anyway (Strange, I know).  Also make sure to add python and perl to the PATH.  Lastly and most importantly make to update QMAKESPEC to `win32-msvc2015`
+   I didn't specify an arch value in qt5vars.cmd since MSVC2015 is x86 anyway (Strange, I know).  Also make sure to add python and perl to the PATH.  Lastly and most importantly - be sure to update QMAKESPEC to `win32-msvc2015`
 4. Launch MSVC 2015 developer console, `cd c:\qt-5.5.0\` and execute `qt5vars.cmd` to load environment variables
 5. In the same MSVC developer console, execute the configuration script.  Below are configuration options that worked well on my machine against MSVC 2015:
 
@@ -140,13 +140,13 @@ There is a considerable amount of work to support C++1y with MSVC 2015 since the
     configure.bat -platform win32-msvc2015 -debug -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative
     ```
 6. Build with `nmake` or `jom`
-7. Add the MSVC 2015 tool-chain to QtCreator - It's a little tricky but it should be straight forward. 
+7. Add the MSVC 2015 tool-chain to QtCreator:
 
-   Create an empty project and load it in QtCreator
+   * Create an empty project and load it in QtCreator
 
-   Go to the `Projects > Manage Kits.. > Build & Run > Qt Versions > Add...` and select C:\qt-5.5.0\qtbase\bin\qmake and include somewhere in the label MSVC2015.
+   * Go to the `Projects > Manage Kits.. > Build & Run > Qt Versions > Add...` and select C:\qt-5.5.0\qtbase\bin\qmake and include somewhere in the label MSVC2015.
 
-   Then within `Projects > Manage Kits.. > Build & Run > Kits > Add` a new kit named "Qt 5.5.0 MSVC2015 32bit", choose the compiler that matches MSVC 2015 (Compiler v14), and lastly choose the Qt version that we recently created.
+   * Then within `Projects > Manage Kits.. > Build & Run > Kits > Add` a new kit named "Qt 5.5.0 MSVC2015 32bit", choose the compiler that matches MSVC 2015 (Compiler v14), and lastly choose the Qt version that we recently created.
 
 #### Finally building QttpServer
 
