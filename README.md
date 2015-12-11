@@ -35,7 +35,7 @@ qmake CONFIG+=debug qttp.pro
 make
 ```
 
-### Windows 10 only
+### Windows 10 only - PRELIMINARY
 
 ```bash
 git clone https://github.com/supamii/QttpServer
