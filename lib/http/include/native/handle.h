@@ -47,15 +47,7 @@ namespace native
 
             bool is_active() { return uv_is_active(get()) != 0; }
 
-            void close(std::function<void()> callback)
-            {
-                callbacks::store(get()->data, native::internal::uv_cid_close, callback);
-                uv_close(get(),
-                    [](uv_handle_t* h) {
-                        callbacks::invoke<decltype(callback)>(h->data, native::internal::uv_cid_close);
-                        _delete_handle(h);
-                    });
-            }
+            void close(std::function<void()> callback);
 
             handle& operator =(const handle& h)
             {
