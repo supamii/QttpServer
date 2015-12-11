@@ -7,7 +7,7 @@
 1. [git](http://git-scm.com/)
 2. [python 2.x](https://www.python.org/)
 3. [qt installer](http://www.qt.io/download/) or [from source](http://doc.qt.io/qt-5/linux-building.html)
-4. Perl
+4. perl
 
 ## Build (*nix only)
 
@@ -107,17 +107,18 @@ For more information visit [mongodb.org](https://docs.mongodb.org/getting-starte
 
 The MSVC 2012 and 2013 compilers don't support C++1y well enough so QttpServer is limited to  Windows 10 with Visual Studio 2015.
 
-There is a considerable amount of work to support C++1y with MSVC 2015 since the Qt installer does not yet support it.  We'll first need to install Qt with MSVC 2013 for QtCreator, [download sources](http://doc.qt.io/qt-5/windows-building.html), and finally build Qt5 against MSVC 2015.
+There is a considerable amount of work to support C++1y with MSVC 2015 since the Qt installer does not yet support it.  We'll first need to install Qt with MSVC 2013 for QtCreator, download sources, and finally build Qt5 against MSVC 2015.
 
 #### Prerequisites
-1. Visual Studio 2013 express (MSVC 2013 tool-chain) - C++ tools must be activated
-2. Visual Studio 2015 community (MSVC 2015 tool-chain
-3. Qt 5.x (Initially configure to match with MSVC 2013)
-4. [python 2.x](https://www.python.org/)
-5. [strawberry perl](http://strawberryperl.com/) - As a precaution
+1. [git](http://git-scm.com/)
+2. Visual Studio 2013 express (MSVC 2013 tool-chain) - C++ tools must be activated
+3. Visual Studio 2015 community (MSVC 2015 tool-chain
+4. Qt 5.x (Initially configure to match with MSVC 2013)
+5. [python 2.x](https://www.python.org/)
+6. [strawberry perl](http://strawberryperl.com/) - As a precaution
 
 #### Building Qt from source
-1. Download source zip - I didn't bother with Qt's Git components
+1. [Building](http://doc.qt.io/qt-5/windows-building.html) from [zip file](http://download.qt.io/official_releases/qt/5.5/5.5.0/single/) - I didn't bother with Qt's Git components - [Stackoverflow](http://stackoverflow.com/questions/32894097/how-do-i-use-qt-in-my-visual-studio-2015-projects) always helps
 2. Extract to `C:\qt-5.5.0` - beware, zip is massive so don't use default windows extractor.  I used cygwin's unzip or jar to extract contents
 3. Create file `c:\qt-5.5.0\qt5vars.cmd` with the contents below:
 
