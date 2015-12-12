@@ -2,7 +2,6 @@
 #include <QCoreApplication>
 #include <QtCore>
 #include <thread>
-//#include <mongo/client/dbclient.h>
 
 #include "httpserver.h"
 
@@ -13,8 +12,6 @@ using namespace native::http;
 int main(int argc, char** argv)
 {
   QCoreApplication app(argc, argv);
-
-  // mongo::client::initialize();
 
   // Always initialize in the main thread.
   HttpServer::getInstance();
