@@ -155,6 +155,10 @@ Compounded by the fact that Qt has yet to explicity support MSVC 2015, there are
     ```batch
     configure.bat -platform win32-msvc2015 -debug -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative
     ```
+   To include [OpenSSL](https://code.google.com/p/openssl-for-windows/downloads/list), download and extract to `C:\openssl-0.9.8k_WIN32`
+    ```batch 
+    configure.bat -platform win32-msvc2015 -debug -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative -openssl-linked OPENSSL_LIBS="-lssleay32 -llibeay32" -I C:\openssl-0.9.8k_WIN32\include -L C:\openssl-0.9.8k_WIN32\lib
+    ```
 6. Build with `nmake` or `jom`
 7. Add the MSVC 2015 tool-chain to QtCreator:
 
