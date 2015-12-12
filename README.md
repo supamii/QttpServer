@@ -241,4 +241,5 @@ Launch `qttp.pro`, build, run with Qt Creator and...
 7. ~~Add pre and post processor callbacks as an alternative to the interface class~~
 8. Make available a metrics pre/post processor
 9. Design an error response mechanism
+10. Record PID
 
