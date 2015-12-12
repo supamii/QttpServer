@@ -126,12 +126,16 @@ class Sample : public Action {
     sudo apt-get install libboost1.54-all-dev
     ```
 4. Build the driver!
+
    Ubuntu
+
     ```bash
     cd QttpServer/lib/mongo-cxx-driver
     scons --prefix="/usr/local/opt/mongo-client" --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/include
     ```
+
    Windows
+
     ```batch
     set PATH=C:\Python27;C:Pyathon27\Scripts;%PATH%
     scons --32 --dbg=on --opt=off --sharedclient --dynamic-windows --prefix="C:\local\mongo-client" --cpppath="C:\local\boost_1_59_0" --libpath="C:\local\boost_1_59_0\lib32-msvc-14.0" install
