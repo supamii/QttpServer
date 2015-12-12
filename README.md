@@ -144,11 +144,11 @@ class Sample : public Action {
 For more information visit [mongodb.org](https://docs.mongodb.org/getting-started/cpp/client/)
 
 
-## Windows 10 Build - MSVC 2015 only
+## Windows 8+ Build - MSVC 2015 only
 
-The MSVC 2012 and 2013 compilers don't support C++1y well enough so QttpServer is limited to  Windows 10 with Visual Studio 2015.
+The MSVC 2012 and 2013 compilers don't support C++1y well enough so QttpServer is limited to  Windows 8+ with Visual Studio 2015.
 
-Compounded by the fact that Qt has yet to explicity support MSVC 2015, there are a considerable amount of steps to complete.  We'll first need to install Qt with MSVC 2013 for QtCreator, download sources, and finally build Qt5 against MSVC 2015.
+Compounded by the fact that Qt has yet to explicity support MSVC 2015, there are a considerable amount of steps to complete.  We'll first need to install Qt with MSVC 2013 for QtCreator, download sources, and finally build Qt5 against MSVC 2015.  The guidwas been developed and tested using Windows 10.
 
 #### Prerequisites
 1. Visual Studio 2013 express (MSVC 2013 tool-chain) - C++ tools must be activated
@@ -177,7 +177,7 @@ Compounded by the fact that Qt has yet to explicity support MSVC 2015, there are
 4. Launch MSVC 2015 developer console, `cd c:\qt-5.5.0\` and execute `qt5vars.cmd` to load environment variables
 5. In the same MSVC developer console, execute the configuration script.  Below are configuration options that worked well on my machine against MSVC 2015:
 
-   To include [OpenSSL](https://code.google.com/p/openssl-for-windows/downloads/list), download and extract to `C:\openssl-0.9.8k_WIN32`.  This is **recommended** in general and also helps support the qredis library.  Tip: If you get stuck on qtwebsockets and don't intend on using it, you may also pass in "-skip qtwebsockets"
+   To include [OpenSSL](https://code.google.com/p/openssl-for-windows/downloads/list), download and extract to `C:\openssl-0.9.8k_WIN32`.  Also add the lib and bin paths to the global %PATH% environment variable or equivalent.  This is **recommended** in general and also helps support the qredis library.  Tip: If you get stuck on qtwebsockets and don't intend on using it, you may also pass in "-skip qtwebsockets"
     ```batch 
     configure.bat -platform win32-msvc2015 -debug -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative -openssl-linked OPENSSL_LIBS="-lssleay32 -llibeay32" -I C:\openssl-0.9.8k_WIN32\include -L C:\openssl-0.9.8k_WIN32\lib -l Gdi32 -l User32
     ```
