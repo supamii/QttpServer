@@ -15,7 +15,7 @@
    cd qt-everywhere-opensource-src-5.5.1
    ./configure -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative
    make
-   make install
+   sudo make install
    ```
 4. perl
 
@@ -117,13 +117,13 @@ For more information visit [mongodb.org](https://docs.mongodb.org/getting-starte
 
 The MSVC 2012 and 2013 compilers don't support C++1y well enough so QttpServer is limited to  Windows 10 with Visual Studio 2015.
 
-There is a considerable amount of work to support C++1y with MSVC 2015 since the Qt installer does not include MSVC 2015.  We'll first need to install Qt with MSVC 2013 for QtCreator, download sources, and finally build Qt5 against MSVC 2015.
+Compounded by the fact that Qt has yet to explicity support MSVC 2015, there is a considerable amount of steps to complete.  We'll first need to install Qt with MSVC 2013 for QtCreator, download sources, and finally build Qt5 against MSVC 2015.
 
 #### Prerequisites
-1. [git](http://git-scm.com/)
-2. Visual Studio 2013 express (MSVC 2013 tool-chain) - C++ tools must be activated
-3. Visual Studio 2015 community (MSVC 2015 tool-chain
-4. Qt 5.x (Initially configure to match with MSVC 2013)
+1. Visual Studio 2013 express (MSVC 2013 tool-chain) - C++ tools must be activated
+2. Visual Studio 2015 community (MSVC 2015 tool-chain
+3. Qt 5.x (Initially configure to match with MSVC 2013)
+4. [git](http://git-scm.com/)
 5. [python 2.x](https://www.python.org/)
 6. [strawberry perl](http://strawberryperl.com/) - As a precaution
 
