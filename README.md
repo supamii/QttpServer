@@ -7,6 +7,10 @@
 1. [git](http://git-scm.com/)
 2. [python 2.x](https://www.python.org/)
 3. [qt installer](http://www.qt.io/download/) or [build](http://doc.qt.io/qt-5/linux-building.html) from [source](http://download.qt.io/official_releases/qt/5.5/5.5.1/single/)
+
+    ```bash
+    # Works well for Ubuntu 12 & 14 LTS
+    ./configure -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative```
 4. perl
 
 ## Build (*nix only)
@@ -103,7 +107,7 @@ scons --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/in
 For more information visit [mongodb.org](https://docs.mongodb.org/getting-started/cpp/client/)
 
 
-## Build - Windows 10, MSVC 2015 only
+## Windows 10 Build - MSVC 2015 only
 
 The MSVC 2012 and 2013 compilers don't support C++1y well enough so QttpServer is limited to  Windows 10 with Visual Studio 2015.
 
