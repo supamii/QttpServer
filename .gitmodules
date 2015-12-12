@@ -11,6 +11,3 @@
 [submodule "lib/qredisclient"]
 	path = lib/qredisclient
 	url = https://github.com/uglide/qredisclient.git
-[submodule "lib/open-ssl"]
-	path = lib/open-ssl
-	url = https://github.com/openssl/openssl.git
