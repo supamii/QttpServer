@@ -9,8 +9,13 @@
 3. [qt installer](http://www.qt.io/download/) or [build](http://doc.qt.io/qt-5/linux-building.html) from [source](http://download.qt.io/official_releases/qt/5.5/5.5.1/single/)
 
    ```bash
-   # Works well for Ubuntu 12 & 14 LTS
+   # Building from source is a breeze - works well for Ubuntu 12 & 14 LTS
+   wget http://download.qt.io/official_releases/qt/5.5/5.5.1/single/qt-everywhere-opensource-src-5.5.1.tar.gz
+   tar -xvf qt-everywhere-opensource-src-5.5.1.tar.tz
+   cd qt-everywhere-opensource-src-5.5.1
    ./configure -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative
+   make
+   make install
    ```
 4. perl
 
