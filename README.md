@@ -22,7 +22,7 @@
 ## Build (*nix only)
 
 ```bash
-git clone https://github.com/supamii/QttpServer
+git clone https://github.com/supamii/QttpServer.git
 cd QttpServer
 ```
 
@@ -41,6 +41,12 @@ Generate makefile and compile to ./out/qtdebug/ or ./out/qtrelease/ or launch `q
 ```bash
 qmake CONFIG+=debug qttp.pro
 make
+```
+
+Run the executable!
+```bash
+ln -s out/qtdebug/qttp startQttp
+./startQttp &
 ```
 
 ## Examples
@@ -117,7 +123,7 @@ For more information visit [mongodb.org](https://docs.mongodb.org/getting-starte
 
 The MSVC 2012 and 2013 compilers don't support C++1y well enough so QttpServer is limited to  Windows 10 with Visual Studio 2015.
 
-Compounded by the fact that Qt has yet to explicity support MSVC 2015, there is a considerable amount of steps to complete.  We'll first need to install Qt with MSVC 2013 for QtCreator, download sources, and finally build Qt5 against MSVC 2015.
+Compounded by the fact that Qt has yet to explicity support MSVC 2015, there are a considerable amount of steps to complete.  We'll first need to install Qt with MSVC 2013 for QtCreator, download sources, and finally build Qt5 against MSVC 2015.
 
 #### Prerequisites
 1. Visual Studio 2013 express (MSVC 2013 tool-chain) - C++ tools must be activated
@@ -189,7 +195,9 @@ Copy lib and pdb files to /out/ folder
 ./postbuild.sh
 ```
 
-Launch `qttp.pro` with Qt Creator and ENJOY a beer - you've earned it!
+Launch `qttp.pro`, build, run with Qt Creator and...
+
+**ENJOY a beer - you've earned it!**
 
 # TODOs
 
