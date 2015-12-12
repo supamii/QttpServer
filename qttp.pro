@@ -1,3 +1,11 @@
+#LIBS += -mongoclient -L$$PWD/lib/mongo-cxx-driver/build/darwin/normal
+#INCLUDEPATH += \
+#    $$PWD/lib/mongo-cxx-driver/src \
+#    $$PWD/lib/mongo-cxx-driver/build/darwin/normal \
+#    /usr/local/opt/boost155/include
+#LDFLAGS:  -L/usr/local/opt/boost155/lib
+#CPPFLAGS: -I/usr/local/opt/boost155/include
+
 TEMPLATE = app
 
 QT += core network
@@ -8,18 +16,25 @@ include($$PWD/config/config.pri)
 message('Including qttp source files')
 include($$PWD/qttp/qttp.pri)
 
+OTHER_FILES += \
+    $$PWD/lib/http/include/native/*.h \
+    $$PWD/lib/http/src/* \
+    $$PWD/lib/http-parser/*.c \
+    $$PWD/lib/http-parser/*.h \
+    $$PWD/lib/libuv/src/* \
+    $$PWD/lib/libuv/include/*
+
+unix {
+    OTHER_FILES += $$PWD/lib/libuv/src/unix/*
+}
+!unix {
+    OTHER_FILES += $$PWD/lib/libuv/src/win/*
+}
+
 HEADERS +=
 
 SOURCES += \
     $$PWD/main.cpp
-
-#LIBS += -mongoclient -L$$PWD/lib/mongo-cxx-driver/build/darwin/normal
-#INCLUDEPATH += \
-#    $$PWD/lib/mongo-cxx-driver/src \
-#    $$PWD/lib/mongo-cxx-driver/build/darwin/normal \
-#    /usr/local/opt/boost155/include
-#LDFLAGS:  -L/usr/local/opt/boost155/lib
-#CPPFLAGS: -I/usr/local/opt/boost155/include
 
 INCLUDEPATH += \
     $$PWD/lib/http-parser \
@@ -93,18 +108,6 @@ CONFIG(debug, debug|release) {
         message('Adding http_parser.o on linux')
         OBJECTS += $$PWD/out/Release/obj.target/http_parser/lib/http-parser/http_parser.o
     }
-}
-
-win32 {
-    #QMAKE_CFLAGS_RELEASE += -MT
-    #QMAKE_CXXFLAGS_RELEASE += -MT
-    #QMAKE_CFLAGS_RELEASE -= -MD
-    #QMAKE_CXXFLAGS_RELEASE -= -MD
-
-    #QMAKE_CFLAGS_DEBUG += -MTd
-    #QMAKE_CXXFLAGS_DEBUG += -MTd
-    #QMAKE_CFLAGS_DEBUG -= -MDd
-    #QMAKE_CXXFLAGS_DEBUG -= -MDd
 }
 
 INCLUDEPATH = $$unique(INCLUDEPATH)
