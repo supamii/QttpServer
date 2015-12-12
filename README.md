@@ -10,10 +10,11 @@
 
    ```bash
    # Building from source is a breeze - works well for Ubuntu 12 & 14 LTS
+   sudo apt-get install libssl-dev
    wget http://download.qt.io/official_releases/qt/5.5/5.5.1/single/qt-everywhere-opensource-src-5.5.1.tar.gz
    tar -xvf qt-everywhere-opensource-src-5.5.1.tar.tz
    cd qt-everywhere-opensource-src-5.5.1
-   ./configure -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative
+   ./configure -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative -openssl-linked
    make
    sudo make install
    ```
@@ -105,16 +106,36 @@ class Sample : public Action {
 ```
 
 ## Optional components
+##### Build Redis client
+
+1. `cd lib/qredisclient` and execute `git submodule update --init`
+2. `qmake CONFIG+=debug DESTDIR=. qredisclient.pro`
+3. `make`
+
+
 ##### Build MongoDb driver
 
 1. Install [scons](http://www.scons.org/) - e.g. `brew install scons`
-2. Install [boost](https://github.com/mongodb/mongo-cxx-driver/wiki/Download-and-Compile-the-Legacy-Driver) - e.g. `brew search boost`  `brew install homebrew/versions/boost155` Generally recommend using brew, apt-get, or the pre-built binary installer
-3. Build the driver!
-```bash
-cd QttpServer/lib/mongo-cxx-driver
-scons --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/include
-# On mac contents may be under QttpServer/lib/mongo-cxx-driver/build/darwin/normal
-```
+2. Install [boost](https://github.com/mongodb/mongo-cxx-driver/wiki/Download-and-Compile-the-Legacy-Driver)
+   e.g. `brew search boost` and `brew install homebrew/versions/boost155` 
+   Generally recommend using brew, apt-get, or the pre-built [binary installer for windows](http://sourceforge.net/projects/boost/files/boost-binaries/)
+
+    ```bash
+    # Or skip the whole build, just install what you can with ubuntu
+    sudo apt-get install mongodb-dev
+    sudo apt-get install libboost1.54-all-dev
+    ```
+4. Build the driver!
+    
+    ```bash
+    cd QttpServer/lib/mongo-cxx-driver
+    scons --prefix="/usr/local/opt/mongo-client" --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/include
+    ```
+    
+    ```batch
+    rem Windows is similar
+    scons --32 --dbg=on --opt=off --sharedclient --dynamic-windows --prefix="C:\local\mongo-client" --cpppath="C:\local\boost_1_59_0" --libpath="C:\local\boost_1_59_0\lib32-msvc-14.0" install
+    ```
 
 For more information visit [mongodb.org](https://docs.mongodb.org/getting-started/cpp/client/)
 
@@ -152,9 +173,9 @@ Compounded by the fact that Qt has yet to explicity support MSVC 2015, there are
 4. Launch MSVC 2015 developer console, `cd c:\qt-5.5.0\` and execute `qt5vars.cmd` to load environment variables
 5. In the same MSVC developer console, execute the configuration script.  Below are configuration options that worked well on my machine against MSVC 2015:
 
-   To include [OpenSSL](https://code.google.com/p/openssl-for-windows/downloads/list), download and extract to `C:\openssl-0.9.8k_WIN32`.  This is **recommended** in general but also helps support the qredis library.
+   To include [OpenSSL](https://code.google.com/p/openssl-for-windows/downloads/list), download and extract to `C:\openssl-0.9.8k_WIN32`.  This is **recommended** in general and also helps support the qredis library.  Tip: If you get stuck on qtwebsockets and don't intend on using it, you may also pass in "-skip qtwebsockets"
     ```batch 
-    configure.bat -platform win32-msvc2015 -debug -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative -openssl-linked OPENSSL_LIBS="-lssleay32 -llibeay32" -I C:\openssl-0.9.8k_WIN32\include -L C:\openssl-0.9.8k_WIN32\lib
+    configure.bat -platform win32-msvc2015 -debug -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative -openssl-linked OPENSSL_LIBS="-lssleay32 -llibeay32" -I C:\openssl-0.9.8k_WIN32\include -L C:\openssl-0.9.8k_WIN32\lib -l Gdi32 -l User32
     ```
 
     If you really don't want OpenSSL support just run this:
