@@ -8,9 +8,10 @@
 2. [python 2.x](https://www.python.org/)
 3. [qt installer](http://www.qt.io/download/) or [build](http://doc.qt.io/qt-5/linux-building.html) from [source](http://download.qt.io/official_releases/qt/5.5/5.5.1/single/)
 
-    ```bash
-    # Works well for Ubuntu 12 & 14 LTS
-    ./configure -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative```
+   ```bash
+   # Works well for Ubuntu 12 & 14 LTS
+   ./configure -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative
+   ```
 4. perl
 
 ## Build (*nix only)
