@@ -17,7 +17,7 @@ CC = os.environ.get('CC', 'cc')
 script_dir = os.path.dirname(__file__)
 project_root = os.path.normpath(script_dir)
 gyps_dir = os.path.join(project_root, 'build')
-output_dir = os.path.join(os.path.abspath(project_root), 'out')
+output_dir = os.path.join(os.path.abspath(project_root), 'build/out')
 
 root_gyp_lib = os.path.join(project_root, 'build', 'gyp')
 
@@ -79,7 +79,7 @@ if __name__ == '__main__':
         # gyp.
         # TODO: to decide
         if not os.environ.get('GYP_MSVS_VERSION'):
-            os.environ['GYP_MSVS_VERSION'] = '2013'
+            os.environ['GYP_MSVS_VERSION'] = '2015'
     else:
         args.append(os.path.join(os.path.abspath(gyps_dir), 'all.gyp'))
         common_fn  = os.path.join(os.path.abspath(gyps_dir), 'common.gypi')

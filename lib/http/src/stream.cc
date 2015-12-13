@@ -3,6 +3,17 @@
 using namespace native;
 using namespace base;
 
+// Consulted with libuv team and they claim that this is intentional since they
+// rather cast to struct iovec (linux) and WSABUF (windows).
+// Note that normally we should use uv_buf_init (uv.h) to initialize.
+#ifndef CREATE_UVBUF
+    #ifdef _WIN32
+        #define CREATE_UVBUF(LEN, BUF) { uv_buf_t{ static_cast<size_t>(LEN), const_cast<char*>(BUF) } }
+    #else
+        #define CREATE_UVBUF(LEN, BUF) { uv_buf_t { const_cast<char*>(BUF), static_cast<size_t>(LEN) } }
+    #endif
+#endif
+
 bool stream::listen(std::function<void(native::error)> callback, int backlog)
 {
     callbacks::store(get()->data, native::internal::uv_cid_listen, callback);
@@ -30,12 +41,7 @@ bool stream::read_stop()
 
 bool stream::write(const char* buf, int len, std::function<void(error)> callback)
 {
-	// TODO: THIS IS PROBABLY A LIBUV BUG: https://github.com/libuv/libuv/issues/647
-#ifdef _WIN32
-	uv_buf_t bufs[] = { uv_buf_t{ static_cast<size_t>(len), const_cast<char*>(buf) } };
-#else
-    uv_buf_t bufs[] = { uv_buf_t { const_cast<char*>(buf), static_cast<size_t>(len) } };
-#endif
+    uv_buf_t bufs[] = CREATE_UVBUF(len, buf);
     callbacks::store(get()->data, native::internal::uv_cid_write, callback);
     return uv_write(new uv_write_t, get<uv_stream_t>(), bufs, 1, [](uv_write_t* req, int status) {
         callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_write, ((status != 0)?error(status):error()));
@@ -45,12 +51,7 @@ bool stream::write(const char* buf, int len, std::function<void(error)> callback
 
 bool stream::write(const std::string& buf, std::function<void(error)> callback)
 {
-	// TODO: THIS IS PROBABLY A LIBUV BUG: https://github.com/libuv/libuv/issues/647
-#ifdef _WIN32
-	uv_buf_t bufs[] = { uv_buf_t{ buf.length(), const_cast<char*>(buf.c_str()) } };
-#else
-	uv_buf_t bufs[] = { uv_buf_t{ const_cast<char*>(buf.c_str()), buf.length() } };
-#endif
+    uv_buf_t bufs[] = CREATE_UVBUF(buf.length(), buf.c_str());
     callbacks::store(get()->data, native::internal::uv_cid_write, callback);
     return uv_write(new uv_write_t, get<uv_stream_t>(), bufs, 1, [](uv_write_t* req, int status) {
         callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_write, ((status != 0)?error(status):error()));
@@ -60,12 +61,7 @@ bool stream::write(const std::string& buf, std::function<void(error)> callback)
 
 bool stream::write(const std::vector<char>& buf, std::function<void(error)> callback)
 {
-	// TODO: THIS IS PROBABLY A LIBUV BUG: https://github.com/libuv/libuv/issues/647
-#ifdef _WIN32
-	uv_buf_t bufs[] = { uv_buf_t{ buf.size(), const_cast<char*>(&buf[0]) } };
-#else
-    uv_buf_t bufs[] = { uv_buf_t { const_cast<char*>(&buf[0]), buf.size() } };
-#endif
+    uv_buf_t bufs[] = CREATE_UVBUF(buf.size(), &buf[0]);
     callbacks::store(get()->data, native::internal::uv_cid_write, callback);
     return uv_write(new uv_write_t, get<uv_stream_t>(), bufs, 1, [](uv_write_t* req, int status) {
         callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_write, ((status !=0)?error(status):error()));

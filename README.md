@@ -2,57 +2,9 @@
 
 <b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/node.native).  Intended as an alternative to [QHttpServer](https://github.com/nikhilm/qhttpserver), this is ideal for those who want the benefits of libuv with basic Qt libraries.
 
-## Prerequisites
+## Example 1: 
+Using a raw std::function based callback
 
-1. [git](http://git-scm.com/)
-2. [python 2.x](https://www.python.org/)
-3. [qt installer](http://www.qt.io/download/) or [build](http://doc.qt.io/qt-5/linux-building.html) from [source](http://download.qt.io/official_releases/qt/5.5/5.5.1/single/)
-
-   ```bash
-   # Building from source is a breeze - works well for Ubuntu 12 & 14 LTS
-   sudo apt-get install libssl-dev
-   wget http://download.qt.io/official_releases/qt/5.5/5.5.1/single/qt-everywhere-opensource-src-5.5.1.tar.gz
-   tar -xvf qt-everywhere-opensource-src-5.5.1.tar.tz
-   cd qt-everywhere-opensource-src-5.5.1
-   ./configure -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative -openssl-linked
-   make
-   sudo make install
-   ```
-4. perl
-
-## Build (*nix only)
-
-```bash
-git clone https://github.com/supamii/QttpServer.git
-cd QttpServer
-```
-
-Git submodules/dependencies automatically pulls in mongodb-drivers, boost, libuv, http-parser
-```bash
-git submodule update --init
-```
-
-Generate build files and compile to ./out/ folder
-```bash
-./build.py
-make -C out
-```
-
-Generate makefile and compile to ./out/qtdebug/ or ./out/qtrelease/ or launch `qttp.pro` with Qt Creator
-```bash
-qmake CONFIG+=debug qttp.pro
-make
-```
-
-Run the executable!
-```bash
-ln -s out/qtdebug/qttp startQttp
-./startQttp &
-```
-
-## Examples
-
-Example 1: Using a raw std::function based callback
 ```c++
 #include <native.h>
 #include <QCoreApplication>
@@ -72,6 +24,7 @@ int main(int argc, char** argv)
   HttpServer* httpSvr = HttpServer::getInstance();
 
   httpSvr->addAction("test", [](HttpData& data) {
+    // Form the JSON content and the framework handles the rest.
     QJsonObject& json = data.getJson();
     json["response"] = "Test C++ FTW";
   });
@@ -88,7 +41,9 @@ int main(int argc, char** argv)
 }
 ```
 
-Example 2: Using the action interface
+## Example 2: 
+Using the action interface
+
 ```c++
 // Adds the action interface via template method.
 httpSvr->addAction<Sample>();
@@ -105,7 +60,59 @@ class Sample : public Action {
 };
 ```
 
+## Getting started with Mac & Linux
+
+### Prerequisites
+
+1. [git](http://git-scm.com/)
+2. [python 2.x](https://www.python.org/)
+3. [qt installer](http://www.qt.io/download/) or [build](http://doc.qt.io/qt-5/linux-building.html) from [source](http://download.qt.io/official_releases/qt/5.5/5.5.1/single/)
+
+   ```bash
+   # Building from source is a breeze - works well for Ubuntu 12 & 14 LTS
+   sudo apt-get install libssl-dev
+   wget http://download.qt.io/official_releases/qt/5.5/5.5.1/single/qt-everywhere-opensource-src-5.5.1.tar.gz
+   tar -xvf qt-everywhere-opensource-src-5.5.1.tar.tz
+   cd qt-everywhere-opensource-src-5.5.1
+   ./configure -nomake examples -opensource -skip qtwebkit -skip qtwebchannel -skip qtquick1 -skip qtdeclarative -openssl-linked
+   make
+   sudo make install
+   ```
+4. perl
+
+### Build
+
+```bash
+git clone https://github.com/supamii/QttpServer.git
+cd QttpServer
+```
+
+Git submodules/dependencies automatically pulls in mongodb-drivers, boost, libuv, http-parser
+```bash
+git submodule update --init
+```
+
+Generate build files and compile to ./build/out/ folder
+```bash
+./build.py
+make -C build/out
+```
+
+Generate and build or launch `qttp.pro` with Qt Creator
+```bash
+qmake CONFIG+=debug qttp.pro
+make
+```
+
+If you want to run a quick sample application:
+```bash
+qmake CONFIG+=debug CONFIG+=SAMPLEAPP qttp.pro
+make
+./qttpserver
+```
+
 ## Optional components
+
 ##### Build Redis client
 
 1. `cd lib/qredisclient` and execute `git submodule update --init`
@@ -117,13 +124,19 @@ class Sample : public Action {
 
 1. Install [scons](http://www.scons.org/) - e.g. `brew install scons`
 2. Install [boost](https://github.com/mongodb/mongo-cxx-driver/wiki/Download-and-Compile-the-Legacy-Driver)
-   e.g. `brew search boost` and `brew install homebrew/versions/boost155` 
-   Generally recommend using brew, apt-get, or the pre-built [binary installer for windows](http://sourceforge.net/projects/boost/files/boost-binaries/)
+
+   Many agree that building Boost can be challenging so it's recommend to use something like brew, apt-get, or the pre-built [binary installer for windows](http://sourceforge.net/projects/boost/files/boost-binaries/)
 
     ```bash
-    # Or skip the whole build, just install what you can with ubuntu
+    # Install what you can with Ubuntu
     sudo apt-get install mongodb-dev
     sudo apt-get install libboost1.54-all-dev
+    ```
+
+    ```bash
+    # Brew on macx
+    brew search boost
+    brew install homebrew/versions/boost155
     ```
 4. Build the driver!
 
@@ -143,12 +156,11 @@ class Sample : public Action {
 
 For more information visit [mongodb.org](https://docs.mongodb.org/getting-started/cpp/client/)
 
-
-## Windows 8+ Build - MSVC 2015 only
+## Getting start with Windows (8 & 10) MSVC 2015 only
 
 The MSVC 2012 and 2013 compilers don't support C++1y well enough so QttpServer is limited to  Windows 8+ with Visual Studio 2015.
 
-Compounded by the fact that Qt has yet to explicity support MSVC 2015, there are a considerable amount of steps to complete.  We'll first need to install Qt with MSVC 2013 for QtCreator, download sources, and finally build Qt5 against MSVC 2015.  The guidwas been developed and tested using Windows 10.
+Compounded by the fact that Qt has yet to explicity support MSVC 2015, there are a considerable amount of steps to complete.  We'll first need to install Qt with MSVC 2013 for QtCreator, download sources, and finally build Qt5 against MSVC 2015.  This guide was developed and tested using Windows 10.
 
 #### Prerequisites
 1. Visual Studio 2013 express (MSVC 2013 tool-chain) - C++ tools must be activated
@@ -205,30 +217,22 @@ Git submodules/dependencies automatically pulls in mongodb-drivers, boost, libuv
 git submodule update --init
 ```
 
-Generate build files and compile to ./out/ folder
-```bash
-# Double-click on build.py
-./build.py
+Use Python to generate build files and compile to ./build/out folder
+```batch
+build.py
 ```
 
-Open solution build/all.sln with VS2015
-
-Individually configure each project to use MSVC 2015 tool-chain and **BUILD individually**
-
-1. `http_parser`
-2. `libuv`
-3. `node_native`
-4. **SKIP all other projects not listed**
-
-Copy lib and pdb files to /out/ folder
-```bash
-# Under the build directory, double-click
-./postbuild.sh
+Open solution build/all.sln with VS2015 - or execute from the developer console
+```batch
+cd build
+msbuild.exe all.sln /p:Configuration=Debug
 ```
 
-Launch `qttp.pro`, build, run with Qt Creator and...
+Launch `qttp.pro` in QtCreator, build and...
 
 **ENJOY a beer - you've earned it!**
+
+As a side note, if you want to run a quick sample application you can add `CONFIG+=SAMPLEAPP` to the additional arguments section located in QtCreator under `Projects > Build & Run > Build Steps > qmake > Additional arguments`
 
 # TODOs
 
@@ -242,4 +246,5 @@ Launch `qttp.pro`, build, run with Qt Creator and...
 8. Make available a metrics pre/post processor
 9. Design an error response mechanism
 10. Record PID
+11. Create an equivalenet build system with QMake to support more platforms (MinGW)
 
