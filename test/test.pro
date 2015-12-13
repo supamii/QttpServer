@@ -1,3 +1,5 @@
+TEMPLATE = app
+
 QT += testlib
 QT -= gui
 
@@ -7,4 +9,10 @@ HEADERS += \
 SOURCES += \
     testHttpServer.cpp
 
-include($$PWD/../server.pri)
+DESTDIR = $$PWD
+
+message('Including config files')
+include($$PWD/config/config.pri)
+
+message('Including core files')
+include($$PWD/../core.pri)

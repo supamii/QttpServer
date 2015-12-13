@@ -1,19 +1,4 @@
-#LIBS += -mongoclient -L$$PWD/lib/mongo-cxx-driver/build/darwin/normal
-#INCLUDEPATH += \
-#    $$PWD/lib/mongo-cxx-driver/src \
-#    $$PWD/lib/mongo-cxx-driver/build/darwin/normal \
-#    /usr/local/opt/boost155/include
-#LDFLAGS:  -L/usr/local/opt/boost155/lib
-#CPPFLAGS: -I/usr/local/opt/boost155/include
-# #include <mongo/client/dbclient.h>
-# mongo::client::initialize();
-
-TEMPLATE = app
-
 QT += core network
-
-message('Including config files')
-include($$PWD/config/config.pri)
 
 message('Including qttp source files')
 include($$PWD/qttp/qttp.pri)
@@ -86,7 +71,6 @@ CONFIG(debug, debug|release) {
     message('Compiling in DEBUG mode')
     LIBS += -L$$PWD/out/Debug
     DEPENDPATH += $$PWD/out/Debug
-    DESTDIR = $$PWD/out/qtdebug
     OBJECTS_DIR = $$PWD/out/qtdebug
     MOC_DIR = $$PWD/out/qtdebug
     RCC_DIR = $$PWD/out/qtdebug
@@ -96,11 +80,13 @@ CONFIG(debug, debug|release) {
         # For some reason Ubuntu 12 LTS doesn't jive with only the static lib
         OBJECTS += $$PWD/out/Debug/obj.target/http_parser/lib/http-parser/http_parser.o
     }
+    isEmpty(DESTDIR) {
+        DESTDIR = $$PWD/out/qtdebug
+    }
 } else {
     message('Compiling in RELEASE mode')
     LIBS += -L$$PWD/out/Release
     DEPENDPATH += $$PWD/out/Release
-    DESTDIR = $$PWD/out/qtrelease
     OBJECTS_DIR = $$PWD/out/qtrelease
     MOC_DIR = $$PWD/out/qtrelease
     RCC_DIR = $$PWD/out/qtrelease
@@ -109,6 +95,9 @@ CONFIG(debug, debug|release) {
         message('Adding http_parser.o on linux')
         OBJECTS += $$PWD/out/Release/obj.target/http_parser/lib/http-parser/http_parser.o
     }
+    isEmpty(DESTDIR) {
+        DESTDIR = $$PWD/out/qtrelease
+    }
 }
 
 INCLUDEPATH = $$unique(INCLUDEPATH)
@@ -116,3 +105,13 @@ HEADERS = $$unique(HEADERS)
 SOURCES = $$unique(SOURCES)
 LIBS = $$unique(LIBS)
 OBJECTS = $$unique(OBJECTS)
+
+#LIBS += -mongoclient -L$$PWD/lib/mongo-cxx-driver/build/darwin/normal
+#INCLUDEPATH += \
+#    $$PWD/lib/mongo-cxx-driver/src \
+#    $$PWD/lib/mongo-cxx-driver/build/darwin/normal \
+#    /usr/local/opt/boost155/include
+#LDFLAGS:  -L/usr/local/opt/boost155/lib
+#CPPFLAGS: -I/usr/local/opt/boost155/include
+# #include <mongo/client/dbclient.h>
+# mongo::client::initialize();
