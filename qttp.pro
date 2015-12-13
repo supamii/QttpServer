@@ -13,15 +13,15 @@ contains(CONFIG, SAMPLEAPP) {
     VERSION = 0.0.1
     CONFIG(debug, debug|release) {
         win32 {
-            DESTDIR = $$PWD/build/Debug
+            DESTDIR = $$PWD/build/Debug/lib
         } else {
             DESTDIR = $$PWD/build/out/Debug
         }
     } else {
         win32 {
-            DESTDIR = $$PWD/build/Release
+            DESTDIR = $$PWD/build/Release/lib
         } else {
-            DESTIR = $$PWD/build/out/Release
+            DESTDIR = $$PWD/build/out/Release
         }
     }
 }

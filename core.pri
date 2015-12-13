@@ -71,7 +71,6 @@ CONFIG(debug, debug|release) {
     QTBUILDTYPE = qtrelease
 }
 
-OBJECTS_DIR = $$PWD/build/$$QTBUILDTYPE
 MOC_DIR = $$PWD/build/$$QTBUILDTYPE
 RCC_DIR = $$PWD/build/$$QTBUILDTYPE
 UI_DIR = $$PWD/build/$$QTBUILDTYPE
@@ -87,11 +86,13 @@ isEmpty(DESTDIR) {
 }
 
 win32 {
-    LIBS += -L$$PWD/build/$$BUILDTYPE
+    LIBS += -L$$PWD/build/$$BUILDTYPE -L$$PWD/build/$$BUILDTYPE/lib
     DEPENDPATH += $$PWD/build/$$BUILDTYPE
+    OBJECTS_DIR = $$PWD/build/$$BUILDTYPE/obj
 } else {
     LIBS += -L$$PWD/build/out/$$BUILDTYPE
     DEPENDPATH += $$PWD/build/out/$$BUILDTYPE
+    OBJECTS_DIR = $$PWD/build/$$QTBUILDTYPE
 }
 
 INCLUDEPATH = $$unique(INCLUDEPATH)
