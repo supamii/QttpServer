@@ -60,6 +60,7 @@
       #define LOG_FATAL(X) qFatal() << LOG_DATETIME << LOG_FUNCTION("FATAL") << X
     #endif
 #endif
+
 namespace qttp
 {
 
