@@ -224,6 +224,7 @@ build.py
 
 Open solution build/all.sln with VS2015 - or execute from the developer console
 ```batch
+cd build
 msbuild.exe all.sln /p:Configuration=Debug
 ```
 
