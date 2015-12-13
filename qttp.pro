@@ -3,7 +3,7 @@ contains(CONFIG, SAMPLEAPP) {
     # This default configuration is for example purposes.
     TEMPLATE = app
     DESTDIR = $$PWD
-    SOURCES += $$PWD/test/sample/main.cpp
+    SOURCES += $$PWD/examples/sampleapp/main.cpp
     message('Including config files')
     include($$PWD/config/config.pri)
 } else {

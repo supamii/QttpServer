@@ -2,3 +2,6 @@
 /Debug/
 /Release/
 /.vs/
+/qtdebug/
+/qtrelease/
+/out/

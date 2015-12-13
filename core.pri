@@ -1,7 +1,7 @@
 QT += core network
 
 message('Including qttp source files')
-include($$PWD/qttp/qttp.pri)
+include($$PWD/src/qttp.pri)
 
 OTHER_FILES += \
     $$PWD/lib/http/include/native/*.h \
@@ -9,7 +9,8 @@ OTHER_FILES += \
     $$PWD/lib/http-parser/http_parser.c \
     $$PWD/lib/http-parser/http_parser.h \
     $$PWD/lib/libuv/src/* \
-    $$PWD/lib/libuv/include/*
+    $$PWD/lib/libuv/include/* \
+    $$PWD/*.md
 
 unix {
     OTHER_FILES += $$PWD/lib/libuv/src/unix/*
@@ -28,20 +29,16 @@ INCLUDEPATH += \
     $$PWD/lib/http/include \
     $$PWD/lib/http/include/native
 
-unix: {
-    QMAKE_CXXFLAGS += -g -O0 -lm -lpthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
-}
-
 macx: {
-    LIBS += -framework CoreFoundation -framework CoreServices
+    LIBS += -framework CoreFoundation # -framework CoreServices
     CONFIG += c++14
-    QMAKE_CXXFLAGS += -std=gnu++0x -stdlib=libc++
+    QMAKE_CXXFLAGS += -g -O0 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -std=gnu++0x -stdlib=libc++
 }
 
 unix:!macx {
     CONFIG += c++0x
     # This supports GCC 4.7
-    QMAKE_CXXFLAGS += -std=c++0x
+    QMAKE_CXXFLAGS += -g -O0 -lm -lpthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -std=c++0x
 }
 
 win32 {
@@ -101,12 +98,3 @@ SOURCES = $$unique(SOURCES)
 LIBS = $$unique(LIBS)
 OBJECTS = $$unique(OBJECTS)
 
-#LIBS += -mongoclient -L$$PWD/lib/mongo-cxx-driver/build/darwin/normal
-#INCLUDEPATH += \
-#    $$PWD/lib/mongo-cxx-driver/src \
-#    $$PWD/lib/mongo-cxx-driver/build/darwin/normal \
-#    /usr/local/opt/boost155/include
-#LDFLAGS:  -L/usr/local/opt/boost155/lib
-#CPPFLAGS: -I/usr/local/opt/boost155/include
-# #include <mongo/client/dbclient.h>
-# mongo::client::initialize();

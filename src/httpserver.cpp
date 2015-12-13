@@ -1,5 +1,6 @@
-#include "httpevent.h"
 #include "httpserver.h"
+
+#include "httpevent.h"
 
 using namespace std;
 using namespace qttp;
@@ -81,6 +82,9 @@ void HttpServer::setEventCallback(function<void(request*, response*)> eventCallb
 
 function<void(request*, response*)> HttpServer::defaultEventCallback() const
 {
+  // TODO: Can benefit performance gains by caching look up costs - don't care
+  // about amortized theoretical values.
+
   // TODO: Perhaps should lock/wrap m_Routes to guarantee atomicity.
 
   return [=](request* req, response* resp)
@@ -110,17 +114,39 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
     }
     else
     {
-      // Even the the action is not yet found, we'll give the user a chance to 
+      // Even the the action is not yet found, we'll give the user a chance to
       // intercept and process it.
       performPreprocessing(data);
 
       if(data.getControlFlag())
       {
-        
-        QJsonObject& json = data.getJson();
-        json["error"] = "Invalid request";
+        // TODO: Describe this in the header file.
 
-        performPostprocessing(data);
+        // TODO: Can also perform this check once in a while instead to reduce
+        // performance lookup costs.
+
+        // Actions registered under "" is the default handler.
+        auto callback = m_ActionCallbacks.find("");
+        if(callback != m_ActionCallbacks.end())
+        {
+          callback->second(data);
+          performPostprocessing(data);
+        }
+        else
+        {
+          auto action = m_Actions.find("");
+          if(action != m_Actions.end())
+          {
+            action->second->onAction(data);
+            performPostprocessing(data);
+          }
+          else
+          {
+            QJsonObject& json = data.getJson();
+            json["error"] = "Invalid request";
+            performPostprocessing(data);
+          }
+        }
       }
     }
 
