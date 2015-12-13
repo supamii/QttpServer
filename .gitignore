@@ -105,6 +105,6 @@ Thumbs.db
 # --------
 *.dll
 *.exe
-
+*.lib
 
 /Debug/

@@ -13,8 +13,7 @@ OTHER_FILES += \
 
 unix {
     OTHER_FILES += $$PWD/lib/libuv/src/unix/*
-}
-!unix {
+} else {
     OTHER_FILES += $$PWD/lib/libuv/src/win/*
 }
 
@@ -48,9 +47,6 @@ unix:!macx {
 win32 {
     CONFIG += c++14
     QMAKE_CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
-}
-
-win32 {
     LIBS += \
         -llibuv \
         -lhttp_parser \
@@ -61,43 +57,41 @@ win32 {
         -lshell32 \
         -lws2_32 \
         -luserenv
-}
-
-!win32 {
+} else {
     LIBS += -luv -lhttp_parser -lnode_native
 }
 
 CONFIG(debug, debug|release) {
     message('Compiling in DEBUG mode')
-    LIBS += -L$$PWD/out/Debug
-    DEPENDPATH += $$PWD/out/Debug
-    OBJECTS_DIR = $$PWD/out/qtdebug
-    MOC_DIR = $$PWD/out/qtdebug
-    RCC_DIR = $$PWD/out/qtdebug
-    UI_DIR = $$PWD/out/qtdebug
-    unix:!macx {
-        message('Adding http_parser.o on linux')
-        # For some reason Ubuntu 12 LTS doesn't jive with only the static lib
-        OBJECTS += $$PWD/out/Debug/obj.target/http_parser/lib/http-parser/http_parser.o
-    }
-    isEmpty(DESTDIR) {
-        DESTDIR = $$PWD/out/qtdebug
-    }
+    BUILDTYPE = Debug
+    QTBUILDTYPE = qtdebug
 } else {
     message('Compiling in RELEASE mode')
-    LIBS += -L$$PWD/out/Release
-    DEPENDPATH += $$PWD/out/Release
-    OBJECTS_DIR = $$PWD/out/qtrelease
-    MOC_DIR = $$PWD/out/qtrelease
-    RCC_DIR = $$PWD/out/qtrelease
-    UI_DIR = $$PWD/out/qtrelease
-    unix:!macx {
-        message('Adding http_parser.o on linux')
-        OBJECTS += $$PWD/out/Release/obj.target/http_parser/lib/http-parser/http_parser.o
-    }
-    isEmpty(DESTDIR) {
-        DESTDIR = $$PWD/out/qtrelease
-    }
+    BUILDTYPE = Release
+    QTBUILDTYPE = qtrelease
+}
+
+OBJECTS_DIR = $$PWD/build/$$QTBUILDTYPE
+MOC_DIR = $$PWD/build/$$QTBUILDTYPE
+RCC_DIR = $$PWD/build/$$QTBUILDTYPE
+UI_DIR = $$PWD/build/$$QTBUILDTYPE
+
+unix:!macx {
+    message('Adding http_parser.o on linux')
+    # For some reason Ubuntu 12 LTS doesn't jive with only the static lib
+    OBJECTS += $$PWD/build/out/$$BUILDTYPE/obj.target/http_parser/lib/http-parser/http_parser.o
+}
+
+isEmpty(DESTDIR) {
+    DESTDIR = $$PWD/build/$$QTBUILDTYPE
+}
+
+win32 {
+    LIBS += -L$$PWD/build/$$BUILDTYPE
+    DEPENDPATH += $$PWD/build/$$BUILDTYPE
+} else {
+    LIBS += -L$$PWD/build/out/$$BUILDTYPE
+    DEPENDPATH += $$PWD/build/out/$$BUILDTYPE
 }
 
 INCLUDEPATH = $$unique(INCLUDEPATH)

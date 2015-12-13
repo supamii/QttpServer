@@ -1,14 +1,18 @@
-TEMPLATE = app
+contains(CONFIG, SAMPLEAPP) {
+    # This default configuration is for example purposes.
+    TEMPLATE = app
+    SOURCES += $$PWD/test/sample/main.cpp
+    message('Including config files')
+    include($$PWD/config/config.pri)
+} else {
+    TEMPLATE = lib
+    CONFIG += staticlib
+    VERSION = 0.0.1
+}
 
 QT -= gui
-
-SOURCES += \
-    $$PWD/main.cpp
-
+TARGET = qttpserver
 DESTDIR = $$PWD
-
-message('Including config files')
-include($$PWD/config/config.pri)
 
 message('Including core files')
 include($$PWD/core.pri)

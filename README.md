@@ -92,22 +92,23 @@ Git submodules/dependencies automatically pulls in mongodb-drivers, boost, libuv
 git submodule update --init
 ```
 
-Generate build files and compile to ./out/ folder
+Generate build files and compile to ./build/out/ folder
 ```bash
 ./build.py
-make -C out
+make -C build/out
 ```
 
-Generate makefile and compile to ./out/qtdebug/ or ./out/qtrelease/ or launch `qttp.pro` with Qt Creator
+Generate and build or launch `qttp.pro` with Qt Creator
 ```bash
 qmake CONFIG+=debug qttp.pro
 make
 ```
 
-Run the executable!
+If you want to run a quick sample application:
 ```bash
-ln -s out/qtdebug/qttp startQttp
-./startQttp &
+qmake CONFIG+=debug CONFIG+=SAMPLEAPP qttp.pro
+make
+./qttpserver
 ```
 
 ## Optional components
@@ -123,13 +124,19 @@ ln -s out/qtdebug/qttp startQttp
 
 1. Install [scons](http://www.scons.org/) - e.g. `brew install scons`
 2. Install [boost](https://github.com/mongodb/mongo-cxx-driver/wiki/Download-and-Compile-the-Legacy-Driver)
-   e.g. `brew search boost` and `brew install homebrew/versions/boost155` 
-   Generally recommend using brew, apt-get, or the pre-built [binary installer for windows](http://sourceforge.net/projects/boost/files/boost-binaries/)
+
+   Many agree that building Boost can be challenging so it's recommend to use something like brew, apt-get, or the pre-built [binary installer for windows](http://sourceforge.net/projects/boost/files/boost-binaries/)
 
     ```bash
-    # Or skip the whole build, just install what you can with ubuntu
+    # Install what you can with Ubuntu
     sudo apt-get install mongodb-dev
     sudo apt-get install libboost1.54-all-dev
+    ```
+
+    ```bash
+    # Brew on macx
+    brew search boost
+    brew install homebrew/versions/boost155
     ```
 4. Build the driver!
 
@@ -210,30 +217,21 @@ Git submodules/dependencies automatically pulls in mongodb-drivers, boost, libuv
 git submodule update --init
 ```
 
-Generate build files and compile to ./out/ folder
-```bash
-# Double-click on build.py
-./build.py
+Use Python to generate build files and compile to ./build/out folder
+```batch
+build.py
 ```
 
-Open solution build/all.sln with VS2015
-
-Individually configure each project to use MSVC 2015 tool-chain and **BUILD individually**
-
-1. `http_parser`
-2. `libuv`
-3. `node_native`
-4. **SKIP all other projects not listed**
-
-Copy lib and pdb files to /out/ folder
-```bash
-# Under the build directory, double-click
-./postbuild.sh
+Open solution build/all.sln with VS2015 - or execute from the developer console
+```batch
+msbuild.exe all.sln /p:Configuration=Debug
 ```
 
-Launch `qttp.pro`, build, run with Qt Creator and...
+Launch `qttp.pro` in QtCreator, build and...
 
 **ENJOY a beer - you've earned it!**
+
+As a side note, if you want to run a quick sample application you can add `CONFIG+=SAMPLEAPP` to the additional arguments section located in QtCreator under `Projects > Build & Run > Build Steps > qmake > Additional arguments`
 
 # TODOs
 
