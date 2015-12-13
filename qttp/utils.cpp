@@ -2,6 +2,18 @@
 
 using namespace qttp;
 
+LogTrace::LogTrace(QString f, quint32 l)
+{
+  function.swap(f);
+  line = l;
+  qDebug().noquote().nospace() << LOG_DATETIME << " ENTER " << function << ":" << line;
+}
+
+LogTrace::~LogTrace()
+{
+  qDebug().noquote().nospace() << LOG_DATETIME << " EXIT  " << function << ":" << line;
+}
+
 Utils::Utils()
 {
 }

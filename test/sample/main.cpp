@@ -11,6 +11,8 @@ using namespace native::http;
 
 int main(int argc, char** argv)
 {
+  LOG_TRACE;
+
   QCoreApplication app(argc, argv);
 
   // Always initialize in the main thread.

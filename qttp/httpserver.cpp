@@ -51,13 +51,13 @@ int HttpServer::start()
   if(ip.isEmpty())
   {
     ip = "0.0.0.0";
-    qWarning() << "Bind ip is invalid, defaulting to" << ip;
+    LOG_WARN("Bind ip is invalid, defaulting to" << ip);
   }
   auto port = svr->m_GlobalConfig["bindPort"].isUndefined() ? 8080 : svr->m_GlobalConfig["bindPort"].toInt();
   if(port <= 0)
   {
     port = 8080;
-    qWarning() << "Bind port is invalid, defaulting to" << port;
+    LOG_WARN("Bind port is invalid, defaulting to" << port);
   }
   auto result = server.listen(ip.toStdString(), port, [](request& req, response& resp) {
     HttpEvent* event = new HttpEvent(&req, &resp);
@@ -66,11 +66,11 @@ int HttpServer::start()
 
   if(!result)
   {
-    qWarning() << "Unable to bind to" << ip << port;
+    LOG_WARN("Unable to bind to" << ip << port);
     return 1;
   }
 
-  qDebug() << "Server running at" << ip << port;
+  LOG_DBG("Server running at" << ip << port);
   return native::run();
 }
 
@@ -110,12 +110,15 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
     }
     else
     {
+      // Even the the action is not yet found, we'll give the user a chance to 
+      // intercept and process it.
       performPreprocessing(data);
 
       if(data.getControlFlag())
       {
+        
         QJsonObject& json = data.getJson();
-        json["response"] = "C++ FTW";
+        json["error"] = "Invalid request";
 
         performPostprocessing(data);
       }
@@ -123,7 +126,7 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
 
     if(!data.getJson().isEmpty() && !data.isFinished() && !data.finishResponse())
     {
-      qWarning() << "Failed to finish response";
+      LOG_WARN("Failed to finish response");
     }
   };
 }
@@ -183,7 +186,7 @@ bool HttpServer::eventFilter(QObject* /* object */, QEvent* event)
 
   if(!req || !resp)
   {
-    qWarning() << "Request or response is NULL";
+    LOG_WARN("Request or response is NULL");
   }
 
   m_EventCallback(req, resp);
