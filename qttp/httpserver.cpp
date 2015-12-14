@@ -110,17 +110,34 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
     }
     else
     {
-      // Even the the action is not yet found, we'll give the user a chance to 
+      // Even the the action is not yet found, we'll give the user a chance to
       // intercept and process it.
       performPreprocessing(data);
 
       if(data.getControlFlag())
       {
-        
-        QJsonObject& json = data.getJson();
-        json["error"] = "Invalid request";
-
-        performPostprocessing(data);
+        // Actions registered under "" is the default handler.
+        auto callback = m_ActionCallbacks.find("");
+        if(callback != m_ActionCallbacks.end())
+        {
+          callback->second(data);
+          performPostprocessing(data);
+        }
+        else
+        {
+          auto action = m_Actions.find("");
+          if(action != m_Actions.end())
+          {
+            action->second->onAction(data);
+            performPostprocessing(data);
+          }
+          else
+          {
+            QJsonObject& json = data.getJson();
+            json["error"] = "Invalid request";
+            performPostprocessing(data);
+          }
+        }
       }
     }
 

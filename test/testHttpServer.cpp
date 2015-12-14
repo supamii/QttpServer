@@ -34,10 +34,15 @@ void TestHttpServer::initTestCase()
 
   QVERIFY(httpSvr != nullptr);
 
+  bool result = httpSvr->addAction("", [](HttpData& data) {
+      QJsonObject& json = data.getJson();
+      json["response"] = "C++ FTW";
+  });
+
   httpSvr->addProcessor<SampleProcessor>();
 
   // Uses the action interface.
-  bool result = httpSvr->addAction<SampleAction>();
+  result = httpSvr->addAction<SampleAction>();
   QVERIFY(result == true);
 
   result = httpSvr->registerRoute("sample", "/sample");

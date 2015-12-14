@@ -16,6 +16,8 @@
     #define LOG_ERROR(X)
     #define LOG_FATAL(X)
 #else
+
+    // TODO If we're running as a unit test - ignore time stamps!?
     #ifndef LOG_DATETIME
         #define LOG_DATETIME QDateTime::currentDateTime().toString("dd/MM/yyyy hh:mm:ss:sss")
     #endif
