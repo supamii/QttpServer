@@ -101,12 +101,3 @@ SOURCES = $$unique(SOURCES)
 LIBS = $$unique(LIBS)
 OBJECTS = $$unique(OBJECTS)
 
-#LIBS += -mongoclient -L$$PWD/lib/mongo-cxx-driver/build/darwin/normal
-#INCLUDEPATH += \
-#    $$PWD/lib/mongo-cxx-driver/src \
-#    $$PWD/lib/mongo-cxx-driver/build/darwin/normal \
-#    /usr/local/opt/boost155/include
-#LDFLAGS:  -L/usr/local/opt/boost155/lib
-#CPPFLAGS: -I/usr/local/opt/boost155/include
-# #include <mongo/client/dbclient.h>
-# mongo::client::initialize();
