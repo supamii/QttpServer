@@ -81,6 +81,9 @@ void HttpServer::setEventCallback(function<void(request*, response*)> eventCallb
 
 function<void(request*, response*)> HttpServer::defaultEventCallback() const
 {
+  // TODO: Can benefit performance gains by caching look up costs - don't care
+  // about amortized theoretical values.
+
   // TODO: Perhaps should lock/wrap m_Routes to guarantee atomicity.
 
   return [=](request* req, response* resp)
@@ -116,6 +119,11 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
 
       if(data.getControlFlag())
       {
+        // TODO: Describe this in the header file.
+
+        // TODO: Can also perform this check once in a while instead to reduce
+        // performance lookup costs.
+
         // Actions registered under "" is the default handler.
         auto callback = m_ActionCallbacks.find("");
         if(callback != m_ActionCallbacks.end())
