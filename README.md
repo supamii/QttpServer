@@ -156,7 +156,7 @@ make
 
 For more information visit [mongodb.org](https://docs.mongodb.org/getting-started/cpp/client/)
 
-## Getting start with Windows (8 & 10) MSVC 2015 only
+## Getting started with MSVC 2015 (Windows 8 & 10)
 
 The MSVC 2012 and 2013 compilers don't support C++1y well enough so QttpServer is limited to  Windows 8+ with Visual Studio 2015.
 

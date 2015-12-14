@@ -9,7 +9,8 @@ OTHER_FILES += \
     $$PWD/lib/http-parser/http_parser.c \
     $$PWD/lib/http-parser/http_parser.h \
     $$PWD/lib/libuv/src/* \
-    $$PWD/lib/libuv/include/*
+    $$PWD/lib/libuv/include/* \
+    $$PWD/*.md
 
 unix {
     OTHER_FILES += $$PWD/lib/libuv/src/unix/*
