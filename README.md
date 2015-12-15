@@ -241,7 +241,7 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 3. Config parsing is still incomplete - action-routes should be configurable instead of being set in code
 4. Determine versioning support in the path e.g. /v1/ /v2/
 5. Clean up configuration deployment on mac (make install files to the correct folder)
-6. Setup utilities for MongoDB and Redis access
+6. ~~Setup utilities for MongoDB and Redis access~~
 7. ~~Add pre and post processor callbacks as an alternative to the interface class~~
 8. Make available a metrics pre/post processor
 9. Design an error response mechanism
