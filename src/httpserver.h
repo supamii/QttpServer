@@ -8,9 +8,9 @@
 #include <vector>
 #include <unordered_map>
 
-#include "../src/action.h"
-#include "../src/httpdata.h"
-#include "../src/utils.h"
+#include "action.h"
+#include "httpdata.h"
+#include "utils.h"
 
 namespace qttp
 {

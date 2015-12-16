@@ -5,7 +5,7 @@
 #include <thread>
 #include <QtTest/QtTest>
 
-#include "../src/httpserver.h"
+#include "httpserver.h"
 #include "sampleAction.h"
 
 using namespace std;

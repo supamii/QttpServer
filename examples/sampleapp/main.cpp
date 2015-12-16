@@ -3,7 +3,7 @@
 #include <QtCore>
 #include <thread>
 
-#include "../../src/httpserver.h"
+#include <httpserver.h>
 
 using namespace std;
 using namespace qttp;

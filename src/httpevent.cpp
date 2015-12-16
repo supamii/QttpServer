@@ -1,4 +1,4 @@
-#include "../src/httpevent.h"
+#include "httpevent.h"
 
 using namespace std;
 using namespace qttp;

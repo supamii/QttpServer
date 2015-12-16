@@ -5,7 +5,7 @@
 
 #include <mongo/client/dbclient.h>
 
-#include "../../src/httpserver.h"
+#include "httpserver.h"
 
 using namespace std;
 using namespace qttp;

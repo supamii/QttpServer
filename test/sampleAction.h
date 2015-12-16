@@ -3,7 +3,7 @@
 
 #include <QtCore>
 
-#include "../src/action.h"
+#include "action.h"
 
 namespace qttp
 {
