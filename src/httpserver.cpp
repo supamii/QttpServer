@@ -1,5 +1,6 @@
-#include "httpevent.h"
-#include "httpserver.h"
+#include "../src/httpserver.h"
+
+#include "../src/httpevent.h"
 
 using namespace std;
 using namespace qttp;

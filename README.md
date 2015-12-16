@@ -60,7 +60,7 @@ class Sample : public Action {
 };
 ```
 
-## Getting started with Mac & Linux
+## Getting started on Mac & Linux
 
 ### Prerequisites
 
@@ -115,10 +115,14 @@ make
 
 ##### Build Redis client
 
-1. `cd lib/qredisclient` and execute `git submodule update --init`
-2. `qmake CONFIG+=debug DESTDIR=. qredisclient.pro`
-3. `make`
+Pretty straight forward stuff here - just be mindful of the extra environment variable set to DESTDIR:
 
+```bash
+cd lib/qredisclient
+git submodule update --init
+qmake CONFIG+=debug DESTDIR=. qredisclient.pro
+make
+```
 
 ##### Build MongoDb driver
 
@@ -136,7 +140,14 @@ make
     ```bash
     # Brew on macx
     brew search boost
-    brew install homebrew/versions/boost155
+    brew info boost
+    brew install boost --c++11
+    ```
+
+   *NOTE:* If you're installing mongo locally, make sure you link to the same set of BOOST libraries
+
+    ```bash
+    brew install mongodb --with-boost --with-openssl
     ```
 4. Build the driver!
 
@@ -154,9 +165,15 @@ make
     scons --32 --dbg=on --opt=off --sharedclient --dynamic-windows --prefix="C:\local\mongo-client" --cpppath="C:\local\boost_1_59_0" --libpath="C:\local\boost_1_59_0\lib32-msvc-14.0" install
     ```
 
+   Mac
+
+    ```bash
+    scons --libpath=/usr/local/lib --cpppath=/usr/local/include --64
+    ```
+
 For more information visit [mongodb.org](https://docs.mongodb.org/getting-started/cpp/client/)
 
-## Getting started with MSVC 2015 (Windows 8 & 10)
+## Getting started on MSVC 2015 (Windows 8 & 10)
 
 The MSVC 2012 and 2013 compilers don't support C++1y well enough so QttpServer is limited to  Windows 8+ with Visual Studio 2015.
 

@@ -1,6 +1,8 @@
-HEADERS += $$PWD/*.h \
+HEADERS += \
+    $$PWD/*.h \
     $$PWD/processor.h \
     $$PWD/processor.h
+
 SOURCES += $$PWD/*.cpp
 INCLUDEPATH += $$PWD
 

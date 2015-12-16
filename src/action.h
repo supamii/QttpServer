@@ -6,7 +6,7 @@
 #include <http.h>
 #include <functional>
 
-#include "httpdata.h"
+#include "../src/httpdata.h"
 
 namespace qttp
 {

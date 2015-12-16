@@ -3,10 +3,9 @@
 #include <QtCore>
 #include <QtNetwork>
 #include <thread>
-#include "httpserver.h"
-
 #include <QtTest/QtTest>
 
+#include "../src/httpserver.h"
 #include "sampleAction.h"
 
 using namespace std;

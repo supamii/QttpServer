@@ -1,4 +1,4 @@
-#include "action.h"
+#include "../src/action.h"
 
 using namespace std;
 using namespace qttp;

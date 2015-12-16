@@ -17,6 +17,26 @@ win32 {
         C:/local/boost_1_59_0
 }
 
+macx {
+    LIBS += \
+        -L$$PWD/../../lib/mongo-cxx-driver/build/darwin/64 \
+        -lmongoclient \
+        -L/usr/local/lib \
+        -lboost_system \
+        -lboost_atomic-mt \
+        -lboost_exception \
+        -lboost_iostreams \
+        -lboost_filesystem \
+        -lboost_thread-mt \
+        -lboost_regex \
+        -lboost_regex-mt
+
+    INCLUDEPATH += \
+        $$PWD/../../lib/mongo-cxx-driver/src \
+        $$PWD/../../lib/mongo-cxx-driver/build/darwin/64 \
+        /usr/local/include
+}
+
 message('Including config files')
 include($$PWD/config/config.pri)
 
