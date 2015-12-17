@@ -149,8 +149,6 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
     const unordered_map<string, string>* routes = &m_GetRoutes;
     QString method = QString(req->get_method().c_str()).toLower().trimmed();
 
-    LOG_DEBUG(method);
-
     if(method == "get")
     {
       routes = &m_GetRoutes;
