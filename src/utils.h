@@ -16,6 +16,8 @@
   #define LOG_ERROR(X)
   #define LOG_FATAL(X)
 #else
+  // As the name implies, a lot of IDEs and editors are still struggling to
+  // support C++1y and as well as platform nuances.
   #ifdef __ECLIPSE_WORKAROUND__
     #ifndef __FUNCSIG__
       #define __FUNCSIG__ ""
@@ -89,6 +91,14 @@ class Utils
   public:
     Utils();
     virtual ~Utils();
+
+    /**
+     * @brief Throws a std::runtime_error with a message of any JSON validation
+     * errors that were encountered.
+     *
+     * @param path
+     * @return
+     */
     static QJsonObject readJson(const QString& path);
 };
 

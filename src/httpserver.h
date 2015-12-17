@@ -61,7 +61,7 @@ class HttpServer : public QObject
      * @brief More of an association than a registration - binds an action name
      * to a route name.
      */
-    bool registerRoute(const std::string& actionName, const std::string& routeName);
+    bool registerRoute(const std::string& type, const std::string& actionName, const std::string& routeName);
 
     /**
      * @brief A template method to register a processor via the Processor interface.
@@ -100,6 +100,29 @@ class HttpServer : public QObject
 
     void initialize();
 
+    template<class T> void registerRouteFromJSON(T obj, const std::string& type)
+    {
+      if(obj.isArray())
+      {
+        QJsonArray array = obj.toArray();
+        auto i = array.begin();
+        while(i != array.end())
+        {
+          if(i->isObject())
+          {
+            auto obj = i->toObject();
+            auto action = obj["action"].toString().trimmed().toStdString();
+            auto path = obj["path"].toString().trimmed().toStdString();
+            if(obj["isActive"] != false && !path.empty())
+            {
+              this->registerRoute(type, action, path);
+            }
+          }
+          ++i;
+        }
+      }
+    }
+
     /**
      * @brief defaultCallback
      * @param req
@@ -127,7 +150,10 @@ class HttpServer : public QObject
     std::function<void(native::http::request*, native::http::response*)> m_EventCallback;
     std::unordered_map<std::string, std::shared_ptr<Action>> m_Actions;
     std::unordered_map<std::string, std::function<void(HttpData& data)>> m_ActionCallbacks;
-    std::unordered_map<std::string, std::string> m_Routes;
+    std::unordered_map<std::string, std::string> m_GetRoutes;
+    std::unordered_map<std::string, std::string> m_PostRoutes;
+    std::unordered_map<std::string, std::string> m_PutRoutes;
+    std::unordered_map<std::string, std::string> m_DelRoutes;
     std::vector<std::shared_ptr<Processor>> m_Processors;
     std::vector<std::function<void(HttpData& data)>> m_Preprocessors;
     std::vector<std::function<void(HttpData& data)>> m_Postprocessors;

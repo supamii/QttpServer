@@ -44,10 +44,10 @@ void TestHttpServer::initTestCase()
   result = httpSvr->addAction<SampleAction>();
   QVERIFY(result == true);
 
-  result = httpSvr->registerRoute("sample", "/sample");
+  result = httpSvr->registerRoute("get", "sample", "/sample");
   QVERIFY(result == true);
 
-  result = httpSvr->registerRoute("sample", "/sample2");
+  result = httpSvr->registerRoute("get", "sample", "/sample2");
   QVERIFY(result == true);
 
   // Uses a raw std::function based callback.
@@ -60,10 +60,10 @@ void TestHttpServer::initTestCase()
   });
   QVERIFY(result == true);
 
-  result = httpSvr->registerRoute("test", "/test");
+  result = httpSvr->registerRoute("get", "test", "/test");
   QVERIFY(result == true);
 
-  result = httpSvr->registerRoute("test", "/test2");
+  result = httpSvr->registerRoute("get", "test", "/test2");
   QVERIFY(result == true);
 
   result = httpSvr->addAction("terminates", [](HttpData& data) {
@@ -74,7 +74,7 @@ void TestHttpServer::initTestCase()
   });
   QVERIFY(result == true);
 
-  result = httpSvr->registerRoute("terminates", "/terminates");
+  result = httpSvr->registerRoute("get", "terminates", "/terminates");
   QVERIFY(result == true);
 
   std::thread webSvr(HttpServer::start);
@@ -94,7 +94,8 @@ void TestHttpServer::testGET_DefaultResponse()
   QTest::qWait(1000);
   QJsonDocument expected;
   expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"C++ FTW\",\"postprocess\":true}").toLatin1());
-  QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
 }
 
 void TestHttpServer::testGET_RandomLocalhostUrl()
@@ -110,7 +111,8 @@ void TestHttpServer::testGET_RandomLocalhostUrl()
   QTest::qWait(1000);
   QJsonDocument expected;
   expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"C++ FTW\",\"postprocess\":true}").toLatin1());
-  QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
 }
 
 void TestHttpServer::testPOST_RandomLocalhostUrl()
@@ -128,7 +130,8 @@ void TestHttpServer::testPOST_RandomLocalhostUrl()
   QTest::qWait(1000);
   QJsonDocument expected;
   expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"C++ FTW\",\"postprocess\":true}").toLatin1());
-  QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
 }
 
 void TestHttpServer::testGET_TestResponse()
@@ -144,7 +147,8 @@ void TestHttpServer::testGET_TestResponse()
   QTest::qWait(1000);
   QJsonDocument expected;
   expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"Test C++ FTW\"}").toLatin1());
-  QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
 }
 
 void TestHttpServer::testGET_SampleResponse()
@@ -160,7 +164,8 @@ void TestHttpServer::testGET_SampleResponse()
   QTest::qWait(1000);
   QJsonDocument expected;
   expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"Sample C++ FTW\",\"postprocess\":true}").toLatin1());
-  QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
 }
 
 void TestHttpServer::testGET_TerminateResponse()
@@ -176,7 +181,8 @@ void TestHttpServer::testGET_TerminateResponse()
   QTest::qWait(1000);
   QJsonDocument expected;
   expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"Test C++ FTW\"}").toLatin1());
-  QVERIFY(result.toStdString() == expected.toJson().trimmed().toStdString());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
 }
 
 QTEST_MAIN(TestHttpServer)

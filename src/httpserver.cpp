@@ -22,7 +22,10 @@ HttpServer::HttpServer() :
     m_EventCallback(this->defaultEventCallback()),
     m_Actions(),
     m_ActionCallbacks(),
-    m_Routes(),
+    m_GetRoutes(),
+    m_PostRoutes(),
+    m_PutRoutes(),
+    m_DelRoutes(),
     m_Processors(),
     m_Preprocessors(),
     m_Postprocessors(),
@@ -41,6 +44,18 @@ void HttpServer::initialize()
 {
   m_GlobalConfig = Utils::readJson(QDir("config/global.json").absolutePath());
   m_RoutesConfig = Utils::readJson(QDir("config/routes.json").absolutePath());
+
+  QJsonValueRef get = m_RoutesConfig["get"];
+  registerRouteFromJSON(get, "get");
+
+  QJsonValueRef post = m_RoutesConfig["post"];
+  registerRouteFromJSON(post, "post");
+
+  QJsonValueRef put = m_RoutesConfig["put"];
+  registerRouteFromJSON(put, "put");
+
+  QJsonValueRef del = m_RoutesConfig["del"];
+  registerRouteFromJSON(del, "del");
 }
 
 int HttpServer::start()
@@ -91,8 +106,28 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
   {
     HttpData data(req, resp);
 
-    auto lookup = m_Routes.find(req->url().path());
-    if(lookup != m_Routes.end())
+    const unordered_map<string, string>* routes = nullptr;
+    QString method = QString(req->get_method().c_str()).toLower().trimmed();
+
+    if(method == "get")
+    {
+      routes = &m_GetRoutes;
+    }
+    else if(method == "post")
+    {
+      routes = &m_PostRoutes;
+    }
+    else if(method == "put")
+    {
+      routes = &m_PutRoutes;
+    }
+    else // if(method == "delete")
+    {
+      routes = &m_DelRoutes;
+    }
+
+    auto lookup = routes->find(req->url().path());
+    if(lookup != routes->end())
     {
       auto callback = m_ActionCallbacks.find(lookup->second);
       if(callback != m_ActionCallbacks.end())
@@ -142,6 +177,7 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
           }
           else
           {
+            resp->set_status(400);
             QJsonObject& json = data.getJson();
             json["error"] = "Invalid request";
             performPostprocessing(data);
@@ -234,10 +270,31 @@ bool HttpServer::addAction(const string& actionName, function<void(HttpData& dat
   return !containsKey;
 }
 
-bool HttpServer::registerRoute(const string& actionName, const string& routeName)
+bool HttpServer::registerRoute(const std::string& method, const string& actionName, const string& routeName)
 {
-  bool containsKey = (m_Routes.find(routeName) != m_Routes.end());
-  m_Routes[routeName] = actionName;
+  unordered_map<string, string>* routeContainer = nullptr;
+  QString t = QString::fromStdString(method).trimmed().toLower();
+  if(t == "get")
+  {
+    routeContainer = &m_GetRoutes;
+  }
+  else if(t == "post")
+  {
+    routeContainer = &m_PostRoutes;
+  }
+  else if(t == "put")
+  {
+    routeContainer = &m_PutRoutes;
+  }
+  else if(t == "delete")
+  {
+    routeContainer = &m_DelRoutes;
+  }
+
+  LOG_DBG("action [" << actionName.c_str() << "] route [" << routeName.c_str() << "]");
+  bool containsKey = (routeContainer->find(routeName) != routeContainer->end());
+  (*routeContainer)[routeName] = actionName;
+
   return !containsKey;
 }
 
