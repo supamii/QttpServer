@@ -42,6 +42,23 @@ HttpServer::~HttpServer()
 
 void HttpServer::initialize()
 {
+  QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+  if(env.contains("QTTP_HOME"))
+  {
+    QDir::setCurrent(env.value("QTTP_HOME"));
+    LOG_DBG("Working directory" << QDir::currentPath());
+  }
+  else
+  {
+    // Just a quirk for mac, but I wonder if we can apply to all in general.
+    #ifdef Q_OS_MAC
+      QDir::setCurrent(qApp->applicationDirPath());
+      LOG_DBG("Working directory" << QDir::currentPath());
+    #else
+      LOG_DBG("Working directory" << QDir::currentPath());
+    #endif
+  }
+
   m_GlobalConfig = Utils::readJson(QDir("config/global.json").absolutePath());
   m_RoutesConfig = Utils::readJson(QDir("config/routes.json").absolutePath());
 
@@ -56,6 +73,29 @@ void HttpServer::initialize()
 
   QJsonValueRef del = m_RoutesConfig["del"];
   registerRouteFromJSON(del, "del");
+}
+
+void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const std::string& method)
+{
+  if(obj.isArray())
+  {
+    QJsonArray array = obj.toArray();
+    auto i = array.begin();
+    while(i != array.end())
+    {
+      if(i->isObject())
+      {
+        auto route = i->toObject();
+        auto action = route["action"].toString().trimmed().toStdString();
+        auto path = route["path"].toString().trimmed().toStdString();
+        if(route["isActive"] != false && !path.empty())
+        {
+          this->registerRoute(method, action, path);
+        }
+      }
+      ++i;
+    }
+  }
 }
 
 int HttpServer::start()
@@ -273,25 +313,28 @@ bool HttpServer::addAction(const string& actionName, function<void(HttpData& dat
 bool HttpServer::registerRoute(const std::string& method, const string& actionName, const string& routeName)
 {
   unordered_map<string, string>* routeContainer = nullptr;
-  QString t = QString::fromStdString(method).trimmed().toLower();
-  if(t == "get")
+  QString methodStr = QString::fromStdString(method).trimmed().toLower();
+  if(methodStr == "get")
   {
     routeContainer = &m_GetRoutes;
   }
-  else if(t == "post")
+  else if(methodStr == "post")
   {
     routeContainer = &m_PostRoutes;
   }
-  else if(t == "put")
+  else if(methodStr == "put")
   {
     routeContainer = &m_PutRoutes;
   }
-  else if(t == "delete")
+  else if(methodStr == "delete")
   {
     routeContainer = &m_DelRoutes;
   }
 
-  LOG_DBG("action [" << actionName.c_str() << "] route [" << routeName.c_str() << "]");
+  LOG_DBG("method [" << method.c_str() << "] "
+          "action [" << actionName.c_str() << "] "
+          "route [" << routeName.c_str() << "]");
+
   bool containsKey = (routeContainer->find(routeName) != routeContainer->end());
   (*routeContainer)[routeName] = actionName;
 

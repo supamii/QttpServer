@@ -100,28 +100,7 @@ class HttpServer : public QObject
 
     void initialize();
 
-    template<class T> void registerRouteFromJSON(T obj, const std::string& type)
-    {
-      if(obj.isArray())
-      {
-        QJsonArray array = obj.toArray();
-        auto i = array.begin();
-        while(i != array.end())
-        {
-          if(i->isObject())
-          {
-            auto obj = i->toObject();
-            auto action = obj["action"].toString().trimmed().toStdString();
-            auto path = obj["path"].toString().trimmed().toStdString();
-            if(obj["isActive"] != false && !path.empty())
-            {
-              this->registerRoute(type, action, path);
-            }
-          }
-          ++i;
-        }
-      }
-    }
+    void registerRouteFromJSON(QJsonValueRef& obj, const std::string& method);
 
     /**
      * @brief defaultCallback
