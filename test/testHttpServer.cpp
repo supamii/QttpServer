@@ -23,8 +23,13 @@ class TestHttpServer: public QObject
     void testPOST_RandomLocalhostUrl();
 
     void testGET_TestResponse();
+    void testGET_TestConfigResponse();
+
     void testGET_SampleResponse();
+
     void testGET_TerminateResponse();
+    void testPOST_InvalidTerminateResponse();
+    void testPUT_TerminateResponse();
 };
 
 void TestHttpServer::initTestCase()
@@ -151,6 +156,23 @@ void TestHttpServer::testGET_TestResponse()
            result.toStdString().c_str());
 }
 
+void TestHttpServer::testGET_TestConfigResponse()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080/test3")));
+  QVERIFY(result.isEmpty());
+  QTest::qWait(1000);
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"Test C++ FTW\"}").toLatin1());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
+}
+
 void TestHttpServer::testGET_SampleResponse()
 {
   QString result;
@@ -177,6 +199,40 @@ void TestHttpServer::testGET_TerminateResponse()
     result = QString(reply->readAll()).trimmed();
   });
   netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080/terminates")));
+  QVERIFY(result.isEmpty());
+  QTest::qWait(1000);
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"Test C++ FTW\"}").toLatin1());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
+}
+
+void TestHttpServer::testPOST_InvalidTerminateResponse()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  netMgr->post(QNetworkRequest(QUrl("http://127.0.0.1:8080/terminates2")), QByteArray());
+  QVERIFY(result.isEmpty());
+  QTest::qWait(1000);
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"C++ FTW\",\"postprocess\":true}").toLatin1());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
+}
+
+void TestHttpServer::testPUT_TerminateResponse()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  netMgr->put(QNetworkRequest(QUrl("http://127.0.0.1:8080/terminates2")), QByteArray());
   QVERIFY(result.isEmpty());
   QTest::qWait(1000);
   QJsonDocument expected;

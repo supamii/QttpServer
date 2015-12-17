@@ -49,6 +49,10 @@
     #define LOG_DBG(X) qDebug().noquote() << LOG_DATETIME << LOG_FUNCTION("DEBUG") << X
   #endif
 
+  #ifndef LOG_DEBUG
+    #define LOG_DEBUG(X) LOG_DBG(X)
+  #endif
+
   #ifndef LOG_INFO
     #define LOG_INFO(X) qInfo().noquote() << LOG_DATETIME << LOG_FUNCTION("INFO ") << X
   #endif

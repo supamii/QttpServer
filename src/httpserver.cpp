@@ -46,16 +46,16 @@ void HttpServer::initialize()
   if(env.contains("QTTP_HOME"))
   {
     QDir::setCurrent(env.value("QTTP_HOME"));
-    LOG_DBG("Working directory" << QDir::currentPath());
+    LOG_DEBUG("Working directory" << QDir::currentPath());
   }
   else
   {
     // Just a quirk for mac, but I wonder if we can apply to all in general.
     #ifdef Q_OS_MAC
       QDir::setCurrent(qApp->applicationDirPath());
-      LOG_DBG("Working directory" << QDir::currentPath());
+      LOG_DEBUG("Working directory" << QDir::currentPath());
     #else
-      LOG_DBG("Working directory" << QDir::currentPath());
+      LOG_DEBUG("Working directory" << QDir::currentPath());
     #endif
   }
 
@@ -80,12 +80,12 @@ void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const std::string& me
   if(obj.isArray())
   {
     QJsonArray array = obj.toArray();
-    auto i = array.begin();
-    while(i != array.end())
+    auto item = array.begin();
+    while(item != array.end())
     {
-      if(i->isObject())
+      if(item->isObject())
       {
-        auto route = i->toObject();
+        auto route = item->toObject();
         auto action = route["action"].toString().trimmed().toStdString();
         auto path = route["path"].toString().trimmed().toStdString();
         if(route["isActive"] != false && !path.empty())
@@ -93,7 +93,7 @@ void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const std::string& me
           this->registerRoute(method, action, path);
         }
       }
-      ++i;
+      ++item;
     }
   }
 }
@@ -126,7 +126,7 @@ int HttpServer::start()
     return 1;
   }
 
-  LOG_DBG("Server running at" << ip << port);
+  LOG_DEBUG("Server running at" << ip << port);
   return native::run();
 }
 
@@ -146,8 +146,10 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
   {
     HttpData data(req, resp);
 
-    const unordered_map<string, string>* routes = nullptr;
+    const unordered_map<string, string>* routes = &m_GetRoutes;
     QString method = QString(req->get_method().c_str()).toLower().trimmed();
+
+    LOG_DEBUG(method);
 
     if(method == "get")
     {
@@ -161,7 +163,7 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
     {
       routes = &m_PutRoutes;
     }
-    else // if(method == "delete")
+    else if(method == "delete")
     {
       routes = &m_DelRoutes;
     }
@@ -331,9 +333,9 @@ bool HttpServer::registerRoute(const std::string& method, const string& actionNa
     routeContainer = &m_DelRoutes;
   }
 
-  LOG_DBG("method [" << method.c_str() << "] "
-          "action [" << actionName.c_str() << "] "
-          "route [" << routeName.c_str() << "]");
+  LOG_DEBUG("method [" << method.c_str() << "] "
+            "action [" << actionName.c_str() << "] "
+            "route [" << routeName.c_str() << "]");
 
   bool containsKey = (routeContainer->find(routeName) != routeContainer->end());
   (*routeContainer)[routeName] = actionName;
