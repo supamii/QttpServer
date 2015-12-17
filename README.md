@@ -30,8 +30,8 @@ int main(int argc, char** argv)
   });
 
   // Bind routes and actions together.
-  httpSvr->registerRoute("test", "/test");
-  httpSvr->registerRoute("test", "/test2");
+  httpSvr->registerRoute("get", "test", "/test");
+  httpSvr->registerRoute("get", "test", "/test2");
 
   thread webSvr(HttpServer::start);
   webSvr.detach();
@@ -48,8 +48,8 @@ Using the action interface
 // Adds the action interface via template method.
 httpSvr->addAction<Sample>();
 
-httpSvr->registerRoute("sample", "/sample");
-httpSvr->registerRoute("sample", "/sampleAgain");
+httpSvr->registerRoute("get", "sample", "/sample");
+httpSvr->registerRoute("post", "sample", "/sampleAgain");
 
 class Sample : public Action {
   void onAction(HttpData& data) {

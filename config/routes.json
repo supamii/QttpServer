@@ -1,3 +1,33 @@
 {
-    "/": ""
+  "get": [
+    {
+      "path": "/",
+      "action": "",
+      "isActive": true
+    }
+  ],
+
+  "post": [
+    {
+      "path": "/",
+      "action": "",
+      "isActive": true
+    }
+  ],
+
+  "put": [
+    {
+      "path": "/",
+      "action": "",
+      "isActive": true
+    }
+  ],
+
+  "delete": [
+    {
+      "path": "/",
+      "action": "",
+      "isActive": true
+    }
+  ]
 }

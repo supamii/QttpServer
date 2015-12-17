@@ -2,6 +2,8 @@
 #include <QCoreApplication>
 #include <QtCore>
 #include <thread>
+#include <iostream>
+#include <stdexcept>
 
 #include <httpserver.h>
 
@@ -11,18 +13,31 @@ using namespace native::http;
 
 int main(int argc, char** argv)
 {
-  LOG_TRACE;
+  auto result = -1;
 
-  QCoreApplication app(argc, argv);
+  try
+  {
+    LOG_TRACE;
 
-  // Always initialize in the main thread.
-  HttpServer::getInstance();
+    QCoreApplication app(argc, argv);
 
-  thread webSvr(HttpServer::start);
-  webSvr.detach();
+    // Always initialize in the main thread.
+    HttpServer::getInstance();
 
-  auto result = app.exec();
+    thread webSvr(HttpServer::start);
+    webSvr.detach();
 
-  // TODO: Shutdown the webserver.
+    result = app.exec();
+  }
+  catch(std::exception& e)
+  {
+    std::cerr << e.what() << std::endl;
+  }
+  catch(...)
+  {
+    std::cerr << "Caught and unknown exception" << std::endl;
+  }
+
+  // TODO: Shutdown the webserver!
   return result;
 }

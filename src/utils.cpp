@@ -29,11 +29,19 @@ QJsonObject Utils::readJson(const QString& path)
   {
     return QJsonObject();
   }
-  QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+
+  QJsonParseError parseError;
+  QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &parseError);
+
+  if(parseError.error != QJsonParseError::NoError)
+  {
+    throw std::runtime_error((path + ": " +
+                              parseError.errorString()).toStdString());
+  }
+
   if(doc.isNull())
   {
     return QJsonObject();
   }
   return doc.object();
 }
-
