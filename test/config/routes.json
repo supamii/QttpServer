@@ -1,3 +1,27 @@
 {
-    "/": ""
+  "get": [
+    {
+      "path": "/test3",
+      "action": "test"
+    }
+  ],
+
+  "post": [
+    {
+      "path": "/terminates2",
+      "action": "terminates",
+      "isActive": false
+    }
+  ],
+
+  "put": [
+    {
+      "path": "/terminates2",
+      "action": "terminates",
+      "isActive": true
+    }
+  ],
+
+  "delete": [
+  ]
 }

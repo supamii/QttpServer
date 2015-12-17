@@ -23,19 +23,22 @@ int main(int argc, char** argv)
   // Always initialize in the main thread.
   HttpServer* httpSvr = HttpServer::getInstance();
 
+  // Associate this call-back with the action named, "test"
   httpSvr->addAction("test", [](HttpData& data) {
-    // Form the JSON content and the framework handles the rest.
+    // Form the JSON content and let the framework handle the rest.
     QJsonObject& json = data.getJson();
     json["response"] = "Test C++ FTW";
   });
 
-  // Bind routes and actions together.
+  // Bind the http method, action name, and the url route together.
   httpSvr->registerRoute("get", "test", "/test");
   httpSvr->registerRoute("get", "test", "/test2");
 
+  // Libuv runs in its own thread.
   thread webSvr(HttpServer::start);
   webSvr.detach();
 
+  // Qt takes the main thread per the usual.
   auto result = app.exec();
   return result;
 }
@@ -48,6 +51,8 @@ Using the action interface
 // Adds the action interface via template method.
 httpSvr->addAction<Sample>();
 
+// Based on class definition below, we bind the the http method, action name, 
+// and the url route.
 httpSvr->registerRoute("get", "sample", "/sample");
 httpSvr->registerRoute("post", "sample", "/sampleAgain");
 
@@ -255,7 +260,7 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 
 1. Address subtle techdebt surrounding references with native::http components
 2. Create default preprocessors for meta data for each incomming request guid generation
-3. Config parsing is still incomplete - action-routes should be configurable instead of being set in code
+3. ~~Config parsing is still incomplete - action-routes should be configurable instead of being set in code~~
 4. Determine versioning support in the path e.g. /v1/ /v2/
 5. Clean up configuration deployment on mac (make install files to the correct folder)
 6. ~~Setup utilities for MongoDB and Redis access~~

@@ -2,3 +2,4 @@
 /libuv/
 /mongo-cxx-driver/
 /qredisclient/
+/build-*
