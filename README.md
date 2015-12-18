@@ -1,5 +1,13 @@
 # QttpServer
 
+### Features
+
+* Libuv integrated into Qt
+* URL routing
+* Pre & Post processing hooks and chaining ("middleware" for NodeJS)
+* Submodules ready to support MongoDb, Redis, and XMPP (TODO)
+
+
 <b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/node.native).  Intended as an alternative to [QHttpServer](https://github.com/nikhilm/qhttpserver), this is ideal for those who want the benefits of libuv with basic Qt libraries.
 
 ## Example 1: 
@@ -262,13 +270,16 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 2. Create default preprocessors for meta data for each incomming request guid generation
 3. ~~Config parsing is still incomplete - action-routes should be configurable instead of being set in code~~
 4. Determine versioning support in the path e.g. /v1/ /v2/
-5. Clean up configuration deployment on mac (make install files to the correct folder)
+5. ~Clean up configuration deployment on mac (make install files to the correct folder)~
 6. ~~Setup utilities for MongoDB and Redis access~~
 7. ~~Add pre and post processor callbacks as an alternative to the interface class~~
 8. Make available a metrics pre/post processor
 9. Design an error response mechanism
-10. Record PID in a file to easily kill the last known process
+10. Record PID in a file to kill the most recently launched process
 11. Create an equivalenet build system with QMake to support more platforms (MinGW)
 12. Re-work node.native to improve testability by allowing tests to inject requests into qt event loop - allow factory to create instances and prevent shallow copying
 13. Figure out if we can introduce Qt's daemon/services legacy add-on
+14. Distributed scheduling (tasks)
+15. Server diagnostics UI
+16. Authentication
 
