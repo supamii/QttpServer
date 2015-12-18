@@ -310,7 +310,7 @@ bool HttpServer::addAction(const string& actionName, function<void(HttpData& dat
   return !containsKey;
 }
 
-bool HttpServer::registerRoute(const std::string& method, const string& actionName, const string& routeName)
+bool HttpServer::registerRoute(const std::string& method, const string& actionName, const string& route)
 {
   unordered_map<string, string>* routeContainer = nullptr;
   QString methodStr = QString::fromStdString(method).trimmed().toLower();
@@ -336,17 +336,17 @@ bool HttpServer::registerRoute(const std::string& method, const string& actionNa
     LOG_WARN("Invalid http "
              "method [" << method.c_str() << "] "
              "action [" << actionName.c_str() << "] "
-             "route [" << routeName.c_str() << "]");
+             "route [" << route.c_str() << "]");
 
     return false;
   }
 
   LOG_DEBUG("method [" << method.c_str() << "] "
             "action [" << actionName.c_str() << "] "
-            "route [" << routeName.c_str() << "]");
+            "route [" << route.c_str() << "]");
 
-  bool containsKey = (routeContainer->find(routeName) != routeContainer->end());
-  (*routeContainer)[routeName] = actionName;
+  bool containsKey = (routeContainer->find(route) != routeContainer->end());
+  (*routeContainer)[route] = actionName;
 
   return !containsKey;
 }

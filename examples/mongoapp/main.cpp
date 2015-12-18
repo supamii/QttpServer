@@ -16,47 +16,59 @@ int main(int argc, char** argv)
 {
   LOG_TRACE;
 
+  QCoreApplication app(argc, argv);
+
+  // Always initialize in the main thread.
+  HttpServer* httpSvr = HttpServer::getInstance();
+
   auto result = -1;
 
-  // INCOMPLETE ---
-  // TODO: All of this needs to be moved into an organized wrapper.
   mongo::client::initialize();
   mongo::DBClientConnection c;
 
   try
   {
-    // TODO: Include this as a config value.
     c.connect("localhost");
 
-    // Took some of this from the tutorials online.
-    BSONObjBuilder b;
-    b.append("name", "Joe");
-    b.append("age", 33);
+    // Registers the action "addPerson"
+    // to the http method "post"
+    // when the request url targets "http://localhost:8080/person"
 
-    BSONObj p = b.obj();
-    c.insert("tutorial.persons", p);
+    httpSvr->registerRoute("post", "addPerson", "/person");
 
-    LOG_WARN(c.getLastError().c_str());
-
-    auto_ptr<DBClientCursor> cursor = c.query("tutorial.persons", BSONObj());
-
-    while (cursor->more())
+    httpSvr->addAction("addPerson", [&](HttpData& data)
     {
-       LOG_DEBUG(cursor->next().toString().c_str());
-    }
+      // Took some of this from the tutorials online.
+      BSONObj p = BSON( "name" << "Joe" << "age" << 33 );
+      c.insert("tutorial.persons", p);
 
-    LOG_WARN(c.getLastError().c_str());
+      string err = c.getLastError();
+      if(!err.empty())
+      {
+        LOG_WARN(err.c_str());
+      }
 
-    QCoreApplication app(argc, argv);
+      QJsonObject& json = data.getJson();
+      json["response"] = QJsonDocument::fromJson(QString(p.jsonString(Strict).c_str()).toLatin1()).object();
+    });
 
-    // Always initialize in the main thread.
-    HttpServer* httpSvr = HttpServer::getInstance();
+    // Registers the action "getPerson"
+    // to the http method "get"
+    // when the request url targets "http://localhost:8080/person"
+
+    httpSvr->registerRoute("get", "getPerson", "/person");
 
     httpSvr->addAction("getPerson", [&](HttpData& data)
     {
       QJsonArray array;
       QJsonObject& json = data.getJson();
       auto_ptr<DBClientCursor> cursor = c.query("tutorial.persons", BSONObj());
+
+      string err = c.getLastError();
+      if(!err.empty())
+      {
+        LOG_WARN(err.c_str());
+      }
 
       while (cursor->more())
       {
@@ -71,8 +83,6 @@ int main(int argc, char** argv)
 
       json["response"] = array;
     });
-
-    httpSvr->registerRoute("get", "getPerson", "/");
 
     thread webSvr(HttpServer::start);
     webSvr.detach();

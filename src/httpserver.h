@@ -59,9 +59,9 @@ class HttpServer : public QObject
 
     /**
      * @brief More of an association than a registration - binds an action name
-     * to a route name.
+     * to a route url.
      */
-    bool registerRoute(const std::string& type, const std::string& actionName, const std::string& routeName);
+    bool registerRoute(const std::string& type, const std::string& actionName, const std::string& route);
 
     /**
      * @brief A template method to register a processor via the Processor interface.
