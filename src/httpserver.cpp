@@ -331,6 +331,16 @@ bool HttpServer::registerRoute(const std::string& method, const string& actionNa
     routeContainer = &m_DelRoutes;
   }
 
+  if(routeContainer == nullptr)
+  {
+    LOG_WARN("Invalid http "
+             "method [" << method.c_str() << "] "
+             "action [" << actionName.c_str() << "] "
+             "route [" << routeName.c_str() << "]");
+
+    return false;
+  }
+
   LOG_DEBUG("method [" << method.c_str() << "] "
             "action [" << actionName.c_str() << "] "
             "route [" << routeName.c_str() << "]");
