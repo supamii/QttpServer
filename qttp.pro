@@ -4,7 +4,7 @@ contains(CONFIG, SAMPLEAPP) {
     TEMPLATE = app
     DESTDIR = $$PWD
     SOURCES += $$PWD/examples/sampleapp/main.cpp
-
+    TARGET = QttpServer
     macx {
         # Since things are buried in the app folder, we'll copy configs there.
         MediaFiles.files = \
@@ -21,6 +21,7 @@ contains(CONFIG, SAMPLEAPP) {
     TEMPLATE = lib
     CONFIG += staticlib
     VERSION = 0.0.1
+    TARGET = qttpserver
     CONFIG(debug, debug|release) {
         win32 {
             DESTDIR = $$PWD/build/Debug/lib
@@ -37,7 +38,6 @@ contains(CONFIG, SAMPLEAPP) {
 }
 
 QT -= gui
-TARGET = qttpserver
 
 message('Including core files')
 include($$PWD/core.pri)
