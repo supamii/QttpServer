@@ -48,8 +48,11 @@ int main(int argc, char** argv)
         LOG_WARN(err.c_str());
       }
 
+      string str = p.jsonString(Strict);
+      QByteArray bytes(str.c_str(), str.size());
+
       QJsonObject& json = data.getJson();
-      json["response"] = QJsonDocument::fromJson(QString(p.jsonString(Strict).c_str()).toLatin1()).object();
+      json["response"] = QJsonDocument::fromJson(bytes).object();
     });
 
     // Registers the action "getPerson"
@@ -60,7 +63,6 @@ int main(int argc, char** argv)
 
     httpSvr->addAction("getPerson", [&](HttpData& data)
     {
-      QJsonArray array;
       QJsonObject& json = data.getJson();
       auto_ptr<DBClientCursor> cursor = c.query("tutorial.persons", BSONObj());
 
@@ -70,18 +72,27 @@ int main(int argc, char** argv)
         LOG_WARN(err.c_str());
       }
 
+      stringstream buffer;
+      bool first = true;
+
       while (cursor->more())
       {
-         BSONObj obj = cursor->next();
-         string str = obj.jsonString(Strict);
-         QByteArray bytes(str.c_str(), str.length());
-
-         QJsonParseError error;
-         QJsonObject entry = QJsonDocument::fromJson(bytes, &error).object();
-         array.push_back(entry);
+        buffer << (first ? "[" : ",");
+        first = false;
+        BSONObj obj = cursor->next();
+        buffer << obj.jsonString(Strict);
       }
 
-      json["response"] = array;
+      buffer << "]";
+      string str = buffer.str();
+      QByteArray bytes(str.c_str(), str.length());
+      QJsonParseError error;
+      json["response"] = QJsonDocument::fromJson(bytes, &error).array();
+
+      if(error.error != QJsonParseError::NoError)
+      {
+        json["error"] = error.errorString();
+      }
     });
 
     thread webSvr(HttpServer::start);
