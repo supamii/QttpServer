@@ -25,7 +25,7 @@ class Action
      * @param data
      */
     virtual void onAction(HttpData& data) = 0;
-    virtual const std::string getActionName() const = 0;
+    virtual const QString getActionName() const = 0;
 };
 
 /**
@@ -39,7 +39,7 @@ class Processor
     Processor();
     virtual ~Processor();
 
-    virtual const std::string getProcessorName() const = 0;
+    virtual const QString getProcessorName() const = 0;
 
     /// @brief Invoked before qttp::Action::onAction().
     virtual void preprocess(HttpData& data);

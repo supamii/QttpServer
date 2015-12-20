@@ -17,7 +17,7 @@ class SampleAction: public Action
       json["response"] = "Sample C++ FTW";
     }
 
-    const std::string getActionName() const
+    const QString getActionName() const
     {
       return "sample";
     }
@@ -26,7 +26,7 @@ class SampleAction: public Action
 class SampleProcessor: public Processor
 {
   public:
-    const std::string getProcessorName() const
+    const QString getProcessorName() const
     {
       return "SampleProcessor";
     }

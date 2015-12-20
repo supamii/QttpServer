@@ -55,13 +55,13 @@ class HttpServer : public QObject
      * action.
      * @return boolean false if a previous route was replaced, false otherwise
      */
-    bool addAction(const std::string&, std::function<void(HttpData& data)>);
+    bool addAction(const QString&, std::function<void(HttpData& data)>);
 
     /**
      * @brief More of an association than a registration - binds an action name
-     * to a route name.
+     * to a route url.
      */
-    bool registerRoute(const std::string& type, const std::string& actionName, const std::string& routeName);
+    bool registerRoute(const QString& type, const QString& actionName, const QString& route);
 
     /**
      * @brief A template method to register a processor via the Processor interface.
@@ -100,7 +100,7 @@ class HttpServer : public QObject
 
     void initialize();
 
-    void registerRouteFromJSON(QJsonValueRef& obj, const std::string& method);
+    void registerRouteFromJSON(QJsonValueRef& obj, const QString& method);
 
     /**
      * @brief defaultCallback
@@ -119,20 +119,56 @@ class HttpServer : public QObject
      * @param event
      * @return
      */
-    bool eventFilter(QObject *object, QEvent *event);
+    bool eventFilter(QObject* object, QEvent* event);
+
+    /**
+     * @brief Determines if "path" matches the pattern "pathParts".
+     * @param pathParts The route or pattern to match
+     * @param path The requested endpoint
+     * @param responseParams The list of parameters parsed from "path"
+     * @return If there is a match
+     */
+    static bool matchUrl(const QStringList& pathParts, const QString& path, QHash<QString, QString>& responseParams);
 
     static std::unique_ptr<HttpServer> m_Instance;
+
+    /**
+     * @todo Copy constructor and the move constructor!
+     * @brief The Route class
+     */
+    class Route
+    {
+      public:
+        Route() :
+          route(),
+          action(),
+          parts()
+        {
+        }
+
+        Route(const QString& r, const QString& a) :
+          route(r),
+          action(a),
+          parts(route.split('/', QString::SkipEmptyParts))
+        {
+        }
+
+      QString route;
+      QString action;
+      QStringList parts;
+    };
 
     /// @brief Private constructor per singleton design.
     HttpServer();
     /// @brief This callback allows the caller to intercept all responses.
     std::function<void(native::http::request*, native::http::response*)> m_EventCallback;
-    std::unordered_map<std::string, std::shared_ptr<Action>> m_Actions;
-    std::unordered_map<std::string, std::function<void(HttpData& data)>> m_ActionCallbacks;
-    std::unordered_map<std::string, std::string> m_GetRoutes;
-    std::unordered_map<std::string, std::string> m_PostRoutes;
-    std::unordered_map<std::string, std::string> m_PutRoutes;
-    std::unordered_map<std::string, std::string> m_DelRoutes;
+    QHash<QString, std::shared_ptr<Action>> m_Actions;
+    QHash<QString, std::function<void(HttpData& data)>> m_ActionCallbacks;
+    QHash<QString, Route> m_GetRoutes;
+    QHash<QString, Route> m_PostRoutes;
+    QHash<QString, Route> m_PutRoutes;
+    QHash<QString, Route> m_DeleteRoutes;
+    QHash<QString, Route> m_PatchRoutes;
     std::vector<std::shared_ptr<Processor>> m_Processors;
     std::vector<std::function<void(HttpData& data)>> m_Preprocessors;
     std::vector<std::function<void(HttpData& data)>> m_Postprocessors;

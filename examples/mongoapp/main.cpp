@@ -16,63 +16,95 @@ int main(int argc, char** argv)
 {
   LOG_TRACE;
 
+  QCoreApplication app(argc, argv);
+
+  // Always initialize in the main thread.
+  HttpServer* httpSvr = HttpServer::getInstance();
+
   auto result = -1;
 
-  // INCOMPLETE ---
-  // TODO: All of this needs to be moved into an organized wrapper.
   mongo::client::initialize();
   mongo::DBClientConnection c;
 
   try
   {
-    // TODO: Include this as a config value.
     c.connect("localhost");
 
-    // Took some of this from the tutorials online.
-    BSONObjBuilder b;
-    b.append("name", "Joe");
-    b.append("age", 33);
+    // Registers the action "addPerson"
+    // to the http method "post"
+    // when the request url targets "http://localhost:8080/person"
 
-    BSONObj p = b.obj();
-    c.insert("tutorial.persons", p);
+    httpSvr->registerRoute("post", "addPerson", "/person");
 
-    LOG_WARN(c.getLastError().c_str());
-
-    auto_ptr<DBClientCursor> cursor = c.query("tutorial.persons", BSONObj());
-
-    while (cursor->more())
+    httpSvr->addAction("addPerson", [&](HttpData& data)
     {
-       LOG_DEBUG(cursor->next().toString().c_str());
-    }
+      // Took some of this from the tutorials online.
+      BSONObj p = BSON( "name" << "Joe" << "age" << 33 );
+      c.insert("tutorial.persons", p);
 
-    LOG_WARN(c.getLastError().c_str());
+      string err = c.getLastError();
+      if(!err.empty())
+      {
+        LOG_WARN(err.c_str());
+      }
 
-    QCoreApplication app(argc, argv);
+      QByteArray bytes = Utils::toByteArray(p.jsonString(Strict));
 
-    // Always initialize in the main thread.
-    HttpServer* httpSvr = HttpServer::getInstance();
+      QJsonObject& json = data.getJson();
+      json["response"] = Utils::toJson(bytes);
+    });
+
+    // Registers the action "getPerson"
+    // to the http method "get"
+    // when the request url targets "http://localhost:8080/person"
+
+    httpSvr->registerRoute("get", "getPerson", "/person");
 
     httpSvr->addAction("getPerson", [&](HttpData& data)
     {
-      QJsonArray array;
       QJsonObject& json = data.getJson();
-      auto_ptr<DBClientCursor> cursor = c.query("tutorial.persons", BSONObj());
+
+      BSONObj bson;
+
+      // Supports querying a person by name.
+      QHash<QString, QString>& params = data.getParameters();
+      auto name = params.find("name");
+      if(name != params.end())
+      {
+        bson = BSON("name" << name.value().toStdString());
+      }
+
+      auto_ptr<DBClientCursor> cursor = c.query("tutorial.persons", bson);
+
+      string err = c.getLastError();
+      if(!err.empty())
+      {
+        LOG_WARN(err.c_str());
+      }
+
+      stringstream buffer;
+      bool first = true;
 
       while (cursor->more())
       {
-         BSONObj obj = cursor->next();
-         string str = obj.jsonString(Strict);
-         QByteArray bytes(str.c_str(), str.length());
-
-         QJsonParseError error;
-         QJsonObject entry = QJsonDocument::fromJson(bytes, &error).object();
-         array.push_back(entry);
+        buffer << (first ? "[" : ",");
+        first = false;
+        BSONObj obj = cursor->next();
+        buffer << obj.jsonString(Strict);
       }
 
-      json["response"] = array;
-    });
+      buffer << "]";
 
-    httpSvr->registerRoute("get", "getPerson", "/");
+      QByteArray bytes = Utils::toByteArray(buffer);
+      QJsonParseError error;
+      json["response"] = Utils::toArray(bytes, &error);
+
+      if(error.error != QJsonParseError::NoError)
+      {
+        LOG_ERROR(error.errorString());
+        // json["error"] = error.errorString();
+      }
+    });
 
     thread webSvr(HttpServer::start);
     webSvr.detach();

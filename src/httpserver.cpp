@@ -25,7 +25,8 @@ HttpServer::HttpServer() :
     m_GetRoutes(),
     m_PostRoutes(),
     m_PutRoutes(),
-    m_DelRoutes(),
+    m_DeleteRoutes(),
+    m_PatchRoutes(),
     m_Processors(),
     m_Preprocessors(),
     m_Postprocessors(),
@@ -75,7 +76,7 @@ void HttpServer::initialize()
   registerRouteFromJSON(del, "del");
 }
 
-void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const std::string& method)
+void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const QString& method)
 {
   if(obj.isArray())
   {
@@ -86,9 +87,9 @@ void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const std::string& me
       if(item->isObject())
       {
         auto route = item->toObject();
-        auto action = route["action"].toString().trimmed().toStdString();
-        auto path = route["path"].toString().trimmed().toStdString();
-        if(route["isActive"] != false && !path.empty())
+        auto action = route["action"].toString().trimmed();
+        auto path = route["path"].toString().trimmed();
+        if(route["isActive"] != false && !path.isEmpty())
         {
           this->registerRoute(method, action, path);
         }
@@ -100,8 +101,6 @@ void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const std::string& me
 
 int HttpServer::start()
 {
-  http server;
-
   HttpServer* svr = HttpServer::getInstance();
   QString ip = svr->m_GlobalConfig["bindIp"].isUndefined() ? "0.0.0.0" : svr->m_GlobalConfig["bindIp"].toString().trimmed();
   if(ip.isEmpty())
@@ -115,6 +114,7 @@ int HttpServer::start()
     port = 8080;
     LOG_WARN("Bind port is invalid, defaulting to" << port);
   }
+  native::http::http server;
   auto result = server.listen(ip.toStdString(), port, [](request& req, response& resp) {
     HttpEvent* event = new HttpEvent(&req, &resp);
     QCoreApplication::postEvent(HttpServer::getInstance(), event);
@@ -122,7 +122,7 @@ int HttpServer::start()
 
   if(!result)
   {
-    LOG_WARN("Unable to bind to" << ip << port);
+    LOG_ERROR("Unable to bind to" << ip << port);
     return 1;
   }
 
@@ -142,11 +142,11 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
 
   // TODO: Perhaps should lock/wrap m_Routes to guarantee atomicity.
 
-  return [=](request* req, response* resp)
+  return [&](request* req, response* resp)
   {
     HttpData data(req, resp);
 
-    const unordered_map<string, string>* routes = &m_GetRoutes;
+    const QHash<QString, Route>* routes = &m_GetRoutes;
     QString method = QString(req->get_method().c_str()).toLower().trimmed();
 
     if(method == "get")
@@ -163,33 +163,72 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
     }
     else if(method == "delete")
     {
-      routes = &m_DelRoutes;
+      routes = &m_DeleteRoutes;
     }
 
-    auto lookup = routes->find(req->url().path());
-    if(lookup != routes->end())
+    QHash<QString, QString> parameters;
+    QString urlPath = QString::fromStdString(req->url().path()).trimmed();
+    auto route = routes->begin();
+
+    // TODO: ROOM FOR IMPROVEMENT: We can reduce the total number of searches
+    // for the worst case scenario.
+
+    for(; route != routes->end(); ++route)
     {
-      auto callback = m_ActionCallbacks.find(lookup->second);
+      parameters.clear();
+
+      if(HttpServer::matchUrl(route.value().parts,
+                              urlPath,
+                              parameters))
+      {
+        // Since this request is going to be processed, let's also parse the
+        // query strings for easy access.
+
+        QString str = QString::fromStdString(req->url().query());
+        auto list = str.split('&', QString::SkipEmptyParts);
+        for(auto i : list)
+        {
+          auto kv = i.split('=');
+          if(kv.length() > 1)
+          {
+            parameters[kv.at(0)] = kv.at(1);
+          }
+          else if(!kv.isEmpty())
+          {
+            parameters[kv.at(0)] = "";
+          }
+        }
+        data.setParameters(parameters);
+        break;
+      }
+    }
+
+    // Previously we had hard-routes that weren't dynamic.
+    // auto route = routes->find(urlPath);
+
+    if(route != routes->end())
+    {
+      auto callback = m_ActionCallbacks.find(route.value().action);
       if(callback != m_ActionCallbacks.end())
       {
         performPreprocessing(data);
-        if(data.getControlFlag()) callback->second(data);
+        if(data.getControlFlag()) (callback.value())(data);
         if(data.getControlFlag()) performPostprocessing(data);
       }
       else
       {
-        auto action = m_Actions.find(lookup->second);
-        if(action != m_Actions.end() && action->second.get() != nullptr)
+        auto action = m_Actions.find(route.value().action);
+        if(action != m_Actions.end() && action.value().get() != nullptr)
         {
           performPreprocessing(data);
-          if(data.getControlFlag()) action->second->onAction(data);
+          if(data.getControlFlag()) (action.value())->onAction(data);
           if(data.getControlFlag()) performPostprocessing(data);
         }
       }
     }
     else
     {
-      // Even the the action is not yet found, we'll give the user a chance to
+      // Even if the action is not yet found, we'll give the user a chance to
       // intercept and process it.
       performPreprocessing(data);
 
@@ -204,7 +243,7 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
         auto callback = m_ActionCallbacks.find("");
         if(callback != m_ActionCallbacks.end())
         {
-          callback->second(data);
+          callback.value()(data);
           performPostprocessing(data);
         }
         else
@@ -212,7 +251,7 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
           auto action = m_Actions.find("");
           if(action != m_Actions.end())
           {
-            action->second->onAction(data);
+            (action.value())->onAction(data);
             performPostprocessing(data);
           }
           else
@@ -231,6 +270,56 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
       LOG_WARN("Failed to finish response");
     }
   };
+}
+
+bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QHash<QString, QString>& responseParams)
+{
+  // Using splitRef to reduce string copies.
+  QVector<QStringRef> urlParts = path.splitRef('/', QString::SkipEmptyParts);
+
+  if(urlParts.length() != routeParts.length())
+  {
+    return false;
+  }
+
+  QString variable = "";
+  QString regexp = "";
+
+  for(int i = 0; i < urlParts.length(); ++i)
+  {
+    const QStringRef& urlPart = urlParts[i];
+    const QString& routePart = routeParts[i];
+
+    if(routePart.startsWith(':') && routePart.indexOf('(') < 0)
+    {
+      // We found something like /:id/ so let's make sure we grab that.
+
+      variable = QString(routePart).replace(':', "");
+      responseParams[variable] = urlPart.toString();
+    }
+    else if(routePart.startsWith(':') && routePart.indexOf('(') >= 0)
+    {
+      // Proceed to grab the regular expression inside the expressed route.
+      // TODO: TEST THIS
+      QString urlPartTmp = urlPart.toString();
+      regexp = routePart.mid(routePart.indexOf('(') + 1, routePart.length() - 1);
+      bool matches = urlPartTmp.contains(QRegularExpression(regexp));
+      if(matches)
+      {
+        variable = QString(routePart).replace(':', "").split('(')[0];
+        responseParams[variable] = urlPartTmp;
+      }
+      else
+      {
+        return false;
+      }
+    }
+    else if(urlPart.isEmpty() || routePart != urlPart)
+    {
+      return false;
+    }
+  }
+  return true;
 }
 
 void HttpServer::performPreprocessing(HttpData& data) const
@@ -303,17 +392,17 @@ bool HttpServer::addAction(std::shared_ptr<Action>& action)
   return !containsKey;
 }
 
-bool HttpServer::addAction(const string& actionName, function<void(HttpData& data)> callback)
+bool HttpServer::addAction(const QString& actionName, function<void(HttpData& data)> callback)
 {
   bool containsKey = (m_ActionCallbacks.find(actionName) != m_ActionCallbacks.end());
   m_ActionCallbacks[actionName] = callback;
   return !containsKey;
 }
 
-bool HttpServer::registerRoute(const std::string& method, const string& actionName, const string& routeName)
+bool HttpServer::registerRoute(const QString& method, const QString& actionName, const QString& route)
 {
-  unordered_map<string, string>* routeContainer = nullptr;
-  QString methodStr = QString::fromStdString(method).trimmed().toLower();
+  QHash<QString, Route>* routeContainer = nullptr;
+  QString methodStr = method.trimmed().toLower();
   if(methodStr == "get")
   {
     routeContainer = &m_GetRoutes;
@@ -328,15 +417,27 @@ bool HttpServer::registerRoute(const std::string& method, const string& actionNa
   }
   else if(methodStr == "delete")
   {
-    routeContainer = &m_DelRoutes;
+    routeContainer = &m_DeleteRoutes;
   }
 
-  LOG_DEBUG("method [" << method.c_str() << "] "
-            "action [" << actionName.c_str() << "] "
-            "route [" << routeName.c_str() << "]");
+  if(routeContainer == nullptr)
+  {
+    LOG_WARN("Invalid http "
+             "method [" << method << "] "
+             "action [" << actionName << "] "
+             "route [" << route << "]");
 
-  bool containsKey = (routeContainer->find(routeName) != routeContainer->end());
-  (*routeContainer)[routeName] = actionName;
+    return false;
+  }
+
+  LOG_DEBUG("method [" << method << "] "
+            "action [" << actionName << "] "
+            "route [" << route << "]");
+
+  bool containsKey = (routeContainer->find(route) != routeContainer->end());
+
+  // Initialize and assign the Route struct.
+  (*routeContainer)[route] = Route(route, actionName);
 
   return !containsKey;
 }
