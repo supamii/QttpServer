@@ -49,9 +49,9 @@ class HttpData
      */
     native::http::response& getResponse() const;
 
-    QHash<QString, QString>& getParameters();
+    QUrlQuery& getQuery();
 
-    const QHash<QString, QString>& getParameters() const;
+    const QUrlQuery& getQuery() const;
 
     /**
      * @brief A wrapper for native::http::response::end() and writes directly
@@ -94,11 +94,12 @@ class HttpData
     /**
      * @brief This will swap data - beware
      */
-    void setParameters(QHash<QString, QString>&);
+    void setQuery(QUrlQuery&);
+
 
     native::http::request* m_Request;
     native::http::response* m_Response;
-    QHash<QString, QString> m_Parameters;
+    QUrlQuery m_Query;
     QJsonObject m_Json;
     /// TODO Consolidate with control flag.
     bool m_IsFinished;

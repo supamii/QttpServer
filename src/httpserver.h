@@ -128,7 +128,7 @@ class HttpServer : public QObject
      * @param responseParams The list of parameters parsed from "path"
      * @return If there is a match
      */
-    static bool matchUrl(const QStringList& pathParts, const QString& path, QHash<QString, QString>& responseParams);
+    static bool matchUrl(const QStringList& pathParts, const QString& path, QUrlQuery& responseParams);
 
     static std::unique_ptr<HttpServer> m_Instance;
 

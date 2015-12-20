@@ -147,26 +147,26 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
     HttpData data(req, resp);
 
     const QHash<QString, Route>* routes = &m_GetRoutes;
-    QString method = QString(req->get_method().c_str()).toLower().trimmed();
+    QString method = QString(req->get_method().c_str()).toUpper().trimmed();
 
-    if(method == "get")
+    if(method == "GET")
     {
       routes = &m_GetRoutes;
     }
-    else if(method == "post")
+    else if(method == "POST")
     {
       routes = &m_PostRoutes;
     }
-    else if(method == "put")
+    else if(method == "PUT")
     {
       routes = &m_PutRoutes;
     }
-    else if(method == "delete")
+    else if(method == "DELETE")
     {
       routes = &m_DeleteRoutes;
     }
 
-    QHash<QString, QString> parameters;
+    QUrlQuery parameters;
     QString urlPath = QString::fromStdString(req->url().path()).trimmed();
     auto route = routes->begin();
 
@@ -183,22 +183,14 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
       {
         // Since this request is going to be processed, let's also parse the
         // query strings for easy access.
-
-        QString str = QString::fromStdString(req->url().query());
-        auto list = str.split('&', QString::SkipEmptyParts);
-        for(auto i : list)
+        QUrlQuery params(QString::fromStdString(req->url().query()));
+        for(auto i : params.queryItems())
         {
-          auto kv = i.split('=');
-          if(kv.length() > 1)
-          {
-            parameters[kv.at(0)] = kv.at(1);
-          }
-          else if(!kv.isEmpty())
-          {
-            parameters[kv.at(0)] = "";
-          }
+          // Should note that existing itms are not replaced!  These are simply
+          // appended to the query string.
+          parameters.addQueryItem(i.first, i.second);
         }
-        data.setParameters(parameters);
+        data.setQuery(parameters);
         break;
       }
     }
@@ -272,7 +264,7 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
   };
 }
 
-bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QHash<QString, QString>& responseParams)
+bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QUrlQuery& params)
 {
   // Using splitRef to reduce string copies.
   QVector<QStringRef> urlParts = path.splitRef('/', QString::SkipEmptyParts);
@@ -295,7 +287,7 @@ bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QH
       // We found something like /:id/ so let's make sure we grab that.
 
       variable = QString(routePart).replace(':', "");
-      responseParams[variable] = urlPart.toString();
+      params.addQueryItem(variable, urlPart.toString());
     }
     else if(routePart.startsWith(':') && routePart.indexOf('(') >= 0)
     {
@@ -307,7 +299,7 @@ bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QH
       if(matches)
       {
         variable = QString(routePart).replace(':', "").split('(')[0];
-        responseParams[variable] = urlPartTmp;
+        params.addQueryItem(variable, urlPartTmp);
       }
       else
       {

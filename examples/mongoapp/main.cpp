@@ -67,11 +67,10 @@ int main(int argc, char** argv)
       BSONObj bson;
 
       // Supports querying a person by name.
-      QHash<QString, QString>& params = data.getParameters();
-      auto name = params.find("name");
-      if(name != params.end())
+      QUrlQuery& params = data.getQuery();
+      if(params.hasQueryItem("name"))
       {
-        bson = BSON("name" << name.value().toStdString());
+        bson = BSON("name" << params.queryItemValue("name").toStdString());
       }
 
       auto_ptr<DBClientCursor> cursor = c.query("tutorial.persons", bson);
