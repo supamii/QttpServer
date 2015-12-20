@@ -4,6 +4,8 @@
 #include <QtCore>
 #include <QFile>
 #include <QJsonDocument>
+#include <iostream>
+#include <sstream>
 
 #ifdef NO_QTTP_LOGGING
   #define LOG_DATETIME
@@ -104,6 +106,26 @@ class Utils
      * @return
      */
     static QJsonObject readJson(const QString& path);
+
+    static inline QByteArray toByteArray(const std::string& str)
+    {
+      return QByteArray(str.c_str(), str.length());
+    }
+
+    static inline QByteArray toByteArray(const std::stringstream& buffer)
+    {
+      return Utils::toByteArray(buffer.str());
+    }
+
+    static inline QJsonObject toJson(QByteArray bytes, QJsonParseError* error = 0)
+    {
+      return QJsonDocument::fromJson(bytes, error).object();
+    }
+
+    static inline QJsonArray toArray(QByteArray bytes, QJsonParseError* error = 0)
+    {
+      return QJsonDocument::fromJson(bytes, error).array();
+    }
 };
 
 } // End namespace qttp

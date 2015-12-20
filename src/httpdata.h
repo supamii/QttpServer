@@ -49,6 +49,10 @@ class HttpData
      */
     native::http::response& getResponse() const;
 
+    QHash<QString, QString>& getParameters();
+
+    const QHash<QString, QString>& getParameters() const;
+
     /**
      * @brief A wrapper for native::http::response::end() and writes directly
      * to the response socket.  For direct writes, this is highly encouraged
@@ -86,8 +90,15 @@ class HttpData
     bool getControlFlag() const;
 
   private:
+
+    /**
+     * @brief This will swap data - beware
+     */
+    void setParameters(QHash<QString, QString>&);
+
     native::http::request* m_Request;
     native::http::response* m_Response;
+    QHash<QString, QString> m_Parameters;
     QJsonObject m_Json;
     /// TODO Consolidate with control flag.
     bool m_IsFinished;
