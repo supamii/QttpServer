@@ -58,7 +58,11 @@ int main(int argc, char** argv)
     // to the http method "get"
     // when the request url targets "http://localhost:8080/person"
 
+    // Get all persons
     httpSvr->registerRoute("get", "getPerson", "/person");
+
+    // Get a person by name e.g. http://localhost:8080/p/Joe
+    httpSvr->registerRoute("get", "getPerson", "/p/:name");
 
     httpSvr->addAction("getPerson", [&](HttpData& data)
     {

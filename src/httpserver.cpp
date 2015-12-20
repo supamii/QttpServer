@@ -191,7 +191,6 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
           parameters.addQueryItem(i.first, i.second);
         }
         data.setQuery(parameters);
-        break;
       }
     }
 
