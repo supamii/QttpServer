@@ -6,15 +6,15 @@ using namespace std;
 using namespace qttp;
 using namespace native::http;
 
-unique_ptr<HttpServer> HttpServer::m_Instance(nullptr);
+HttpServer* HttpServer::m_Instance = nullptr;
 
 HttpServer* HttpServer::getInstance()
 {
-  if(m_Instance.get() == nullptr)
+  if(m_Instance == nullptr)
   {
-      m_Instance.reset(new HttpServer());
+      m_Instance = new HttpServer();
   }
-  return m_Instance.get();
+  return m_Instance;
 }
 
 HttpServer::HttpServer() :
@@ -101,14 +101,14 @@ void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const QString& method
 
 int HttpServer::start()
 {
-  HttpServer* svr = HttpServer::getInstance();
-  QString ip = svr->m_GlobalConfig["bindIp"].isUndefined() ? "0.0.0.0" : svr->m_GlobalConfig["bindIp"].toString().trimmed();
+  HttpServer& svr = *(HttpServer::getInstance());
+  QString ip = svr.m_GlobalConfig["bindIp"].isUndefined() ? "0.0.0.0" : svr.m_GlobalConfig["bindIp"].toString().trimmed();
   if(ip.isEmpty())
   {
     ip = "0.0.0.0";
     LOG_WARN("Bind ip is invalid, defaulting to" << ip);
   }
-  auto port = svr->m_GlobalConfig["bindPort"].isUndefined() ? 8080 : svr->m_GlobalConfig["bindPort"].toInt();
+  auto port = svr.m_GlobalConfig["bindPort"].isUndefined() ? 8080 : svr.m_GlobalConfig["bindPort"].toInt();
   if(port <= 0)
   {
     port = 8080;
@@ -144,6 +144,9 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
 
   return [&](request* req, response* resp)
   {
+    Stats& stats = *Stats::getInstance();
+    stats.increment("http:hits");
+
     HttpData data(req, resp);
 
     const QHash<QString, Route>* routes = &m_GetRoutes;
@@ -151,19 +154,27 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
 
     if(method == "GET")
     {
+      stats.increment("http:method:get");
       routes = &m_GetRoutes;
     }
     else if(method == "POST")
     {
+      stats.increment("http:method:post");
       routes = &m_PostRoutes;
     }
     else if(method == "PUT")
     {
+      stats.increment("http:method:put");
       routes = &m_PutRoutes;
     }
     else if(method == "DELETE")
     {
+      stats.increment("http:method:delete");
       routes = &m_DeleteRoutes;
+    }
+    else
+    {
+      stats.increment("http:method:unknown");
     }
 
     QUrlQuery parameters;

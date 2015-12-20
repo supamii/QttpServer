@@ -130,7 +130,7 @@ class HttpServer : public QObject
      */
     static bool matchUrl(const QStringList& pathParts, const QString& path, QUrlQuery& responseParams);
 
-    static std::unique_ptr<HttpServer> m_Instance;
+    static HttpServer* m_Instance;
 
     /**
      * @todo Copy constructor and the move constructor!

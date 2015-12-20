@@ -96,7 +96,7 @@ class Utils
 {
   public:
     Utils();
-    virtual ~Utils();
+    ~Utils();
 
     /**
      * @brief Throws a std::runtime_error with a message of any JSON validation
@@ -128,6 +128,20 @@ class Utils
     }
 };
 
+class Stats
+{
+  public:
+    static Stats* getInstance();
+    void increment(const QString& key);
+    void setValue(const QString& key, const QVariant& value);
+
+  private:
+    Stats();
+    ~Stats();
+    static Stats* m_Instance;
+    QHash<QString, QVariant> m_Statistics;
+
+};
 } // End namespace qttp
 
 #endif // QTTPUTILS_H
