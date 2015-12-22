@@ -160,6 +160,8 @@ class HttpServer : public QObject
 
     /// @brief Private constructor per singleton design.
     HttpServer();
+    // TODO make the copy-constructor private as well.
+
     /// @brief This callback allows the caller to intercept all responses.
     std::function<void(native::http::request*, native::http::response*)> m_EventCallback;
     QHash<QString, std::shared_ptr<Action>> m_Actions;
@@ -174,6 +176,7 @@ class HttpServer : public QObject
     std::vector<std::function<void(HttpData& data)>> m_Postprocessors;
     QJsonObject m_GlobalConfig;
     QJsonObject m_RoutesConfig;
+    Stats* m_Stats; //! To work around const captures this is a pointer.
 };
 
 } // End namespace qttp

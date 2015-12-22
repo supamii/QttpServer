@@ -31,7 +31,8 @@ HttpServer::HttpServer() :
     m_Preprocessors(),
     m_Postprocessors(),
     m_GlobalConfig(),
-    m_RoutesConfig()
+    m_RoutesConfig(),
+    m_Stats(new Stats())
 {
   this->installEventFilter(this);
   this->initialize();
@@ -39,6 +40,10 @@ HttpServer::HttpServer() :
 
 HttpServer::~HttpServer()
 {
+  if(m_Stats)
+  {
+    delete m_Stats;
+  }
 }
 
 void HttpServer::initialize()
@@ -142,10 +147,9 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
 
   // TODO: Perhaps should lock/wrap m_Routes to guarantee atomicity.
 
-  return [&](request* req, response* resp)
+  return [&](request* req, response* resp) mutable
   {
-    Stats& stats = *Stats::getInstance();
-    stats.increment("http:hits");
+    m_Stats->increment("http:hits");
 
     HttpData data(req, resp);
 
@@ -154,27 +158,27 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
 
     if(method == "GET")
     {
-      stats.increment("http:method:get");
+      m_Stats->increment("http:method:get");
       routes = &m_GetRoutes;
     }
     else if(method == "POST")
     {
-      stats.increment("http:method:post");
+      m_Stats->increment("http:method:post");
       routes = &m_PostRoutes;
     }
     else if(method == "PUT")
     {
-      stats.increment("http:method:put");
+      m_Stats->increment("http:method:put");
       routes = &m_PutRoutes;
     }
     else if(method == "DELETE")
     {
-      stats.increment("http:method:delete");
+      m_Stats->increment("http:method:delete");
       routes = &m_DeleteRoutes;
     }
     else
     {
-      stats.increment("http:method:unknown");
+      m_Stats->increment("http:method:unknown");
     }
 
     QUrlQuery parameters;
@@ -202,6 +206,7 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
           parameters.addQueryItem(i.first, i.second);
         }
         data.setQuery(parameters);
+        break;
       }
     }
 
@@ -214,8 +219,12 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
       if(callback != m_ActionCallbacks.end())
       {
         performPreprocessing(data);
-        if(data.getControlFlag()) (callback.value())(data);
-        if(data.getControlFlag()) performPostprocessing(data);
+        if(data.shouldContinue())
+        {
+          data.setControlFlag(HttpData::ActionProcessed);
+          (callback.value())(data);
+        }
+        if(data.shouldContinue()) performPostprocessing(data);
       }
       else
       {
@@ -223,18 +232,26 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
         if(action != m_Actions.end() && action.value().get() != nullptr)
         {
           performPreprocessing(data);
-          if(data.getControlFlag()) (action.value())->onAction(data);
-          if(data.getControlFlag()) performPostprocessing(data);
+          if(data.shouldContinue())
+          {
+            data.setControlFlag(HttpData::ActionProcessed);
+            (action.value())->onAction(data);
+          }
+          if(data.shouldContinue()) performPostprocessing(data);
         }
       }
     }
-    else
+
+    // Check the control flag bit mask to determine if it was processed above.
+    if(!data.isProcessed())
     {
+      LOG_DEBUG("No route found for" << urlPath << ", checking default routes");
+
       // Even if the action is not yet found, we'll give the user a chance to
       // intercept and process it.
       performPreprocessing(data);
 
-      if(data.getControlFlag())
+      if(data.shouldContinue())
       {
         // TODO: Describe this in the header file.
 
@@ -245,22 +262,25 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
         auto callback = m_ActionCallbacks.find("");
         if(callback != m_ActionCallbacks.end())
         {
+          data.setControlFlag(HttpData::ActionProcessed);
           callback.value()(data);
-          performPostprocessing(data);
+          if(data.shouldContinue()) performPostprocessing(data);
         }
         else
         {
           auto action = m_Actions.find("");
           if(action != m_Actions.end())
           {
+            data.setControlFlag(HttpData::ActionProcessed);
             (action.value())->onAction(data);
-            performPostprocessing(data);
+            if(data.shouldContinue()) performPostprocessing(data);
           }
           else
           {
             resp->set_status(400);
             QJsonObject& json = data.getJson();
             json["error"] = "Invalid request";
+
             performPostprocessing(data);
           }
         }
@@ -321,6 +341,8 @@ bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QU
       return false;
     }
   }
+
+  LOG_DEBUG("Found route" << path);
   return true;
 }
 
@@ -329,6 +351,7 @@ void HttpServer::performPreprocessing(HttpData& data) const
   for(auto& callback : m_Preprocessors)
   {
     callback(data);
+    data.setControlFlag(HttpData::Preprocessed);
   }
 
   for(auto& processor : m_Processors)
@@ -336,6 +359,7 @@ void HttpServer::performPreprocessing(HttpData& data) const
     if(processor.get())
     {
       processor->preprocess(data);
+      data.setControlFlag(HttpData::Preprocessed);
     }
   }
 }
@@ -351,6 +375,7 @@ void HttpServer::performPostprocessing(HttpData& data) const
     if(p)
     {
       p->postprocess(data);
+      data.setControlFlag(HttpData::Postprocessed);
     }
     ++processor;
   }
@@ -358,6 +383,7 @@ void HttpServer::performPostprocessing(HttpData& data) const
   for(auto& callback : m_Postprocessors)
   {
     callback(data);
+    data.setControlFlag(HttpData::Postprocessed);
   }
 }
 

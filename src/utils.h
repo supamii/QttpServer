@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <iostream>
 #include <sstream>
+#include <typeinfo>
 
 #ifdef NO_QTTP_LOGGING
   #define LOG_DATETIME
@@ -31,6 +32,25 @@
     #define LOG_DATETIME QDateTime::currentDateTime().toString("dd/MM/yyyy hh:mm:ss:sss")
   #endif
 
+  #ifdef NO_LOG_DATETIME
+    #define LOG_DATETIME QString()
+  #endif
+
+  // A bit nasty and expensive string creation - strictly for debugging so
+  // in release mode the build should define NO_LOG_FILE or NO_LOG_FUNCTION
+  #ifndef LOG_FILE
+    // TODO This doesn't check cygwin
+    #ifdef Q_OS_WIN
+      #define LOG_FILE QString(__FILE__).mid(QString(__FILE__).lastIndexOf('\\') + 1).append(":")
+    #else
+      #define LOG_FILE QString(__FILE__).mid(QString(__FILE__).lastIndexOf('/') + 1).append(":")
+    #endif
+  #endif
+
+  #ifdef NO_LOG_FILE
+    #define LOG_FILE QString()
+  #endif
+
   #ifndef LOG_FUNCTION
     // If the function and line numbers are too noisy then define
     // NO_LOG_FUNCTION to remove it from print statements
@@ -39,12 +59,12 @@
     #else
       // Sample below confuses QtCreator syntax editor:
       // QString(__FUNCTION__":%1").arg(__LINE__)
-      #define LOG_FUNCTION(LEVEL) LEVEL << QString(__FUNCTION__).append(":").append(std::to_string(__LINE__).c_str())
+      #define LOG_FUNCTION(LEVEL) LEVEL << LOG_FILE.append(__FUNCTION__).append(":").append(std::to_string(__LINE__).c_str())
     #endif
   #endif
 
   #ifndef LOG_TRACE
-    #define LOG_TRACE qttp::LogTrace logTraceObject(__FUNCTION__, __LINE__)
+    #define LOG_TRACE qttp::LogTrace logTraceObject(LOG_FILE.append(__FUNCTION__), __LINE__)
   #endif
 
   #ifndef LOG_DBG
@@ -78,6 +98,9 @@
 
 namespace qttp
 {
+
+// Forward declaration
+class HttpServer;
 
 /**
  * @brief This takes from ideas in ACE C++ to print on construction and
@@ -130,18 +153,18 @@ class Utils
 
 class Stats
 {
+    friend class HttpServer;
+
   public:
-    static Stats* getInstance();
+    Stats();
+    ~Stats();
     void increment(const QString& key);
     void setValue(const QString& key, const QVariant& value);
 
   private:
-    Stats();
-    ~Stats();
-    static Stats* m_Instance;
     QHash<QString, QVariant> m_Statistics;
-
 };
+
 } // End namespace qttp
 
 #endif // QTTPUTILS_H

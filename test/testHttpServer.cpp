@@ -5,7 +5,7 @@
 #include <thread>
 #include <QtTest/QtTest>
 
-#include "httpserver.h"
+#include <httpserver.h>
 #include "sampleAction.h"
 
 using namespace std;
@@ -75,7 +75,7 @@ void TestHttpServer::initTestCase()
     QJsonObject& json = data.getJson();
     json["response"] = "Test C++ FTW";
     // NOTE: This terminates early so we should not expect any post-processing.
-    data.setControlFlag(false);
+    data.setTerminated();
   });
   QVERIFY(result == true);
 

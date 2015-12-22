@@ -1,14 +1,13 @@
 # QttpServer
 
-### Features
-
-* Libuv integrated into Qt
-* URL routing
-* Pre & Post processing hooks and chaining ("middleware" for NodeJS)
-* Submodules ready to support MongoDb, Redis
-
-
 <b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/node.native).  Intended as an alternative to [QHttpServer](https://github.com/nikhilm/qhttpserver), this is ideal for those who want the benefits of libuv with basic Qt libraries.
+
+## Features
+
+* Libuv integrated with Qt
+* URL routing
+* Pre & Post processing hooks and chaining
+* Submodules ready to support MongoDb, Redis
 
 ## Example 1: 
 Using a raw std::function based callback
@@ -283,4 +282,7 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 15. Server diagnostics UI
 16. Authentication
 17. ~~Support ids and nouns within url routes~~
+18. Introduce modules to load shared libs for pre, post, and action processing
+19. File logging and support for remote logging (splunk?)
+20. Add syslog support
 

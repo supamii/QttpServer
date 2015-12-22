@@ -12,6 +12,8 @@ namespace qttp
 class HttpServer;
 
 /**
+ * @todo Add a friend stream operator for pretty-printing
+ *
  * @brief
  */
 class HttpData
@@ -29,6 +31,23 @@ class HttpData
     ~HttpData();
 
   public:
+
+    typedef enum eControl
+    {
+      // Provided for Processors to abort/terminate processing.
+      Terminated = 0x0001,
+      // Set internally to indicate that the response was sent.
+      Finished = 0x0002,
+      // Set internally to indicate that preprocessors operated on this.
+      Preprocessed = 0x0004,
+      // Set internally to indicate that postprocessors operated on this.
+      Postprocessed = 0x0008,
+      // Set internally to indicate this was operated on by an Action.
+      ActionProcessed = 0x0010,
+      // Default value.
+      None = 0x0000
+
+    } eControl;
 
     /**
      * @brief Beware that accessing this after invoking finishResponse() will
@@ -76,6 +95,14 @@ class HttpData
     bool finishResponse();
     bool finishResponse(const QJsonObject& json);
 
+    quint32 getControlFlag() const;
+
+    bool shouldContinue() const;
+
+    void setTerminated();
+
+    bool isTerminated() const;
+
     /**
      * @return Boolean indicating if finishResponse() has been called.
      *
@@ -84,28 +111,36 @@ class HttpData
      */
     bool isFinished() const;
 
-    /// @brief Sets a flag to indicate if the action should continue processing.
-    void setControlFlag(bool shouldContinue);
+    // Not sure how useful these are yet - YAGNI?  Ya ain't gunna need it.
+    // bool isPreprocessed() const;
+    // bool isPostprocessed() const;
+    // bool isActionProcessed() const;
 
-    bool getControlFlag() const;
+    /**
+     * @return If this was processed by any processor or action.  Intended to
+     * track if this data object was operated on already.
+     */
+    bool isProcessed() const;
 
   private:
+
+    /**
+     * @brief Sets a flag to indicate if the action should continue processing
+     * or simply marks this data as having been processed e.g. preprocess was
+     * performed already.
+     */
+    void setControlFlag(eControl flag);
 
     /**
      * @brief This will swap data - beware
      */
     void setQuery(QUrlQuery&);
 
-
     native::http::request* m_Request;
     native::http::response* m_Response;
     QUrlQuery m_Query;
     QJsonObject m_Json;
-    /// TODO Consolidate with control flag.
-    bool m_IsFinished;
-
-    /// TODO Create enum flags.
-    bool m_ControlFlag;
+    quint32 m_ControlFlag;
 };
 
 }

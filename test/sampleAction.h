@@ -3,7 +3,8 @@
 
 #include <QtCore>
 
-#include "action.h"
+#include <action.h>
+#include <utils.h>
 
 namespace qttp
 {
@@ -13,6 +14,7 @@ class SampleAction: public Action
   public:
     void onAction(HttpData& data)
     {
+      LOG_TRACE;
       QJsonObject& json = data.getJson();
       json["response"] = "Sample C++ FTW";
     }
@@ -33,11 +35,13 @@ class SampleProcessor: public Processor
 
     void preprocess(HttpData& data)
     {
+      LOG_TRACE;
       data.getJson()["preprocess"] = true;
     }
 
     void postprocess(HttpData& data)
     {
+      LOG_TRACE;
       data.getJson()["postprocess"] = true;
     }
 };

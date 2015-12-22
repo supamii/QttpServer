@@ -46,23 +46,12 @@ QJsonObject Utils::readJson(const QString& path)
   return doc.object();
 }
 
-Stats* Stats::m_Instance = nullptr;
-
 Stats::Stats()
 {
 }
 
 Stats::~Stats()
 {
-}
-
-Stats* Stats::getInstance()
-{
-  if(m_Instance == nullptr)
-  {
-    m_Instance = new Stats();
-  }
-  return m_Instance;
 }
 
 void Stats::increment(const QString& key)

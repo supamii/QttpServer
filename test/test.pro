@@ -11,6 +11,9 @@ SOURCES += \
 
 DESTDIR = $$PWD
 
+# Skip timestamps since it adds clutter to unit test logs.
+DEFINES += NO_LOG_DATETIME
+
 macx {
     # Since things are buried in the app folder, we'll copy configs there.
     MediaFiles.files = \
