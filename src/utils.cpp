@@ -6,12 +6,12 @@ LogTrace::LogTrace(QString f, quint32 l)
 {
   function.swap(f);
   line = l;
-  qDebug().noquote().nospace() << LOG_DATETIME << " ENTER " << function << ":" << line;
+  qDebug().noquote().nospace() << LOG_DATETIME.append("ENTER ") << function << ":" << line;
 }
 
 LogTrace::~LogTrace()
 {
-  qDebug().noquote().nospace() << LOG_DATETIME << " EXIT  " << function << ":" << line;
+  qDebug().noquote().nospace() << LOG_DATETIME.append("EXIT  ") << function << ":" << line;
 }
 
 Utils::Utils()

@@ -1,6 +1,6 @@
 # QttpServer
 
-<b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/node.native).  Intended as an alternative to [QHttpServer](https://github.com/nikhilm/qhttpserver), this is ideal for those who want the benefits of libuv with basic Qt libraries.
+<b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/node.native).  Intended as an alternative to [QHttpServer](https://github.com/nikhilm/qhttpserver), this is ideal for those who want the benefits of libuv with Qt.
 
 ## Features
 
@@ -285,4 +285,4 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 18. Introduce modules to load shared libs for pre, post, and action processing
 19. File logging and support for remote logging (splunk?)
 20. Add syslog support
-
+21. Include diagram of framework

@@ -131,7 +131,7 @@ int HttpServer::start()
     return 1;
   }
 
-  LOG_DEBUG("Server running at" << ip << port);
+  LOG_INFO("Server running at" << ip << port);
   return native::run();
 }
 
