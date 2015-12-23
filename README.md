@@ -286,3 +286,4 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 19. File logging and support for remote logging (splunk?)
 20. Add syslog support
 21. Include diagram of framework
+22. Command line arguments for common config values

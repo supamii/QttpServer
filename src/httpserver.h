@@ -96,6 +96,10 @@ class HttpServer : public QObject
      */
     void addPostprocessor(std::function<void(HttpData& data)> callback);
 
+    Stats& getStats();
+
+    LoggingUtils& getLoggingUtils();
+
   private:
 
     void initialize();
@@ -177,6 +181,7 @@ class HttpServer : public QObject
     QJsonObject m_GlobalConfig;
     QJsonObject m_RoutesConfig;
     Stats* m_Stats; //! To work around const captures this is a pointer.
+    LoggingUtils m_LoggingUtils;
 };
 
 } // End namespace qttp

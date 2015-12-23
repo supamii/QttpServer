@@ -28,7 +28,7 @@
 
   // TODO If we're running as a unit test - ignore time stamps!?
   #ifndef LOG_DATETIME
-    #define LOG_DATETIME QDateTime::currentDateTime().toString("dd/MM/yyyy hh:mm:ss:sss").append(' ')
+    #define LOG_DATETIME QDateTime::currentDateTime().toString("yyyy/MM/dd-hh:mm:ss:zzz").append(' ')
   #endif
 
   #ifdef NO_LOG_DATETIME
@@ -164,6 +164,45 @@ class Stats
 
   private:
     QHash<QString, QVariant> m_Statistics;
+};
+
+class LoggingUtils : public QObject
+{
+    Q_OBJECT
+
+  public:
+    LoggingUtils();
+    ~LoggingUtils();
+
+    static void fileLogger(QtMsgType type, const QMessageLogContext& context, const QString& msg);
+
+    bool initializeFile(const QString& filename = QString(), quint32 flushDuration = 300);
+
+    bool initializeSysLog();
+
+    QMutex& getMutex()
+    {
+      return m_Mutex;
+    }
+
+    const QFile& getFile() const
+    {
+      return m_File;
+    }
+
+    QtMessageHandler getOriginalMessageHandler()
+    {
+      return m_OriginalMessageHandler;
+    }
+
+    void timerEvent(QTimerEvent* event);
+
+  private:
+    QMutex m_Mutex;
+    QFile m_File;
+    QTextStream m_Stream;
+    QtMessageHandler m_OriginalMessageHandler;
+    qint32 m_TimerId;
 };
 
 } // End namespace qttp

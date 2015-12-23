@@ -32,7 +32,8 @@ HttpServer::HttpServer() :
     m_Postprocessors(),
     m_GlobalConfig(),
     m_RoutesConfig(),
-    m_Stats(new Stats())
+    m_Stats(new Stats()),
+    m_LoggingUtils()
 {
   this->installEventFilter(this);
   this->initialize();
@@ -489,3 +490,15 @@ void HttpServer::addPostprocessor(std::function<void(HttpData& data)> callback)
 {
   m_Postprocessors.push_back(callback);
 }
+
+Stats& HttpServer::getStats()
+{
+  Q_ASSERT(m_Stats);
+  return *m_Stats;
+}
+
+LoggingUtils& HttpServer::getLoggingUtils()
+{
+  return m_LoggingUtils;
+}
+
