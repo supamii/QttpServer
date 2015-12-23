@@ -70,39 +70,50 @@ LoggingUtils::LoggingUtils() :
     m_Mutex(),
     m_File(QDir::temp().absoluteFilePath(QString("qttp-").append(QDateTime::currentDateTime().toString("yyyy-MM-dd-hhmmss")).append(".log"))),
     m_Stream(&m_File),
-    m_OriginalMessageHandler(),
+    m_OriginalMessageHandler(nullptr),
     m_TimerId(-1)
 {
 }
 
 LoggingUtils::~LoggingUtils()
 {
+  if(m_TimerId > -1) this->killTimer(m_TimerId);
+  if(m_File.isOpen()) m_File.close();
 }
 
-bool LoggingUtils::initializeFile(const QString& filename, quint32 flushDuration)
+bool LoggingUtils::initializeFile(const QString& filename, quint32 writeFrequency)
 {
   if(!filename.isEmpty())
   {
     m_File.setFileName(filename);
   }
 
+  if(m_File.isOpen())
+  {
+    LOG_WARN("Log file is already open");
+    return false;
+  }
+
   if(m_File.open(QIODevice::WriteOnly | QIODevice::Truncate))
   {
     LOG_DEBUG("Using log file" << m_File.fileName());
-    m_OriginalMessageHandler = qInstallMessageHandler(LoggingUtils::fileLogger);
+
+    if(m_OriginalMessageHandler == nullptr)
+    {
+      m_OriginalMessageHandler = qInstallMessageHandler(LoggingUtils::fileLogger);
+    }
 
     // If our flush duration is 0 we intend to always flush on every write so
     // we'll check against m_TimerId's default value of -1.
-    if(flushDuration > 0)
+    if(writeFrequency > 0)
     {
-      LOG_DEBUG("Flushing to log file every " << flushDuration << "ms");
-      m_TimerId = this->startTimer(flushDuration, Qt::CoarseTimer);
+      LOG_DEBUG("Flushing to log file every" << writeFrequency << "ms");
+      m_TimerId = this->startTimer(writeFrequency, Qt::CoarseTimer);
     }
     else
     {
-      LOG_DEBUG("Flush duration is not set, will flush on every single write");
+      LOG_DEBUG("Flush frequency is not set, will flush on every single write");
     }
-
     return true;
   }
 
@@ -131,7 +142,14 @@ void LoggingUtils::timerEvent(QTimerEvent* event)
 void LoggingUtils::fileLogger(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
   LoggingUtils& log = HttpServer::getInstance()->getLoggingUtils();
+
+  if(log.m_OriginalMessageHandler == nullptr)
+  {
+    return;
+  }
+
   log.m_OriginalMessageHandler(type, context, msg);
+
   QMutexLocker scopedLock(&(log.m_Mutex));
 
   // If the timer hasn't been initialized then it means we need to flush on

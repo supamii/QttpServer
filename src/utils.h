@@ -176,7 +176,7 @@ class LoggingUtils : public QObject
 
     static void fileLogger(QtMsgType type, const QMessageLogContext& context, const QString& msg);
 
-    bool initializeFile(const QString& filename = QString(), quint32 flushDuration = 300);
+    bool initializeFile(const QString& filename = QString(), quint32 writeFrequency = 300);
 
     bool initializeSysLog();
 

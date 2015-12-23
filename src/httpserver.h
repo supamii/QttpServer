@@ -100,9 +100,14 @@ class HttpServer : public QObject
 
     LoggingUtils& getLoggingUtils();
 
-  private:
+    bool isInitialized() const
+    {
+      return m_IsInitialized;
+    }
 
-    void initialize();
+    bool initialize();
+
+  private:
 
     void registerRouteFromJSON(QJsonValueRef& obj, const QString& method);
 
@@ -182,6 +187,7 @@ class HttpServer : public QObject
     QJsonObject m_RoutesConfig;
     Stats* m_Stats; //! To work around const captures this is a pointer.
     LoggingUtils m_LoggingUtils;
+    bool m_IsInitialized;
 };
 
 } // End namespace qttp

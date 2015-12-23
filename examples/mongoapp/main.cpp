@@ -18,8 +18,10 @@ int main(int argc, char** argv)
 
   QCoreApplication app(argc, argv);
 
-  // Always initialize in the main thread.
   HttpServer& httpSvr = *(HttpServer::getInstance());
+
+  // Always initialize in the main thread.
+  httpSvr.initialize();
 
   auto result = -1;
 

@@ -21,11 +21,10 @@ int main(int argc, char** argv)
 
     QCoreApplication app(argc, argv);
 
-    // Always initialize in the main thread.
     HttpServer* svr = HttpServer::getInstance();
 
-    // Activate logging to file.
-    svr->getLoggingUtils().initializeFile();
+    // Always initialize in the main thread.
+    svr->initialize();
 
     svr->registerRoute("get", "helloworld", "/helloworld");
 

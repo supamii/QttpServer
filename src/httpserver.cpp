@@ -33,10 +33,10 @@ HttpServer::HttpServer() :
     m_GlobalConfig(),
     m_RoutesConfig(),
     m_Stats(new Stats()),
-    m_LoggingUtils()
+    m_LoggingUtils(),
+    m_IsInitialized(false)
 {
   this->installEventFilter(this);
-  this->initialize();
 }
 
 HttpServer::~HttpServer()
@@ -47,8 +47,14 @@ HttpServer::~HttpServer()
   }
 }
 
-void HttpServer::initialize()
+bool HttpServer::initialize()
 {
+  if(m_IsInitialized)
+  {
+    LOG_DEBUG("Already initialized");
+    return false;
+  }
+
   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
   if(env.contains("QTTP_HOME"))
   {
@@ -67,6 +73,29 @@ void HttpServer::initialize()
   }
 
   m_GlobalConfig = Utils::readJson(QDir("config/global.json").absolutePath());
+
+  QJsonValue loggingObj = m_GlobalConfig["logfile"];
+  if(loggingObj.isObject())
+  {
+    QJsonObject logging = loggingObj.toObject();
+    if(logging["isEnabled"].isBool() && logging["isEnabled"].toBool())
+    {
+      QString filename;
+      if(logging["filename"].isString())
+      {
+        filename = logging["filename"].toString();
+      }
+      if(logging["writeFrequency"].isDouble())
+      {
+        m_LoggingUtils.initializeFile(filename, logging["writeFrequency"].toInt());
+      }
+      else
+      {
+        m_LoggingUtils.initializeFile(filename);
+      }
+    }
+  }
+
   m_RoutesConfig = Utils::readJson(QDir("config/routes.json").absolutePath());
 
   QJsonValueRef get = m_RoutesConfig["get"];
@@ -80,6 +109,10 @@ void HttpServer::initialize()
 
   QJsonValueRef del = m_RoutesConfig["del"];
   registerRouteFromJSON(del, "del");
+
+  m_IsInitialized = true;
+
+  return true;
 }
 
 void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const QString& method)
