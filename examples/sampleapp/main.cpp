@@ -21,8 +21,17 @@ int main(int argc, char** argv)
 
     QCoreApplication app(argc, argv);
 
+    HttpServer* svr = HttpServer::getInstance();
+
     // Always initialize in the main thread.
-    HttpServer::getInstance();
+    svr->initialize(&app);
+
+    svr->registerRoute("get", "helloworld", "/helloworld");
+
+    svr->addAction("helloworld", [](HttpData& data) {
+      QJsonObject& json = data.getJson();
+      json["response"] = "Hello World!";
+    });
 
     thread webSvr(HttpServer::start);
     webSvr.detach();

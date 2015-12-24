@@ -18,8 +18,10 @@ int main(int argc, char** argv)
 
   QCoreApplication app(argc, argv);
 
+  HttpServer& httpSvr = *(HttpServer::getInstance());
+
   // Always initialize in the main thread.
-  HttpServer* httpSvr = HttpServer::getInstance();
+  httpSvr.initialize();
 
   auto result = -1;
 
@@ -34,9 +36,9 @@ int main(int argc, char** argv)
     // to the http method "post"
     // when the request url targets "http://localhost:8080/person"
 
-    httpSvr->registerRoute("post", "addPerson", "/person");
+    httpSvr.registerRoute("post", "addPerson", "/person");
 
-    httpSvr->addAction("addPerson", [&](HttpData& data)
+    httpSvr.addAction("addPerson", [&](HttpData& data)
     {
       // Took some of this from the tutorials online.
       BSONObj p = BSON( "name" << "Joe" << "age" << 33 );
@@ -58,20 +60,23 @@ int main(int argc, char** argv)
     // to the http method "get"
     // when the request url targets "http://localhost:8080/person"
 
-    httpSvr->registerRoute("get", "getPerson", "/person");
+    // Get all persons
+    httpSvr.registerRoute("get", "getPerson", "/person");
 
-    httpSvr->addAction("getPerson", [&](HttpData& data)
+    // Get a person by name e.g. http://localhost:8080/p/Joe
+    httpSvr.registerRoute("get", "getPerson", "/p/:name");
+
+    httpSvr.addAction("getPerson", [&](HttpData& data)
     {
       QJsonObject& json = data.getJson();
 
       BSONObj bson;
 
       // Supports querying a person by name.
-      QHash<QString, QString>& params = data.getParameters();
-      auto name = params.find("name");
-      if(name != params.end())
+      QUrlQuery& params = data.getQuery();
+      if(params.hasQueryItem("name"))
       {
-        bson = BSON("name" << name.value().toStdString());
+        bson = BSON("name" << params.queryItemValue("name").toStdString());
       }
 
       auto_ptr<DBClientCursor> cursor = c.query("tutorial.persons", bson);

@@ -20,8 +20,12 @@ class HttpEvent : public QEvent
     std::pair<native::http::request*, native::http::response*>& getData();
     std::pair<native::http::request*, native::http::response*> getData() const;
 
+    void setCmd(const QString& cmd);
+    const QString& getCmd() const;
+
   private:
     std::pair<native::http::request*, native::http::response*> m_Data;
+    QString m_Cmd;
 };
 
 } // End namespace qttp

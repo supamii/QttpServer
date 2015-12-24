@@ -1,4 +1,5 @@
 #include "httpdata.h"
+#include "utils.h"
 
 using namespace std;
 using namespace native::http;
@@ -7,10 +8,9 @@ using namespace qttp;
 HttpData::HttpData(request* req, response* resp):
     m_Request(req),
     m_Response(resp),
-    m_Parameters(),
+    m_Query(),
     m_Json(),
-    m_IsFinished(false),
-    m_ControlFlag(true)
+    m_ControlFlag(None)
 {
   Q_ASSERT(m_Request != nullptr);
   Q_ASSERT(m_Response != nullptr);
@@ -22,29 +22,29 @@ HttpData::~HttpData()
 
 request& HttpData::getRequest() const
 {
-  Q_ASSERT(!m_IsFinished && m_Request != nullptr);
+  Q_ASSERT(!isFinished() && m_Request != nullptr);
   return *m_Request;
 }
 
 response& HttpData::getResponse() const
 {
-  Q_ASSERT(!m_IsFinished && m_Response != nullptr);
+  Q_ASSERT(!isFinished() && m_Response != nullptr);
   return *m_Response;
 }
 
-QHash<QString, QString>& HttpData::getParameters()
+QUrlQuery& HttpData::getQuery()
 {
-  return m_Parameters;
+  return m_Query;
 }
 
-const QHash<QString, QString>& HttpData::getParameters() const
+const QUrlQuery& HttpData::getQuery() const
 {
-  return m_Parameters;
+  return m_Query;
 }
 
-void HttpData::setParameters(QHash<QString, QString>& params)
+void HttpData::setQuery(QUrlQuery& params)
 {
-  m_Parameters.swap(params);
+  m_Query.swap(params);
 }
 
 QJsonObject& HttpData::getJson()
@@ -54,7 +54,7 @@ QJsonObject& HttpData::getJson()
 
 bool HttpData::finishResponse(const std::string& body)
 {
-  m_IsFinished = true;
+  setControlFlag(Finished);
 
   // TODO: Handle error response codes and possibly infer other details.
   m_Response->write(body);
@@ -63,14 +63,15 @@ bool HttpData::finishResponse(const std::string& body)
 
 bool HttpData::finishResponse()
 {
+  LOG_TRACE;
   return finishResponse(m_Json);
 }
 
 bool HttpData::finishResponse(const QJsonObject& json)
 {
-  m_IsFinished = true;
+  setControlFlag(Finished);
 
-  // TODO: We'll want to dynamically update the status code, 400, 500?
+  // TODO: Errors detected should set the status code, 400, 500, etc
 
   m_Response->set_header("Content-Type", "application/json");
 
@@ -80,17 +81,37 @@ bool HttpData::finishResponse(const QJsonObject& json)
   return m_Response->close();
 }
 
-bool HttpData::isFinished() const
-{
-  return m_IsFinished;
-}
-
-void HttpData::setControlFlag(bool shouldContinue)
-{
-  m_ControlFlag = shouldContinue;
-}
-
-bool HttpData::getControlFlag() const
+quint32 HttpData::getControlFlag() const
 {
   return m_ControlFlag;
+}
+
+void HttpData::setTerminated()
+{
+  setControlFlag(Terminated);
+}
+
+void HttpData::setControlFlag(eControl shouldContinue)
+{
+  m_ControlFlag |= shouldContinue;
+}
+
+bool HttpData::isFinished() const
+{
+  return m_ControlFlag & Finished;
+}
+
+bool HttpData::isTerminated() const
+{
+  return m_ControlFlag & Terminated;
+}
+
+bool HttpData::shouldContinue() const
+{
+  return !(m_ControlFlag & (Finished | Terminated));
+}
+
+bool HttpData::isProcessed() const
+{
+  return m_ControlFlag & (Preprocessed | Postprocessed | ActionProcessed);
 }

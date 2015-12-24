@@ -40,3 +40,13 @@ pair<request*, response*> HttpEvent::getData() const
 {
   return this->m_Data;
 }
+
+void HttpEvent::setCmd(const QString& cmd)
+{
+  m_Cmd = cmd;
+}
+
+const QString& HttpEvent::getCmd() const
+{
+  return m_Cmd;
+}

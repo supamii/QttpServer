@@ -5,7 +5,7 @@
 #include <thread>
 #include <QtTest/QtTest>
 
-#include "httpserver.h"
+#include <httpserver.h>
 #include "sampleAction.h"
 
 using namespace std;
@@ -34,29 +34,30 @@ class TestHttpServer: public QObject
 
 void TestHttpServer::initTestCase()
 {
-  HttpServer* httpSvr = HttpServer::getInstance();
+  HttpServer& httpSvr = *(HttpServer::getInstance());
+  httpSvr.initialize();
 
-  QVERIFY(httpSvr != nullptr);
+  QVERIFY(HttpServer::getInstance() != nullptr);
 
-  bool result = httpSvr->addAction("", [](HttpData& data) {
+  bool result = httpSvr.addAction("", [](HttpData& data) {
       QJsonObject& json = data.getJson();
       json["response"] = "C++ FTW";
   });
 
-  httpSvr->addProcessor<SampleProcessor>();
+  httpSvr.addProcessor<SampleProcessor>();
 
   // Uses the action interface.
-  result = httpSvr->addAction<SampleAction>();
+  result = httpSvr.addAction<SampleAction>();
   QVERIFY(result == true);
 
-  result = httpSvr->registerRoute("get", "sample", "/sample");
+  result = httpSvr.registerRoute("get", "sample", "/sample");
   QVERIFY(result == true);
 
-  result = httpSvr->registerRoute("get", "sample", "/sample2");
+  result = httpSvr.registerRoute("get", "sample", "/sample2");
   QVERIFY(result == true);
 
   // Uses a raw std::function based callback.
-  result = httpSvr->addAction("test", [](HttpData& data) {
+  result = httpSvr.addAction("test", [](HttpData& data) {
     QJsonObject& json = data.getJson();
     json["response"] = "Test C++ FTW";
 
@@ -65,21 +66,21 @@ void TestHttpServer::initTestCase()
   });
   QVERIFY(result == true);
 
-  result = httpSvr->registerRoute("get", "test", "/test");
+  result = httpSvr.registerRoute("get", "test", "/test");
   QVERIFY(result == true);
 
-  result = httpSvr->registerRoute("get", "test", "/test2");
+  result = httpSvr.registerRoute("get", "test", "/test2");
   QVERIFY(result == true);
 
-  result = httpSvr->addAction("terminates", [](HttpData& data) {
+  result = httpSvr.addAction("terminates", [](HttpData& data) {
     QJsonObject& json = data.getJson();
     json["response"] = "Test C++ FTW";
     // NOTE: This terminates early so we should not expect any post-processing.
-    data.setControlFlag(false);
+    data.setTerminated();
   });
   QVERIFY(result == true);
 
-  result = httpSvr->registerRoute("get", "terminates", "/terminates");
+  result = httpSvr.registerRoute("get", "terminates", "/terminates");
   QVERIFY(result == true);
 
   std::thread webSvr(HttpServer::start);

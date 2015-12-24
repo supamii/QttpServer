@@ -96,9 +96,20 @@ class HttpServer : public QObject
      */
     void addPostprocessor(std::function<void(HttpData& data)> callback);
 
-  private:
+    Stats& getStats();
 
-    void initialize();
+    LoggingUtils& getLoggingUtils();
+
+    bool isInitialized() const
+    {
+      return m_IsInitialized;
+    }
+
+    bool initialize(QCoreApplication* app = nullptr);
+
+    QCommandLineParser& getCommandLineParser();
+
+  private:
 
     void registerRouteFromJSON(QJsonValueRef& obj, const QString& method);
 
@@ -128,9 +139,9 @@ class HttpServer : public QObject
      * @param responseParams The list of parameters parsed from "path"
      * @return If there is a match
      */
-    static bool matchUrl(const QStringList& pathParts, const QString& path, QHash<QString, QString>& responseParams);
+    static bool matchUrl(const QStringList& pathParts, const QString& path, QUrlQuery& responseParams);
 
-    static std::unique_ptr<HttpServer> m_Instance;
+    static HttpServer* m_Instance;
 
     /**
      * @todo Copy constructor and the move constructor!
@@ -160,6 +171,8 @@ class HttpServer : public QObject
 
     /// @brief Private constructor per singleton design.
     HttpServer();
+    // TODO make the copy-constructor private as well.
+
     /// @brief This callback allows the caller to intercept all responses.
     std::function<void(native::http::request*, native::http::response*)> m_EventCallback;
     QHash<QString, std::shared_ptr<Action>> m_Actions;
@@ -174,6 +187,10 @@ class HttpServer : public QObject
     std::vector<std::function<void(HttpData& data)>> m_Postprocessors;
     QJsonObject m_GlobalConfig;
     QJsonObject m_RoutesConfig;
+    Stats* m_Stats; //! To work around const captures this is a pointer.
+    LoggingUtils m_LoggingUtils;
+    bool m_IsInitialized;
+    QCommandLineParser m_CmdLineParser;
 };
 
 } // End namespace qttp

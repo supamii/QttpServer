@@ -1,4 +1,10 @@
 {
     "bindIp": "0.0.0.0",
-    "bindPort": 8080
+    "bindPort": 8080,
+    "logfile":
+    {
+        "isEnabled": true,
+        "filename": null,
+        "writeFrequency": 300
+    }
 }
