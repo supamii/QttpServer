@@ -283,7 +283,9 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 16. Authentication
 17. ~~Support ids and nouns within url routes~~
 18. Introduce modules to load shared libs for pre, post, and action processing
-19. File logging and support for remote logging (splunk?)
-20. Add syslog support
-21. Include diagram of framework
-22. Command line arguments for common config values
+19. ~File logging~
+20. Support for remote logging (splunk?)
+21. Add syslog support
+22. Include diagram of framework
+23. ~~Command line arguments for common config values~~
+24. Prevent copy constructor access where it makes sense
