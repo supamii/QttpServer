@@ -24,7 +24,7 @@ int main(int argc, char** argv)
     HttpServer* svr = HttpServer::getInstance();
 
     // Always initialize in the main thread.
-    svr->initialize();
+    svr->initialize(&app);
 
     svr->registerRoute("get", "helloworld", "/helloworld");
 

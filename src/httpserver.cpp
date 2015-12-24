@@ -34,7 +34,8 @@ HttpServer::HttpServer() :
     m_RoutesConfig(),
     m_Stats(new Stats()),
     m_LoggingUtils(),
-    m_IsInitialized(false)
+    m_IsInitialized(false),
+    m_CmdLineParser()
 {
   this->installEventFilter(this);
 }
@@ -47,7 +48,7 @@ HttpServer::~HttpServer()
   }
 }
 
-bool HttpServer::initialize()
+bool HttpServer::initialize(QCoreApplication* app)
 {
   if(m_IsInitialized)
   {
@@ -72,7 +73,7 @@ bool HttpServer::initialize()
     #endif
   }
 
-  m_GlobalConfig = Utils::readJson(QDir("config/global.json").absolutePath());
+  m_GlobalConfig = Utils::readJson(QDir("./config/global.json").absolutePath());
 
   QJsonValue loggingObj = m_GlobalConfig["logfile"];
   if(loggingObj.isObject())
@@ -96,7 +97,7 @@ bool HttpServer::initialize()
     }
   }
 
-  m_RoutesConfig = Utils::readJson(QDir("config/routes.json").absolutePath());
+  m_RoutesConfig = Utils::readJson(QDir("./config/routes.json").absolutePath());
 
   QJsonValueRef get = m_RoutesConfig["get"];
   registerRouteFromJSON(get, "get");
@@ -109,6 +110,38 @@ bool HttpServer::initialize()
 
   QJsonValueRef del = m_RoutesConfig["del"];
   registerRouteFromJSON(del, "del");
+
+  if(app != nullptr)
+  {
+    m_CmdLineParser.addOptions({
+        {{"i", "ip"},
+        QCoreApplication::translate("main", "ip of the target interface"),
+        QCoreApplication::translate("main", "ip")},
+        {{"p", "port"},
+        QCoreApplication::translate("main", "port to listen on"),
+        QCoreApplication::translate("main", "port")} });
+
+    m_CmdLineParser.addHelpOption();
+    m_CmdLineParser.process(*app);
+
+    QJsonValue i = m_CmdLineParser.value("p");
+    if(i.isString())
+    {
+      QString ip = m_CmdLineParser.value("i");
+      m_GlobalConfig["bindIp"] = ip;
+
+      LOG_DEBUG("Cmd line ip" << ip);
+    }
+
+    QJsonValue p = m_CmdLineParser.value("p");
+    if(p.isDouble() || p.isString())
+    {
+      qint32 port = m_CmdLineParser.value("p").toInt();
+      m_GlobalConfig["bindPort"] = port;
+
+      LOG_DEBUG("Cmd line port" << port);
+    }
+  }
 
   m_IsInitialized = true;
 
@@ -535,3 +568,7 @@ LoggingUtils& HttpServer::getLoggingUtils()
   return m_LoggingUtils;
 }
 
+QCommandLineParser& HttpServer::getCommandLineParser()
+{
+  return m_CmdLineParser;
+}

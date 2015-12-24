@@ -105,7 +105,9 @@ class HttpServer : public QObject
       return m_IsInitialized;
     }
 
-    bool initialize();
+    bool initialize(QCoreApplication* app = nullptr);
+
+    QCommandLineParser& getCommandLineParser();
 
   private:
 
@@ -188,6 +190,7 @@ class HttpServer : public QObject
     Stats* m_Stats; //! To work around const captures this is a pointer.
     LoggingUtils m_LoggingUtils;
     bool m_IsInitialized;
+    QCommandLineParser m_CmdLineParser;
 };
 
 } // End namespace qttp
