@@ -392,7 +392,7 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
       {
         QJsonObject obj;
         obj["uid"] = data.getUid().toString();
-        obj["timestamp"] = event->getTimestamp().toString();
+        obj["timestamp"] = data.getTimestamp().toString("yyyy/MM/dd hh:mm:ss:zzz");
         obj["timeElapsed"] = data.getTime().elapsed();
 
         obj["timeElapsedMs"] = (qreal)(uv_hrtime() - req->get_timestamp()) /
