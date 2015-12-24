@@ -29,6 +29,7 @@ int main(int argc, char** argv)
 
   // Always initialize in the main thread.
   HttpServer* httpSvr = HttpServer::getInstance();
+  httpSvr->initialize();
 
   // Associate this call-back with the action named, "test"
   httpSvr->addAction("test", [](HttpData& data) {
@@ -266,26 +267,27 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 # TODOs
 
 1. Address subtle techdebt surrounding references with native::http components
-2. Create default preprocessors for meta data for each incomming request guid generation
+2. ~~Create default preprocessors for meta data for each incomming request guid generation~~
 3. ~~Config parsing is still incomplete - action-routes should be configurable instead of being set in code~~
 4. Determine versioning support in the path e.g. /v1/ /v2/
-5. ~Clean up configuration deployment on mac (make install files to the correct folder)~
+5. ~~Clean up configuration deployment on mac (make install files to the correct folder)~~
 6. ~~Setup utilities for MongoDB and Redis access~~
 7. ~~Add pre and post processor callbacks as an alternative to the interface class~~
-8. Make available a metrics pre/post processor
-9. Design an error response mechanism
-10. Record PID in a file to kill the most recently launched process
+8. ~~Make available a metrics pre/post processor~~
+9. ~~Design an error response mechanism~~ (rely on exceptions)
+10. ~~Record PID in a file to kill the most recently launched process~~ (printed in logs instead)
 11. Create an equivalenet build system with QMake to support more platforms (MinGW)
 12. Re-work node.native to improve testability by allowing tests to inject requests into qt event loop - allow factory to create instances and prevent shallow copying
 13. Figure out if we can introduce Qt's daemon/services legacy add-on
-14. Distributed scheduling (tasks)
+14. Distributed scheduling with redis or mongo
 15. Server diagnostics UI
-16. Authentication
+16. Authentication basics - api token
 17. ~~Support ids and nouns within url routes~~
 18. Introduce modules to load shared libs for pre, post, and action processing
-19. ~File logging~
-20. Support for remote logging (splunk?)
+19. ~~File logging~~
+20. Support for remote logging services
 21. Add syslog support
 22. Include diagram of framework
 23. ~~Command line arguments for common config values~~
 24. Prevent copy constructor access where it makes sense
+25. Revisit common and trivial methods - add inline hint

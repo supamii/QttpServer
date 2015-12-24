@@ -35,7 +35,8 @@ HttpServer::HttpServer() :
     m_Stats(new Stats()),
     m_LoggingUtils(),
     m_IsInitialized(false),
-    m_CmdLineParser()
+    m_CmdLineParser(),
+    m_SendRequestMetadata(false)
 {
   this->installEventFilter(this);
 }
@@ -97,6 +98,8 @@ bool HttpServer::initialize(QCoreApplication* app)
     }
   }
 
+  m_SendRequestMetadata = m_GlobalConfig["sendRequestMetadata"].toBool(false);
+
   m_RoutesConfig = Utils::readJson(QDir("./config/routes.json").absolutePath());
 
   QJsonValueRef get = m_RoutesConfig["get"];
@@ -119,27 +122,33 @@ bool HttpServer::initialize(QCoreApplication* app)
         QCoreApplication::translate("main", "ip")},
         {{"p", "port"},
         QCoreApplication::translate("main", "port to listen on"),
-        QCoreApplication::translate("main", "port")} });
+        QCoreApplication::translate("main", "port")},
+        {{"r", "meta"},
+        QCoreApplication::translate("main", "appends metadata to responses")}
+    });
 
     m_CmdLineParser.addHelpOption();
     m_CmdLineParser.process(*app);
 
     QJsonValue i = m_CmdLineParser.value("p");
-    if(i.isString())
+    if((i.isString() || i.isDouble()) && !i.toString().isEmpty())
     {
       QString ip = m_CmdLineParser.value("i");
       m_GlobalConfig["bindIp"] = ip;
-
       LOG_DEBUG("Cmd line ip" << ip);
     }
 
     QJsonValue p = m_CmdLineParser.value("p");
-    if(p.isDouble() || p.isString())
+    if((p.isString() || p.isDouble()) && !p.toString().isEmpty())
     {
       qint32 port = m_CmdLineParser.value("p").toInt();
       m_GlobalConfig["bindPort"] = port;
-
       LOG_DEBUG("Cmd line port" << port);
+    }
+
+    if(!m_SendRequestMetadata)
+    {
+      m_SendRequestMetadata = m_CmdLineParser.isSet("r");
     }
   }
 
@@ -174,18 +183,10 @@ void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const QString& method
 int HttpServer::start()
 {
   HttpServer& svr = *(HttpServer::getInstance());
-  QString ip = svr.m_GlobalConfig["bindIp"].isUndefined() ? "0.0.0.0" : svr.m_GlobalConfig["bindIp"].toString().trimmed();
-  if(ip.isEmpty())
-  {
-    ip = "0.0.0.0";
-    LOG_WARN("Bind ip is invalid, defaulting to" << ip);
-  }
-  auto port = svr.m_GlobalConfig["bindPort"].isUndefined() ? 8080 : svr.m_GlobalConfig["bindPort"].toInt();
-  if(port <= 0)
-  {
-    port = 8080;
-    LOG_WARN("Bind port is invalid, defaulting to" << port);
-  }
+
+  QString ip = svr.m_GlobalConfig["bindIp"].toString("0.0.0.0").trimmed();
+  auto port = svr.m_GlobalConfig["bindPort"].toInt(8080);
+
   native::http::http server;
   auto result = server.listen(ip.toStdString(), port, [](request& req, response& resp) {
     HttpEvent* event = new HttpEvent(&req, &resp);
@@ -198,54 +199,60 @@ int HttpServer::start()
     return 1;
   }
 
-  LOG_INFO("Server running at" << ip << port);
+  LOG_INFO("Server pid" << QCoreApplication::applicationPid() <<
+           "running at" << ip << port);
+
   return native::run();
 }
 
-void HttpServer::setEventCallback(function<void(request*, response*)> eventCallback)
+void HttpServer::setEventCallback(function<void(HttpEvent*)> eventCallback)
 {
   m_EventCallback = eventCallback;
 }
 
-function<void(request*, response*)> HttpServer::defaultEventCallback() const
+function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
 {
   // TODO: Can benefit performance gains by caching look up costs - don't care
   // about amortized theoretical values.
 
   // TODO: Perhaps should lock/wrap m_Routes to guarantee atomicity.
 
-  return [&](request* req, response* resp) mutable
+  return [&](HttpEvent* event) mutable
   {
-    m_Stats->increment("http:hits");
+    request* req = event->getData().first;
+    response* resp = event->getData().second;
+
+    STATS_INC("http:hits");
 
     HttpData data(req, resp);
+    data.setTimestamp(event->getTimestamp());
 
     const QHash<QString, Route>* routes = &m_GetRoutes;
     QString method = QString(req->get_method().c_str()).toUpper().trimmed();
 
     if(method == "GET")
     {
-      m_Stats->increment("http:method:get");
+      STATS_INC("http:method:get");
       routes = &m_GetRoutes;
     }
     else if(method == "POST")
     {
-      m_Stats->increment("http:method:post");
+      STATS_INC("http:method:post");
       routes = &m_PostRoutes;
     }
     else if(method == "PUT")
     {
-      m_Stats->increment("http:method:put");
+      STATS_INC("http:method:put");
       routes = &m_PutRoutes;
     }
     else if(method == "DELETE")
     {
-      m_Stats->increment("http:method:delete");
+      STATS_INC("http:method:delete");
       routes = &m_DeleteRoutes;
     }
     else
     {
-      m_Stats->increment("http:method:unknown");
+      STATS_INC("http:method:unknown");
     }
 
     QUrlQuery parameters;
@@ -259,9 +266,7 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
     {
       parameters.clear();
 
-      if(HttpServer::matchUrl(route.value().parts,
-                              urlPath,
-                              parameters))
+      if(HttpServer::matchUrl(route.value().parts, urlPath, parameters))
       {
         // Since this request is going to be processed, let's also parse the
         // query strings for easy access.
@@ -277,86 +282,134 @@ function<void(request*, response*)> HttpServer::defaultEventCallback() const
       }
     }
 
-    // Previously we had hard-routes that weren't dynamic.
-    // auto route = routes->find(urlPath);
-
-    if(route != routes->end())
+    try
     {
-      auto callback = m_ActionCallbacks.find(route.value().action);
-      if(callback != m_ActionCallbacks.end())
+      // Previously we had hard-routes that weren't dynamic.
+      // auto route = routes->find(urlPath);
+
+      if(route != routes->end())
       {
-        performPreprocessing(data);
-        if(data.shouldContinue())
-        {
-          data.setControlFlag(HttpData::ActionProcessed);
-          (callback.value())(data);
-        }
-        if(data.shouldContinue()) performPostprocessing(data);
-      }
-      else
-      {
-        auto action = m_Actions.find(route.value().action);
-        if(action != m_Actions.end() && action.value().get() != nullptr)
+        auto callback = m_ActionCallbacks.find(route.value().action);
+        if(callback != m_ActionCallbacks.end())
         {
           performPreprocessing(data);
           if(data.shouldContinue())
           {
             data.setControlFlag(HttpData::ActionProcessed);
-            (action.value())->onAction(data);
+            (callback.value())(data);
           }
-          if(data.shouldContinue()) performPostprocessing(data);
-        }
-      }
-    }
-
-    // Check the control flag bit mask to determine if it was processed above.
-    if(!data.isProcessed())
-    {
-      LOG_DEBUG("No route found for" << urlPath << ", checking default routes");
-
-      // Even if the action is not yet found, we'll give the user a chance to
-      // intercept and process it.
-      performPreprocessing(data);
-
-      if(data.shouldContinue())
-      {
-        // TODO: Describe this in the header file.
-
-        // TODO: Can also perform this check once in a while instead to reduce
-        // performance lookup costs.
-
-        // Actions registered under "" is the default handler.
-        auto callback = m_ActionCallbacks.find("");
-        if(callback != m_ActionCallbacks.end())
-        {
-          data.setControlFlag(HttpData::ActionProcessed);
-          callback.value()(data);
           if(data.shouldContinue()) performPostprocessing(data);
         }
         else
         {
-          auto action = m_Actions.find("");
-          if(action != m_Actions.end())
+          auto action = m_Actions.find(route.value().action);
+          if(action != m_Actions.end() && action.value().get() != nullptr)
+          {
+            performPreprocessing(data);
+            if(data.shouldContinue())
+            {
+              data.setControlFlag(HttpData::ActionProcessed);
+              (action.value())->onAction(data);
+            }
+            if(data.shouldContinue()) performPostprocessing(data);
+          }
+        }
+      }
+
+      // Check the control flag bit mask to determine if it was processed above.
+      if(!data.isProcessed())
+      {
+        LOG_DEBUG("No route found for" << urlPath << ", checking default routes");
+
+        // Even if the action is not yet found, we'll give the user a chance to
+        // intercept and process it.
+        performPreprocessing(data);
+
+        if(data.shouldContinue())
+        {
+          // TODO: Describe this in the header file.
+
+          // TODO: Can also perform this check once in a while instead to reduce
+          // performance lookup costs.
+
+          // Actions registered under "" is the default handler.
+          auto callback = m_ActionCallbacks.find("");
+          if(callback != m_ActionCallbacks.end())
           {
             data.setControlFlag(HttpData::ActionProcessed);
-            (action.value())->onAction(data);
+            callback.value()(data);
             if(data.shouldContinue()) performPostprocessing(data);
           }
           else
           {
-            resp->set_status(400);
-            QJsonObject& json = data.getJson();
-            json["error"] = "Invalid request";
-
-            performPostprocessing(data);
+            auto action = m_Actions.find("");
+            if(action != m_Actions.end())
+            {
+              data.setControlFlag(HttpData::ActionProcessed);
+              (action.value())->onAction(data);
+              if(data.shouldContinue()) performPostprocessing(data);
+            }
+            else
+            {
+              resp->set_status(400);
+              QJsonObject& json = data.getJson();
+              json["error"] = "Invalid request";
+              performPostprocessing(data);
+            }
           }
-        }
-      }
+        } // End if(data.shouldContinue())
+      } // End if(!data.isProcessed())
+    }
+    catch(const std::exception& e)
+    {
+      LOG_ERROR("Exception caught" << e.what());
+      resp->set_status(500);
+      QJsonObject& json = data.getJson();
+      json["error"] = e.what();
+    }
+    catch(const QJsonObject& e)
+    {
+      LOG_ERROR("JSON caught" << e);
+      resp->set_status(500);
+      data.getJson() = e;
+    }
+    catch(...)
+    {
+      resp->set_status(500);
+      QJsonObject& json = data.getJson();
+      json["error"] = "Internal server error";
     }
 
-    if(!data.getJson().isEmpty() && !data.isFinished() && !data.finishResponse())
+    if(!data.getJson().isEmpty() && !data.isFinished())
     {
-      LOG_WARN("Failed to finish response");
+      if(m_SendRequestMetadata)
+      {
+        QJsonObject obj;
+        bool ip4;
+        std::string ip;
+        int port;
+
+        if(resp->getpeername(ip4, ip, port))
+        {
+          obj["remoteIp"] = ip.c_str();
+          obj["remotePort"] = port;
+        }
+
+        obj["query"] = data.getQuery().toString();
+        obj["uid"] = data.getUid().toString();
+        obj["timestamp"] = data.getTimestamp().toString("yyyy/MM/dd hh:mm:ss:zzz");
+        obj["timeElapsed"] = data.getTime().elapsed();
+        obj["timeElapsedMs"] = (qreal)(uv_hrtime() - req->get_timestamp()) /
+                               (qreal)1000000.00;
+
+        QJsonObject& json = data.getJson();
+        json["requestMetadata"] = obj;
+      }
+
+      if( !data.finishResponse())
+      {
+        LOG_WARN("Failed to finish response");
+      }
     }
   };
 }
@@ -382,7 +435,6 @@ bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QU
     if(routePart.startsWith(':') && routePart.indexOf('(') < 0)
     {
       // We found something like /:id/ so let's make sure we grab that.
-
       variable = QString(routePart).replace(':', "");
       params.addQueryItem(variable, urlPart.toString());
     }
@@ -475,7 +527,7 @@ bool HttpServer::eventFilter(QObject* /* object */, QEvent* event)
     LOG_WARN("Request or response is NULL");
   }
 
-  m_EventCallback(req, resp);
+  m_EventCallback(httpEvent);
   return true;
 }
 

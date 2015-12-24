@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QEvent>
+#include <QDateTime>
 #include <http.h>
 
 namespace qttp
@@ -23,9 +24,12 @@ class HttpEvent : public QEvent
     void setCmd(const QString& cmd);
     const QString& getCmd() const;
 
+    const QDateTime& getTimestamp() const;
+
   private:
     std::pair<native::http::request*, native::http::response*> m_Data;
     QString m_Cmd;
+    QDateTime m_Timestamp;
 };
 
 } // End namespace qttp

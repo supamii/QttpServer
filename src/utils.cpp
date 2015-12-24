@@ -68,7 +68,10 @@ void Stats::setValue(const QString& key, const QVariant& value)
 LoggingUtils::LoggingUtils() :
     QObject(),
     m_Mutex(),
-    m_File(QDir::temp().absoluteFilePath(QString("qttp-").append(QDateTime::currentDateTime().toString("yyyy-MM-dd-hhmmss")).append(".log"))),
+    m_File(QDir::temp().absoluteFilePath(QString("qttp-").
+           append(QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss-")).
+           append(std::to_string(QCoreApplication::applicationPid()).c_str()).
+           append(".log"))),
     m_Stream(&m_File),
     m_OriginalMessageHandler(nullptr),
     m_TimerId(-1)

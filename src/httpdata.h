@@ -72,6 +72,8 @@ class HttpData
 
     const QUrlQuery& getQuery() const;
 
+    const QUuid& getUid() const;
+
     /**
      * @brief A wrapper for native::http::response::end() and writes directly
      * to the response socket.  For direct writes, this is highly encouraged
@@ -86,6 +88,7 @@ class HttpData
      * transaction with finishResponse().
      */
     QJsonObject& getJson();
+
     const QJsonObject& getJson() const;
 
     /**
@@ -93,6 +96,7 @@ class HttpData
      * response data using getJson() and then invoke this method to send it off.
      */
     bool finishResponse();
+
     bool finishResponse(const QJsonObject& json);
 
     quint32 getControlFlag() const;
@@ -122,6 +126,12 @@ class HttpData
      */
     bool isProcessed() const;
 
+    void setTimestamp(const QDateTime& timestamp);
+
+    const QDateTime& getTimestamp() const;
+
+    const QTime& getTime() const;
+
   private:
 
     /**
@@ -141,6 +151,9 @@ class HttpData
     QUrlQuery m_Query;
     QJsonObject m_Json;
     quint32 m_ControlFlag;
+    QUuid m_Uid;
+    QDateTime m_Timestamp;
+    QTime m_Time;
 };
 
 }

@@ -72,21 +72,41 @@ namespace native
             ~response();
 
         public:
-            bool end(const std::string& body);
-            bool end(int length, const char* body);
 
-            void write(const std::string& body);
+            bool end(const std::string& body) { return end(body.length(), body.c_str()); }
+
+            bool end(int length, const char* body)
+            {
+              write(length, body);
+              return close();
+            }
+
+            void write(const std::string& body)
+            {
+                return write(body.length(), body.c_str());
+            }
+
             void write(int length, const char* body);
 
             bool close();
 
-            void releaseClientContext(std::shared_ptr<client_context>& swapPtr);
+            void set_status(int status_code) { status_ = status_code; }
 
-            void set_status(int status_code);
-            int get_status() const;
+            int get_status() const { return status_; }
 
-            void set_header(const std::string& key, const std::string& value);
-            const std::map<std::string, std::string, native::text::ci_less>& get_headers() const;
+            void set_header(const std::string& key, const std::string& value) { headers_[key] = value; }
+
+            const std::map<std::string, std::string, native::text::ci_less>& get_headers() const { return headers_; }
+
+            bool getsockname(bool& ip4, std::string& ip, int& port)
+            {
+              return socket_->getsockname(ip4, ip, port);
+            }
+
+            bool getpeername(bool& ip4, std::string& ip, int& port)
+            {
+              return socket_->getpeername(ip4, ip, port);
+            }
 
             static std::string get_status_text(int status);
 
@@ -116,7 +136,9 @@ namespace native
             std::string get_body (void) const { return body_.str(); }
 
             std::stringstream& get_raw_body (void) { return body_; }
-            const std::string& get_method (void) const {return method_; }
+            const std::string& get_method (void) const { return method_; }
+
+            uint64_t get_timestamp(void) const { return timestamp_; }
 
         private:
             url_obj url_;
@@ -124,6 +146,7 @@ namespace native
             std::stringstream body_;
             std::string default_value_;
             std::string method_;
+            uint64_t timestamp_;
         };
 
         class client_context

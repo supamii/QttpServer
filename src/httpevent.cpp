@@ -6,19 +6,22 @@ using namespace native::http;
 
 HttpEvent::HttpEvent() :
     QEvent(QEvent::None),
-    m_Data()
+    m_Data(),
+    m_Timestamp()
 {
 }
 
 HttpEvent::HttpEvent(pair<request*, response*> d) :
     QEvent(QEvent::None),
-    m_Data(d)
+    m_Data(d),
+    m_Timestamp(QDateTime::currentDateTime())
 {
 }
 
 HttpEvent::HttpEvent(request* req, response* resp) :
     QEvent(QEvent::None),
-    m_Data(pair<request*, response*>(req, resp))
+    m_Data(pair<request*, response*>(req, resp)),
+    m_Timestamp(QDateTime::currentDateTime())
 {
 }
 
@@ -49,4 +52,9 @@ void HttpEvent::setCmd(const QString& cmd)
 const QString& HttpEvent::getCmd() const
 {
   return m_Cmd;
+}
+
+const QDateTime& HttpEvent::getTimestamp() const
+{
+  return m_Timestamp;
 }

@@ -100,22 +100,6 @@ http::response::~response()
 {
 }
 
-bool http::response::end(const std::string& body)
-{
-    return end(body.length(), body.c_str());
-}
-
-bool http::response::end(int length, const char* body)
-{
-    write(length, body);
-    return close();
-}
-
-void http::response::write(const std::string& body)
-{
-    return write(body.length(), body.c_str());
-}
-
 void http::response::write(int length, const char* body)
 {
     if(!is_response_written_)
@@ -163,30 +147,35 @@ bool http::response::close()
     });
 }
 
-void http::response::releaseClientContext(std::shared_ptr<client_context>& swapPtr)
-{
-    swapPtr.swap(client_);
-}
-
-void http::response::set_status(int status_code)
-{
-    status_ = status_code;
-}
-
-int http::response::get_status() const
-{
-    return status_;
-}
-
-void http::response::set_header(const std::string& key, const std::string& value)
-{
-    headers_[key] = value;
-}
-
-const std::map<std::string, std::string, native::text::ci_less>& native::http::response::get_headers() const
-{
-    return headers_;
-}
+//void http::response::write(const std::string& body)
+//{
+//    return write(body.length(), body.c_str());
+//}
+//bool http::response::end(const std::string& body)
+//{
+//    return end(body.length(), body.c_str());
+//}
+//bool http::response::end(int length, const char* body)
+//{
+//    write(length, body);
+//    return close();
+//}
+//void http::response::set_status(int status_code)
+//{
+//    status_ = status_code;
+//}
+//int http::response::get_status() const
+//{
+//    return status_;
+//}
+//void http::response::set_header(const std::string& key, const std::string& value)
+//{
+//    headers_[key] = value;
+//}
+//const std::map<std::string, std::string, native::text::ci_less>& native::http::response::get_headers() const
+//{
+//    return headers_;
+//}
 
 std::string http::response::get_status_text(int status)
 {
@@ -260,7 +249,10 @@ std::string http::response::get_status_text(int status)
 http::request::request() :
     url_(),
     headers_(),
-    body_()
+    body_(),
+    default_value_(),
+    method_(),
+    timestamp_(uv_hrtime())
 {
 }
 
