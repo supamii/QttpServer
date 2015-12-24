@@ -40,13 +40,13 @@ int main(int argc, char** argv)
   }
   catch(std::exception& e)
   {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "ERROR: " << e.what() << std::endl;
   }
   catch(...)
   {
-    std::cerr << "Caught and unknown exception" << std::endl;
+    std::cerr << "ERROR: Caught an unknown exception" << std::endl;
   }
 
-  // TODO: Shutdown the webserver!
+  // TODO: Shutdown the webserver!?
   return result;
 }

@@ -71,12 +71,12 @@ bool HttpData::finishResponse(const std::string& body)
 
 bool HttpData::finishResponse()
 {
-  LOG_TRACE;
   return finishResponse(m_Json);
 }
 
 bool HttpData::finishResponse(const QJsonObject& json)
 {
+  LOG_TRACE;
   setControlFlag(Finished);
 
   // TODO: Errors detected should set the status code, 400, 500, etc

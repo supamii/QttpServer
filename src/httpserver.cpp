@@ -366,14 +366,14 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
         } // End if(data.shouldContinue())
       } // End if(!data.isProcessed())
     }
-    catch(std::exception& e)
+    catch(const std::exception& e)
     {
       LOG_ERROR("Exception caught" << e.what());
       resp->set_status(500);
       QJsonObject& json = data.getJson();
       json["error"] = e.what();
     }
-    catch(QJsonObject& e)
+    catch(const QJsonObject& e)
     {
       LOG_ERROR("JSON caught" << e);
       resp->set_status(500);
@@ -391,10 +391,19 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
       if(m_SendRequestMetadata)
       {
         QJsonObject obj;
+        bool ip4;
+        std::string ip;
+        int port;
+
+        if(resp->getsockname(ip4, ip, port))
+        {
+          obj["remoteIp"] = ip.c_str();
+          obj["remotePort"] = port;
+        }
+
         obj["uid"] = data.getUid().toString();
         obj["timestamp"] = data.getTimestamp().toString("yyyy/MM/dd hh:mm:ss:zzz");
         obj["timeElapsed"] = data.getTime().elapsed();
-
         obj["timeElapsedMs"] = (qreal)(uv_hrtime() - req->get_timestamp()) /
                                (qreal)1000000.00;
 
@@ -431,7 +440,6 @@ bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QU
     if(routePart.startsWith(':') && routePart.indexOf('(') < 0)
     {
       // We found something like /:id/ so let's make sure we grab that.
-
       variable = QString(routePart).replace(':', "");
       params.addQueryItem(variable, urlPart.toString());
     }

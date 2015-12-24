@@ -290,3 +290,4 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 22. Include diagram of framework
 23. ~~Command line arguments for common config values~~
 24. Prevent copy constructor access where it makes sense
+25. Revisit common and trivial methods - add inline hint
