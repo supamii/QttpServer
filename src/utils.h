@@ -76,10 +76,6 @@
     #define LOG_DEBUG(X) LOG_DBG(X)
   #endif
 
-  #ifndef LOG_DEBUG
-    #define LOG_DEBUG(X) LOG_DBG(X)
-  #endif
-
   #ifndef LOG_INFO
     #define LOG_INFO(X) qInfo().noquote() << LOG_FUNCTION("INFO ") << X
   #endif
@@ -155,6 +151,19 @@ class Utils
       return QJsonDocument::fromJson(bytes, error).array();
     }
 };
+
+#ifndef STATS_INC
+  #define STATS_INC(X) m_Stats->increment( X )
+#endif
+
+#ifndef STATS_SET
+  #define STATS_SET(X, Y) m_Stats->setValue( X, Y )
+#endif
+
+#ifdef NO_QTTP_STATS
+  #define STATS_INC(X)
+  #define STATS_SET(X, Y)
+#endif
 
 class Stats
 {

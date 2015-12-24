@@ -10,6 +10,7 @@
 
 #include "action.h"
 #include "httpdata.h"
+#include "httpevent.h"
 #include "utils.h"
 
 namespace qttp
@@ -33,7 +34,7 @@ class HttpServer : public QObject
      * @brief setEventFilter
      * @param callback
      */
-    void setEventCallback(std::function<void(native::http::request*, native::http::response*)> eventCallback);
+    void setEventCallback(std::function<void(HttpEvent*)> eventCallback);
 
     /**
      * @brief A template method to register an action via the Action interface.
@@ -118,7 +119,7 @@ class HttpServer : public QObject
      * @param req
      * @param resp
      */
-    std::function<void(native::http::request*, native::http::response*)> defaultEventCallback() const;
+    std::function<void(HttpEvent*)> defaultEventCallback() const;
 
     void performPreprocessing(HttpData& data) const;
 
@@ -174,7 +175,7 @@ class HttpServer : public QObject
     // TODO make the copy-constructor private as well.
 
     /// @brief This callback allows the caller to intercept all responses.
-    std::function<void(native::http::request*, native::http::response*)> m_EventCallback;
+    std::function<void(HttpEvent*)> m_EventCallback;
     QHash<QString, std::shared_ptr<Action>> m_Actions;
     QHash<QString, std::function<void(HttpData& data)>> m_ActionCallbacks;
     QHash<QString, Route> m_GetRoutes;
@@ -191,6 +192,7 @@ class HttpServer : public QObject
     LoggingUtils m_LoggingUtils;
     bool m_IsInitialized;
     QCommandLineParser m_CmdLineParser;
+    bool m_SendRequestMetadata;
 };
 
 } // End namespace qttp

@@ -260,7 +260,10 @@ std::string http::response::get_status_text(int status)
 http::request::request() :
     url_(),
     headers_(),
-    body_()
+    body_(),
+    default_value_(),
+    method_(),
+    timestamp_(uv_hrtime())
 {
 }
 

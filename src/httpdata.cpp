@@ -10,10 +10,13 @@ HttpData::HttpData(request* req, response* resp):
     m_Response(resp),
     m_Query(),
     m_Json(),
-    m_ControlFlag(None)
+    m_ControlFlag(None),
+    m_Uid(QUuid::createUuid()),
+    m_Time()
 {
   Q_ASSERT(m_Request != nullptr);
   Q_ASSERT(m_Response != nullptr);
+  m_Time.start();
 }
 
 HttpData::~HttpData()
@@ -45,6 +48,11 @@ const QUrlQuery& HttpData::getQuery() const
 void HttpData::setQuery(QUrlQuery& params)
 {
   m_Query.swap(params);
+}
+
+const QUuid& HttpData::getUid() const
+{
+  return m_Uid;
 }
 
 QJsonObject& HttpData::getJson()
@@ -114,4 +122,19 @@ bool HttpData::shouldContinue() const
 bool HttpData::isProcessed() const
 {
   return m_ControlFlag & (Preprocessed | Postprocessed | ActionProcessed);
+}
+
+void HttpData::setTimestamp(const QDateTime& timestamp)
+{
+  m_Timestamp = timestamp;
+}
+
+const QDateTime& HttpData::getTimestamp() const
+{
+  return m_Timestamp;
+}
+
+const QTime& HttpData::getTime() const
+{
+  return m_Time;
 }
