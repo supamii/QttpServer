@@ -100,8 +100,6 @@ bool HttpServer::initialize(QCoreApplication* app)
 
   m_SendRequestMetadata = m_GlobalConfig["sendRequestMetadata"].toBool(false);
 
-  LOG_DEBUG(m_GlobalConfig);
-
   m_RoutesConfig = Utils::readJson(QDir("./config/routes.json").absolutePath());
 
   QJsonValueRef get = m_RoutesConfig["get"];
@@ -185,18 +183,10 @@ void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const QString& method
 int HttpServer::start()
 {
   HttpServer& svr = *(HttpServer::getInstance());
-  QString ip = svr.m_GlobalConfig["bindIp"].isUndefined() ? "0.0.0.0" : svr.m_GlobalConfig["bindIp"].toString().trimmed();
-  if(ip.isEmpty())
-  {
-    ip = "0.0.0.0";
-    LOG_WARN("Bind ip is invalid, defaulting to" << ip);
-  }
-  auto port = svr.m_GlobalConfig["bindPort"].isUndefined() ? 8080 : svr.m_GlobalConfig["bindPort"].toInt();
-  if(port <= 0)
-  {
-    port = 8080;
-    LOG_WARN("Bind port is invalid, defaulting to" << port);
-  }
+
+  QString ip = svr.m_GlobalConfig["bindIp"].toString("0.0.0.0").trimmed();
+  auto port = svr.m_GlobalConfig["bindPort"].toInt(8080);
+
   native::http::http server;
   auto result = server.listen(ip.toStdString(), port, [](request& req, response& resp) {
     HttpEvent* event = new HttpEvent(&req, &resp);
@@ -209,7 +199,9 @@ int HttpServer::start()
     return 1;
   }
 
-  LOG_INFO("Server pid" << QCoreApplication::applicationPid() << "running at" << ip << port);
+  LOG_INFO("Server pid" << QCoreApplication::applicationPid() <<
+           "running at" << ip << port);
+
   return native::run();
 }
 
@@ -274,9 +266,7 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
     {
       parameters.clear();
 
-      if(HttpServer::matchUrl(route.value().parts,
-                              urlPath,
-                              parameters))
+      if(HttpServer::matchUrl(route.value().parts, urlPath, parameters))
       {
         // Since this request is going to be processed, let's also parse the
         // query strings for easy access.
@@ -399,12 +389,13 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
         std::string ip;
         int port;
 
-        if(resp->getsockname(ip4, ip, port))
+        if(resp->getpeername(ip4, ip, port))
         {
           obj["remoteIp"] = ip.c_str();
           obj["remotePort"] = port;
         }
 
+        obj["query"] = data.getQuery().toString();
         obj["uid"] = data.getUid().toString();
         obj["timestamp"] = data.getTimestamp().toString("yyyy/MM/dd hh:mm:ss:zzz");
         obj["timeElapsed"] = data.getTime().elapsed();
