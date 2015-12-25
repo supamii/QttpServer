@@ -1,6 +1,7 @@
 {
     "bindIp": "0.0.0.0",
     "bindPort": 8080,
+    "sendRequestMetadata": true,
     "logfile":
     {
         "isEnabled": true,

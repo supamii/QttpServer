@@ -98,7 +98,9 @@ bool HttpServer::initialize(QCoreApplication* app)
     }
   }
 
-  m_SendRequestMetadata = m_GlobalConfig["sendRequestMetadata"].toBool();
+  m_SendRequestMetadata = m_GlobalConfig["sendRequestMetadata"].toBool(false);
+
+  LOG_DEBUG(m_GlobalConfig);
 
   m_RoutesConfig = Utils::readJson(QDir("./config/routes.json").absolutePath());
 
@@ -141,13 +143,15 @@ bool HttpServer::initialize(QCoreApplication* app)
     QJsonValue p = m_CmdLineParser.value("p");
     if((p.isString() || p.isDouble()) && !p.toString().isEmpty())
     {
-      //m_SendRequestMetadata
       qint32 port = m_CmdLineParser.value("p").toInt();
       m_GlobalConfig["bindPort"] = port;
       LOG_DEBUG("Cmd line port" << port);
     }
 
-    m_SendRequestMetadata = m_CmdLineParser.isSet("r");
+    if(!m_SendRequestMetadata)
+    {
+      m_SendRequestMetadata = m_CmdLineParser.isSet("r");
+    }
   }
 
   m_IsInitialized = true;
@@ -205,7 +209,7 @@ int HttpServer::start()
     return 1;
   }
 
-  LOG_INFO("Server running at" << ip << port);
+  LOG_INFO("Server pid" << QCoreApplication::applicationPid() << "running at" << ip << port);
   return native::run();
 }
 

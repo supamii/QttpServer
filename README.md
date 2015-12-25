@@ -274,14 +274,14 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 6. ~~Setup utilities for MongoDB and Redis access~~
 7. ~~Add pre and post processor callbacks as an alternative to the interface class~~
 8. ~~Make available a metrics pre/post processor~~
-9. ~~Design an error response mechanism~~
-10. Record PID in a file to kill the most recently launched process
+9. ~~Design an error response mechanism~~ (rely on exceptions)
+10. ~~Record PID in a file to kill the most recently launched process~~ (printed in logs instead)
 11. Create an equivalenet build system with QMake to support more platforms (MinGW)
 12. Re-work node.native to improve testability by allowing tests to inject requests into qt event loop - allow factory to create instances and prevent shallow copying
 13. Figure out if we can introduce Qt's daemon/services legacy add-on
-14. Distributed scheduling (tasks)
+14. Distributed scheduling with redis or mongo
 15. Server diagnostics UI
-16. Authentication
+16. Authentication basics - api token
 17. ~~Support ids and nouns within url routes~~
 18. Introduce modules to load shared libs for pre, post, and action processing
 19. ~~File logging~~
