@@ -163,7 +163,7 @@ void LoggingUtils::fileLogger(QtMsgType type, const QMessageLogContext& context,
   else
   {
   #ifdef Q_OS_WIN
-    log.m_Stream << msg << '\n\r';
+    log.m_Stream << msg << '\r\n';
   #else
     log.m_Stream << msg << '\n';
   #endif

@@ -5,9 +5,10 @@
 ## Features
 
 * Libuv integrated with Qt
-* URL routing
+* URL routing e.g. /v1/your/api/path
 * Pre & Post processing hooks and chaining
 * Submodules ready to support MongoDb, Redis
+* Built-in logging
 
 ## Example 1: 
 Using a raw std::function based callback
@@ -270,7 +271,7 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 8. ~~Make available a metrics pre/post processor~~
 9. ~~Design an error response mechanism~~ (rely on exceptions)
 10. ~~Record PID in a file to kill the most recently launched process~~ (printed in logs instead)
-11. Create an equivalenet build system with QMake to support more platforms (MinGW)
+11. Create an equivalent build system with QMake to support more platforms (MinGW)
 12. Re-work node.native to improve testability by allowing tests to inject requests into qt event loop - allow factory to create instances and prevent shallow copying
 13. Figure out if we can introduce Qt's daemon/services legacy add-on
 14. Distributed scheduling with redis or mongo
