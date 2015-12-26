@@ -49,3 +49,8 @@ bool native::run_nowait()
 {
     return (uv_run(uv_default_loop(), UV_RUN_NOWAIT) == 0);
 }
+
+void native::stop()
+{
+    return uv_stop(uv_default_loop());
+}

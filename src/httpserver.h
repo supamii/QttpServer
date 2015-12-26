@@ -7,6 +7,7 @@
 #include <functional>
 #include <vector>
 #include <unordered_map>
+#include <thread>
 
 #include "action.h"
 #include "httpdata.h"
@@ -24,11 +25,15 @@ class HttpServer : public QObject
     static HttpServer* getInstance();
     virtual ~HttpServer();
 
+    static void startServer();
+
     /**
      * @brief A statically accessible function to kick off the libuv event loop.
      * @return The integer result from node.native's run method.
      */
     static int start();
+
+    static void stop();
 
     /**
      * @brief setEventFilter
@@ -42,7 +47,6 @@ class HttpServer : public QObject
     template<class T> bool addAction()
     {
       std::shared_ptr<Action> action(new T());
-      // TODO: May need to add a dynamic cast check?
       return addAction(action);
     }
 
@@ -106,7 +110,7 @@ class HttpServer : public QObject
       return m_IsInitialized;
     }
 
-    bool initialize(QCoreApplication* app = nullptr);
+    bool initialize();
 
     QCommandLineParser& getCommandLineParser();
 
@@ -145,16 +149,13 @@ class HttpServer : public QObject
     static HttpServer* m_Instance;
 
     /**
-     * @todo Copy constructor and the move constructor!
+     * @todo The move constructor!
      * @brief The Route class
      */
     class Route
     {
       public:
-        Route() :
-          route(),
-          action(),
-          parts()
+        Route() : route(), action(), parts()
         {
         }
 
@@ -165,14 +166,17 @@ class HttpServer : public QObject
         {
         }
 
-      QString route;
-      QString action;
-      QStringList parts;
+        QString route;
+        QString action;
+        QStringList parts;
     };
 
     /// @brief Private constructor per singleton design.
     HttpServer();
-    // TODO make the copy-constructor private as well.
+
+    //! Forbid copy constructor
+    HttpServer(const HttpServer&) = delete;
+    void operator =(const HttpServer&) {}
 
     /// @brief This callback allows the caller to intercept all responses.
     std::function<void(HttpEvent*)> m_EventCallback;
@@ -193,6 +197,7 @@ class HttpServer : public QObject
     bool m_IsInitialized;
     QCommandLineParser m_CmdLineParser;
     bool m_SendRequestMetadata;
+    std::thread m_Thread;
 };
 
 } // End namespace qttp

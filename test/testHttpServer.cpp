@@ -1,12 +1,6 @@
-#include <native.h>
-#include <QCoreApplication>
-#include <QtCore>
-#include <QtNetwork>
-#include <thread>
-#include <QtTest/QtTest>
-
 #include <httpserver.h>
 #include "sampleAction.h"
+#include <QtTest/QtTest>
 
 using namespace std;
 using namespace qttp;
@@ -83,8 +77,7 @@ void TestHttpServer::initTestCase()
   result = httpSvr.registerRoute("get", "terminates", "/terminates");
   QVERIFY(result == true);
 
-  std::thread webSvr(HttpServer::start);
-  webSvr.detach();
+  httpSvr.startServer();
 }
 
 void TestHttpServer::testGET_DefaultResponse()

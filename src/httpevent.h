@@ -13,22 +13,16 @@ class HttpEvent : public QEvent
 {
   public:
     HttpEvent();
-    HttpEvent(std::pair<native::http::request*, native::http::response*>);
     HttpEvent(native::http::request*, native::http::response*);
     virtual ~HttpEvent();
 
-    void setData(const std::pair<native::http::request*, native::http::response*>&);
-    std::pair<native::http::request*, native::http::response*>& getData();
-    std::pair<native::http::request*, native::http::response*> getData() const;
-
-    void setCmd(const QString& cmd);
-    const QString& getCmd() const;
-
+    native::http::request* getRequest() const;
+    native::http::response* getResponse() const;
     const QDateTime& getTimestamp() const;
 
   private:
-    std::pair<native::http::request*, native::http::response*> m_Data;
-    QString m_Cmd;
+    native::http::request* m_Request;
+    native::http::response* m_Response;
     QDateTime m_Timestamp;
 };
 

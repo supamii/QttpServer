@@ -13,11 +13,7 @@
 Using a raw std::function based callback
 
 ```c++
-#include <native.h>
-#include <QCoreApplication>
-#include <QtCore>
-#include <thread>
-#include "httpserver.h"
+#include <httpserver.h>
 
 using namespace std;
 using namespace qttp;
@@ -43,12 +39,10 @@ int main(int argc, char** argv)
   httpSvr->registerRoute("get", "test", "/test2");
 
   // Libuv runs in its own thread.
-  thread webSvr(HttpServer::start);
-  webSvr.detach();
+  httpSvr->startServer();
 
   // Qt takes the main thread per the usual.
-  auto result = app.exec();
-  return result;
+  return app.exec();
 }
 ```
 
@@ -289,5 +283,5 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 21. Add syslog support
 22. Include diagram of framework
 23. ~~Command line arguments for common config values~~
-24. Prevent copy constructor access where it makes sense
-25. Revisit common and trivial methods - add inline hint
+24. ~~Prevent copy constructor access where it makes sense~~
+25. ~~Revisit common and trivial methods - add inline hint~~

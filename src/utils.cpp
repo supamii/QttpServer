@@ -36,8 +36,7 @@ QJsonObject Utils::readJson(const QString& path)
 
   if(parseError.error != QJsonParseError::NoError)
   {
-    throw std::runtime_error((path + ": " +
-                              parseError.errorString()).toStdString());
+    THROW_EXCEPTION((path + ": " + parseError.errorString()).toStdString());
   }
 
   if(doc.isNull())

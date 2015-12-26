@@ -85,6 +85,8 @@ namespace native
      *  Polls for new events once but don't block if there are no pending events for the default loop.
      */
     bool run_nowait();
+
+    void stop();
 }
 
 

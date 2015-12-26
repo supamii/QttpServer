@@ -36,7 +36,8 @@ HttpServer::HttpServer() :
     m_LoggingUtils(),
     m_IsInitialized(false),
     m_CmdLineParser(),
-    m_SendRequestMetadata(false)
+    m_SendRequestMetadata(false),
+    m_Thread(HttpServer::start)
 {
   this->installEventFilter(this);
 }
@@ -49,7 +50,7 @@ HttpServer::~HttpServer()
   }
 }
 
-bool HttpServer::initialize(QCoreApplication* app)
+bool HttpServer::initialize()
 {
   if(m_IsInitialized)
   {
@@ -114,42 +115,42 @@ bool HttpServer::initialize(QCoreApplication* app)
   QJsonValueRef del = m_RoutesConfig["del"];
   registerRouteFromJSON(del, "del");
 
-  if(app != nullptr)
+  QCoreApplication* app = QCoreApplication::instance();
+  Q_ASSERT(app);
+
+  m_CmdLineParser.addOptions({
+      {{"i", "ip"},
+      QCoreApplication::translate("main", "ip of the target interface"),
+      QCoreApplication::translate("main", "ip")},
+      {{"p", "port"},
+      QCoreApplication::translate("main", "port to listen on"),
+      QCoreApplication::translate("main", "port")},
+      {{"r", "meta"},
+      QCoreApplication::translate("main", "appends metadata to responses")}
+  });
+
+  m_CmdLineParser.addHelpOption();
+  m_CmdLineParser.process(*app);
+
+  QJsonValue i = m_CmdLineParser.value("i");
+  if((i.isString() || i.isDouble()) && !i.toString().isEmpty())
   {
-    m_CmdLineParser.addOptions({
-        {{"i", "ip"},
-        QCoreApplication::translate("main", "ip of the target interface"),
-        QCoreApplication::translate("main", "ip")},
-        {{"p", "port"},
-        QCoreApplication::translate("main", "port to listen on"),
-        QCoreApplication::translate("main", "port")},
-        {{"r", "meta"},
-        QCoreApplication::translate("main", "appends metadata to responses")}
-    });
+    QString ip = i.toString();
+    m_GlobalConfig["bindIp"] = ip;
+    LOG_DEBUG("Cmd line ip" << ip);
+  }
 
-    m_CmdLineParser.addHelpOption();
-    m_CmdLineParser.process(*app);
+  QJsonValue p = m_CmdLineParser.value("p");
+  if((p.isString() || p.isDouble()) && !p.toString().isEmpty())
+  {
+    qint32 port = p.toInt();
+    m_GlobalConfig["bindPort"] = port;
+    LOG_DEBUG("Cmd line port" << port);
+  }
 
-    QJsonValue i = m_CmdLineParser.value("p");
-    if((i.isString() || i.isDouble()) && !i.toString().isEmpty())
-    {
-      QString ip = m_CmdLineParser.value("i");
-      m_GlobalConfig["bindIp"] = ip;
-      LOG_DEBUG("Cmd line ip" << ip);
-    }
-
-    QJsonValue p = m_CmdLineParser.value("p");
-    if((p.isString() || p.isDouble()) && !p.toString().isEmpty())
-    {
-      qint32 port = m_CmdLineParser.value("p").toInt();
-      m_GlobalConfig["bindPort"] = port;
-      LOG_DEBUG("Cmd line port" << port);
-    }
-
-    if(!m_SendRequestMetadata)
-    {
-      m_SendRequestMetadata = m_CmdLineParser.isSet("r");
-    }
+  if(!m_SendRequestMetadata)
+  {
+    m_SendRequestMetadata = m_CmdLineParser.isSet("r");
   }
 
   m_IsInitialized = true;
@@ -180,6 +181,16 @@ void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const QString& method
   }
 }
 
+void HttpServer::startServer()
+{
+  QCoreApplication* app = QCoreApplication::instance();
+  QObject::connect(app, &QCoreApplication::aboutToQuit, [](){
+    LOG_TRACE;
+    HttpServer::getInstance()->stop();
+  });
+  HttpServer::getInstance()->m_Thread.detach();
+}
+
 int HttpServer::start()
 {
   HttpServer& svr = *(HttpServer::getInstance());
@@ -205,6 +216,11 @@ int HttpServer::start()
   return native::run();
 }
 
+void HttpServer::stop()
+{
+  native::stop();
+}
+
 void HttpServer::setEventCallback(function<void(HttpEvent*)> eventCallback)
 {
   m_EventCallback = eventCallback;
@@ -214,13 +230,13 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
 {
   // TODO: Can benefit performance gains by caching look up costs - don't care
   // about amortized theoretical values.
-
+  //
   // TODO: Perhaps should lock/wrap m_Routes to guarantee atomicity.
 
   return [&](HttpEvent* event) mutable
   {
-    request* req = event->getData().first;
-    response* resp = event->getData().second;
+    request* req = event->getRequest();
+    response* resp = event->getResponse();
 
     STATS_INC("http:hits");
 
@@ -319,7 +335,8 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
       // Check the control flag bit mask to determine if it was processed above.
       if(!data.isProcessed())
       {
-        LOG_DEBUG("No route found for" << urlPath << ", checking default routes");
+        LOG_DEBUG("No route found for" << urlPath << ", "
+                  "checking default routes");
 
         // Even if the action is not yet found, we'll give the user a chance to
         // intercept and process it.
@@ -519,12 +536,10 @@ bool HttpServer::eventFilter(QObject* /* object */, QEvent* event)
     return false;
   }
 
-  request* req = httpEvent->getData().first;
-  response* resp = httpEvent->getData().second;
-
-  if(!req || !resp)
+  if(!httpEvent->getRequest() || !httpEvent->getResponse())
   {
-    LOG_WARN("Request or response is NULL");
+    LOG_ERROR("Request or response is NULL");
+    return false;
   }
 
   m_EventCallback(httpEvent);

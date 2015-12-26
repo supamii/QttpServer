@@ -218,6 +218,10 @@ class LoggingUtils : public QObject
     qint32 m_TimerId;
 };
 
+#ifndef THROW_EXCEPTION
+#define THROW_EXCEPTION(X) std::stringstream x; x << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": " << X; throw std::runtime_error(x.str().c_str())
+#endif
+
 } // End namespace qttp
 
 #endif // QTTPUTILS_H

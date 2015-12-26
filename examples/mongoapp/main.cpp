@@ -1,11 +1,5 @@
-#include <native.h>
-#include <QCoreApplication>
-#include <QtCore>
-#include <thread>
-
+#include <httpserver.h>
 #include <mongo/client/dbclient.h>
-
-#include "httpserver.h"
 
 using namespace std;
 using namespace qttp;
@@ -23,7 +17,7 @@ int main(int argc, char** argv)
   // Always initialize in the main thread.
   httpSvr.initialize();
 
-  auto result = -1;
+  auto result = 0;
 
   mongo::client::initialize();
   mongo::DBClientConnection c;
@@ -111,8 +105,7 @@ int main(int argc, char** argv)
       }
     });
 
-    thread webSvr(HttpServer::start);
-    webSvr.detach();
+    httpSvr.startServer();
 
     result = app.exec();
 
@@ -127,6 +120,5 @@ int main(int argc, char** argv)
     LOG_ERROR(e.what());
   }
 
-  // TODO: Shutdown the webserver.
   return result;
 }
