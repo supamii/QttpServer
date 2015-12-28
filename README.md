@@ -8,7 +8,7 @@
 * URL routing e.g. /v1/your/api/path
 * Pre & Post processing hooks and chaining
 * Submodules ready to support MongoDb, Redis
-* Built-in logging
+* Logging support (using macros)
 
 ## Example 1: 
 Using a raw std::function based callback
@@ -261,10 +261,10 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 
 # TODOs
 
-1. Address subtle techdebt surrounding references with native::http components
+1. ~~Address subtle techdebt surrounding references with native::http components~~
 2. ~~Create default preprocessors for meta data for each incomming request guid generation~~
 3. ~~Config parsing is still incomplete - action-routes should be configurable instead of being set in code~~
-4. Determine versioning support in the path e.g. /v1/ /v2/
+4. ~~Determine versioning support in the path e.g. /v1/ /v2/~~
 5. ~~Clean up configuration deployment on mac (make install files to the correct folder)~~
 6. ~~Setup utilities for MongoDB and Redis access~~
 7. ~~Add pre and post processor callbacks as an alternative to the interface class~~
@@ -286,3 +286,5 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 23. ~~Command line arguments for common config values~~
 24. ~~Prevent copy constructor access where it makes sense~~
 25. ~~Revisit common and trivial methods - add inline hint~~
+26. SUPPORT web sockets
+27. Add oauth support
