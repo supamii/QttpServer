@@ -25,12 +25,12 @@ class HttpServer : public QObject
     static HttpServer* getInstance();
     virtual ~HttpServer();
 
+    static void startServer();
+
     /**
      * @brief A statically accessible function to kick off the libuv event loop.
      * @return The integer result from node.native's run method.
      */
-    static void startServer();
-
     static int start();
 
     static void stop();
