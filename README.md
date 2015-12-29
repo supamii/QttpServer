@@ -288,3 +288,4 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 25. ~~Revisit common and trivial methods - add inline hint~~
 26. SUPPORT web sockets
 27. Add oauth support
+28. Support shared library and add exports/import decl macros
