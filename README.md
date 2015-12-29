@@ -220,9 +220,7 @@ cd build
 msbuild.exe all.sln /p:Configuration=Debug
 ```
 
-Launch `qttp.pro` in QtCreator, build and...
-
-**ENJOY a beer - you've earned it!**
+Launch `qttp.pro` in QtCreator and build.
 
 As a side note, if you want to run a quick sample application you can add `CONFIG+=SAMPLEAPP` to the additional arguments section located in QtCreator under `Projects > Build & Run > Build Steps > qmake > Additional arguments`
 
