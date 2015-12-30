@@ -9,7 +9,7 @@
 * URL routing e.g. /v1/your/api/path
 * Pre & Post processing hooks and chaining
 * Submodules ready to support [MongoDb](https://github.com/mongodb/mongo-cxx-driver), [Redis](https://github.com/uglide/qredisclient)
-* Logging support (using macros)
+* Logging support
 
 ## Example 1: 
 Using a raw std::function based callback
