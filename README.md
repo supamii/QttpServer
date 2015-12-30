@@ -4,10 +4,11 @@
 
 ## Features
 
-* Libuv integrated with Qt
+* NodeJS's [libuv](https://github.com/libuv/libuv) integrated with Qt
+* NodeJS's [http-parser](https://github.com/nodejs/http-parser)
 * URL routing e.g. /v1/your/api/path
 * Pre & Post processing hooks and chaining
-* Submodules ready to support MongoDb, Redis
+* Submodules ready to support [MongoDb](https://github.com/mongodb/mongo-cxx-driver), [Redis](https://github.com/uglide/qredisclient)
 * Logging support (using macros)
 
 ## Example 1: 

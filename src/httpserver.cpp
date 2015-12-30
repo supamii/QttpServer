@@ -183,11 +183,15 @@ void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const QString& method
 
 void HttpServer::startServer()
 {
-  QCoreApplication* app = QCoreApplication::instance();
-  QObject::connect(app, &QCoreApplication::aboutToQuit, [](){
+  auto quitCB = [](){
     LOG_TRACE;
     HttpServer::getInstance()->stop();
-  });
+  };
+
+  QObject::connect(QCoreApplication::instance(),
+                   &QCoreApplication::aboutToQuit,
+                   quitCB);
+
   HttpServer::getInstance()->m_Thread.detach();
 }
 
@@ -198,11 +202,13 @@ int HttpServer::start()
   QString ip = svr.m_GlobalConfig["bindIp"].toString("0.0.0.0").trimmed();
   auto port = svr.m_GlobalConfig["bindPort"].toInt(8080);
 
-  native::http::http server;
-  auto result = server.listen(ip.toStdString(), port, [](request& req, response& resp) {
+  auto serverCB = [](request& req, response& resp) {
     HttpEvent* event = new HttpEvent(&req, &resp);
     QCoreApplication::postEvent(HttpServer::getInstance(), event);
-  });
+  };
+
+  native::http::http server;
+  auto result = server.listen(ip.toStdString(), port, serverCB);
 
   if(!result)
   {
