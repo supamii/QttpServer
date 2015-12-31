@@ -1,6 +1,8 @@
 # QttpServer
 
-<b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/node.native).  Intended as an alternative to [QHttpServer](https://github.com/nikhilm/qhttpserver), this is ideal for those who want the benefits of libuv with Qt.
+<b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/node.native).
+
+Check out the examples and samples to get started with your RESTful API server!
 
 ![QttpServer](qttp_eventloops.png)
 
