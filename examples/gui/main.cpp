@@ -11,24 +11,18 @@ int main(int argc, char *argv[])
   QApplication a(argc, argv);
 
   MainWindow w;
+  w.show();
 
   HttpServer* svr = HttpServer::getInstance();
-
-  // Always initialize in the main thread.
   svr->initialize();
-
   svr->registerRoute("get", "helloworld", "/helloworld");
-
   svr->addAction("helloworld", [&](HttpData& data) {
     QJsonObject& json = data.getJson();
     json["response"] = "Hello World!";
 
     w.getModel().setHttpData(data);
   });
-
   svr->startServer();
-
-  w.show();
 
   return a.exec();
 }
