@@ -10,19 +10,19 @@ namespace Ui {
 class MainWindow;
 }
 
-class HttpReceiver : public QAbstractTableModel
+class HttpDataModel : public QAbstractTableModel
 {
     Q_OBJECT
 
   public:
-    HttpReceiver(QWidget *parent = 0);
-    ~HttpReceiver();
+    HttpDataModel(QWidget *parent = 0);
+    ~HttpDataModel();
 
     QVariant data(const QModelIndex &index, int role) const;
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
-    void setHttpData(qttp::HttpData& data);
+    void addData(qttp::HttpData& data);
 
   private:
     QVector<QString> m_Data;
@@ -36,11 +36,11 @@ class MainWindow : public QMainWindow
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    HttpReceiver& getModel();
+    HttpDataModel& getModel();
 
   private:
     Ui::MainWindow *ui;
-    HttpReceiver m_HttpReceiver;
+    HttpDataModel m_HttpDataModel;
 };
 
 

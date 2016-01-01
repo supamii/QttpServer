@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     QJsonObject& json = data.getJson();
     json["response"] = "Hello World!";
 
-    w.getModel().setHttpData(data);
+    w.getModel().addData(data);
   });
   svr->startServer();
 
