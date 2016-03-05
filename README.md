@@ -69,7 +69,7 @@ class Sample : public Action {
     QJsonObject& json = data.getJson();
     json["response"] = "Sample C++ FTW";
   }
-  std::string getActionName() { return "sample"; }
+  const QString getActionName() const { return "sample"; }
 };
 ```
 

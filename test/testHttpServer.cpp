@@ -21,6 +21,11 @@ class TestHttpServer: public QObject
 
     void testGET_SampleResponse();
 
+    void testGET_SampleWithHttpMethodsResponse();
+    void testPOST_SampleWithHttpMethodsResponse();
+    void testPUT_SampleWithHttpMethodsResponse();
+    void testDELETE_SampleWithHttpMethodsResponse();
+
     void testGET_TerminateResponse();
     void testPOST_InvalidTerminateResponse();
     void testPUT_TerminateResponse();
@@ -39,6 +44,15 @@ void TestHttpServer::initTestCase()
   });
 
   httpSvr.addProcessor<SampleProcessor>();
+
+  // Uses the action interface.
+  result = httpSvr.addAction<SampleActionWithHttpMethods>();
+  QVERIFY(result == true);
+
+  result = httpSvr.registerRoute("get", "sampleWithHttpMethods", "/http");
+  result = httpSvr.registerRoute("post", "sampleWithHttpMethods", "/http");
+  result = httpSvr.registerRoute("put", "sampleWithHttpMethods", "/http");
+  result = httpSvr.registerRoute("delete", "sampleWithHttpMethods", "/http");
 
   // Uses the action interface.
   result = httpSvr.addAction<SampleAction>();
@@ -163,6 +177,80 @@ void TestHttpServer::testGET_TestConfigResponse()
   QTest::qWait(1000);
   QJsonDocument expected;
   expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"Test C++ FTW\"}").toLatin1());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
+}
+
+void TestHttpServer::testGET_SampleWithHttpMethodsResponse()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080/http")));
+  QVERIFY(result.isEmpty());
+  QTest::qWait(1000);
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"Sample C++ FTW Get\",\"postprocess\":true}").toLatin1());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
+}
+
+void TestHttpServer::testPOST_SampleWithHttpMethodsResponse()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  QNetworkRequest networkRequest(QUrl("http://127.0.0.1:8080/http"));
+  networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");
+  netMgr->post(networkRequest, QByteArray());
+  QVERIFY(result.isEmpty());
+  QTest::qWait(1000);
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"Sample C++ FTW Post\",\"postprocess\":true}").toLatin1());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
+}
+
+void TestHttpServer::testPUT_SampleWithHttpMethodsResponse()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  QNetworkRequest networkRequest(QUrl("http://127.0.0.1:8080/http"));
+  networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");
+  netMgr->put(networkRequest, QByteArray());
+  QVERIFY(result.isEmpty());
+  QTest::qWait(1000);
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"Sample C++ FTW Put\",\"postprocess\":true}").toLatin1());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
+}
+
+void TestHttpServer::testDELETE_SampleWithHttpMethodsResponse()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  QNetworkRequest networkRequest(QUrl("http://127.0.0.1:8080/http"));
+  networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");
+  netMgr->deleteResource(networkRequest);
+  QVERIFY(result.isEmpty());
+  QTest::qWait(1000);
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"Sample C++ FTW Delete\",\"postprocess\":true}").toLatin1());
   QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
            result.toStdString().c_str());
 }

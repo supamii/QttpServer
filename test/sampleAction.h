@@ -25,6 +25,43 @@ class SampleAction: public Action
     }
 };
 
+class SampleActionWithHttpMethods: public Action
+{
+  public:
+    void onGet(HttpData& data)
+    {
+      LOG_TRACE;
+      QJsonObject& json = data.getJson();
+      json["response"] = "Sample C++ FTW Get";
+    }
+
+    void onPost(HttpData& data)
+    {
+      LOG_TRACE;
+      QJsonObject& json = data.getJson();
+      json["response"] = "Sample C++ FTW Post";
+    }
+
+    void onPut(HttpData& data)
+    {
+      LOG_TRACE;
+      QJsonObject& json = data.getJson();
+      json["response"] = "Sample C++ FTW Put";
+    }
+
+    void onDelete(HttpData& data)
+    {
+      LOG_TRACE;
+      QJsonObject& json = data.getJson();
+      json["response"] = "Sample C++ FTW Delete";
+    }
+
+    const QString getActionName() const
+    {
+      return "sampleWithHttpMethods";
+    }
+};
+
 class SampleProcessor: public Processor
 {
   public:

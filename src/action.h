@@ -21,10 +21,18 @@ class Action
     Action();
     virtual ~Action();
     /**
-     * @brief Primary entry point for processing actions.
+     * @brief Primary entry point for processing actions. Default implementation
+     * will invoke corresponding members against the HTTP methods: onGet(),
+     * onPost(), onPut(), and onDelete()
      * @param data
      */
-    virtual void onAction(HttpData& data) = 0;
+    virtual void onAction(HttpData& data);
+    virtual void onGet(HttpData& data);
+    virtual void onPost(HttpData& data);
+    virtual void onPut(HttpData& data);
+    virtual void onDelete(HttpData& data);
+    virtual void onUnknown(HttpData& data);
+
     virtual const QString getActionName() const = 0;
 };
 
