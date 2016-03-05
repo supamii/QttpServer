@@ -169,7 +169,7 @@ make
 
     ```bash
     cd QttpServer/lib/mongo-cxx-driver
-    scons --prefix="/usr/local/opt/mongo-client" --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/include
+    sudo scons --prefix="/usr/local/opt/mongo-client" --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/include --dbg=on --opt=on --64 install
     ```
 
    Windows
@@ -182,7 +182,7 @@ make
    Mac
 
     ```bash
-    scons --libpath=/usr/local/lib --cpppath=/usr/local/include --64
+    scons --libpath=/usr/local/lib --cpppath=/usr/local/include --dbg=on --opt=on --64 install
     ```
 
 For more information visit [mongodb.org](https://docs.mongodb.org/getting-started/cpp/client/)

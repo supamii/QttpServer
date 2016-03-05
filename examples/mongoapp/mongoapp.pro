@@ -17,8 +17,11 @@ win32 {
 }
 
 macx {
+    # If you don't want the whole mac application folder, comment the below.
+    # CONFIG -= app_bundle
+
     LIBS += \
-        -L$$PWD/../../lib/mongo-cxx-driver/build/darwin/64 \
+        -L$$PWD/lib/mongo-cxx-driver/build/install \
         -lmongoclient \
         -L/usr/local/lib \
         -lboost_system \
@@ -31,8 +34,8 @@ macx {
         -lboost_regex-mt
 
     INCLUDEPATH += \
-        $$PWD/../../lib/mongo-cxx-driver/src \
-        $$PWD/../../lib/mongo-cxx-driver/build/darwin/64 \
+        $$PWD/lib/mongo-cxx-driver/src \
+        $$PWD/lib/mongo-cxx-driver/build/install \
         /usr/local/include
 }
 
