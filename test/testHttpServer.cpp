@@ -21,6 +21,8 @@ class TestHttpServer: public QObject
 
     void testGET_SampleResponse();
 
+    void testGET_SampleWithParamResponse();
+
     void testGET_SampleWithHttpMethodsResponse();
     void testPOST_SampleWithHttpMethodsResponse();
     void testPUT_SampleWithHttpMethodsResponse();
@@ -50,9 +52,24 @@ void TestHttpServer::initTestCase()
   QVERIFY(result == true);
 
   result = httpSvr.registerRoute("get", "sampleWithHttpMethods", "/http");
+  QVERIFY(result == true);
+
   result = httpSvr.registerRoute("post", "sampleWithHttpMethods", "/http");
+  QVERIFY(result == true);
+
   result = httpSvr.registerRoute("put", "sampleWithHttpMethods", "/http");
+  QVERIFY(result == true);
+
   result = httpSvr.registerRoute("delete", "sampleWithHttpMethods", "/http");
+  QVERIFY(result == true);
+
+  // Uses the action interface.
+  QString param = "param";
+  result = httpSvr.addAction<ActionWithParameter, QString>(param);
+  QVERIFY(result == true);
+
+  result = httpSvr.registerRoute("get", "sampleWithParameter", "/sampleWithParameter");
+  QVERIFY(result == true);
 
   // Uses the action interface.
   result = httpSvr.addAction<SampleAction>();
@@ -177,6 +194,23 @@ void TestHttpServer::testGET_TestConfigResponse()
   QTest::qWait(1000);
   QJsonDocument expected;
   expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"Test C++ FTW\"}").toLatin1());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
+}
+
+void TestHttpServer::testGET_SampleWithParamResponse()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080/sampleWithParameter")));
+  QVERIFY(result.isEmpty());
+  QTest::qWait(1000);
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"Sample C++ FTW With Parameter param\",\"postprocess\":true}").toLatin1());
   QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
            result.toStdString().c_str());
 }

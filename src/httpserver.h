@@ -51,6 +51,18 @@ class HttpServer : public QObject
     }
 
     /**
+     * @brief A template method to register an action via the Action interface.
+     * This special option offers a special mechanism to pass plain-old-data
+     * from the main thread to potentially reduce the need for singletons and
+     * the like.
+     */
+    template<class T, class P> bool addAction(P& param)
+    {
+      std::shared_ptr<Action> action(new T(param));
+      return addAction(action);
+    }
+
+    /**
      * @brief Takes ownership of the pointer passed in, do not delete!
      */
     bool addAction(std::shared_ptr<Action>& action);

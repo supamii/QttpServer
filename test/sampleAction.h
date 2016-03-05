@@ -62,6 +62,28 @@ class SampleActionWithHttpMethods: public Action
     }
 };
 
+class ActionWithParameter: public Action
+{
+  public:
+    ActionWithParameter(QString param) : Action(), m_Param(param)
+    {
+    }
+
+    void onAction(HttpData& data)
+    {
+      LOG_TRACE;
+      QJsonObject& json = data.getJson();
+      json["response"] = "Sample C++ FTW With Parameter " + m_Param;
+    }
+
+    const QString getActionName() const
+    {
+      return "sampleWithParameter";
+    }
+
+    QString m_Param;
+};
+
 class SampleProcessor: public Processor
 {
   public:
