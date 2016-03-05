@@ -140,7 +140,7 @@ make
 
 ##### Build MongoDb driver
 
-1. Install [scons](http://www.scons.org/) - e.g. `brew install scons`
+1. Install [scons](http://www.scons.org/) - e.g. `brew install scons` or `sudo apt-get install scons`
 2. Install [boost](https://github.com/mongodb/mongo-cxx-driver/wiki/Download-and-Compile-the-Legacy-Driver)
 
    Many agree that building Boost can be challenging so it's recommend to use something like brew, apt-get, or the pre-built [binary installer for windows](http://sourceforge.net/projects/boost/files/boost-binaries/)
