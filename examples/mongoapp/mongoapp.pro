@@ -21,7 +21,7 @@ macx {
     # CONFIG -= app_bundle
 
     LIBS += \
-        -L$$PWD/lib/mongo-cxx-driver/build/install \
+        -L$$PWD/../../lib/mongo-cxx-driver/build/install/lib \
         -lmongoclient \
         -L/usr/local/lib \
         -lboost_system \
@@ -34,8 +34,7 @@ macx {
         -lboost_regex-mt
 
     INCLUDEPATH += \
-        $$PWD/lib/mongo-cxx-driver/src \
-        $$PWD/lib/mongo-cxx-driver/build/install \
+        $$PWD/../../lib/mongo-cxx-driver/build/install/include \
         /usr/local/include
 }
 
