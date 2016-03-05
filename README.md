@@ -169,7 +169,7 @@ make
 
     ```bash
     cd QttpServer/lib/mongo-cxx-driver
-    sudo scons --libpath=/usr/local/opt/boost155/lib --cpppath=/usr/local/opt/boost155/include --dbg=on --opt=on --64 install
+    sudo scons --libpath=/usr/lib/x86_64-linux-gnu --cpppath=/usr/include --dbg=on --opt=on --64 install
     ```
 
    Windows
