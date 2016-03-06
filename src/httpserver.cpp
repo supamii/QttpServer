@@ -19,6 +19,9 @@ HttpServer* HttpServer::getInstance()
 
 HttpServer::HttpServer() :
     QObject(),
+    m_ServerErrorCallback([](){
+      LOG_FATAL("Unable to bind to ip/port, exiting...");
+    }),
     m_EventCallback(this->defaultEventCallback()),
     m_Actions(),
     m_ActionCallbacks(),
@@ -213,6 +216,12 @@ int HttpServer::start()
   if(!result)
   {
     LOG_ERROR("Unable to bind to" << ip << port);
+
+    if(svr.m_ServerErrorCallback)
+    {
+      svr.m_ServerErrorCallback();
+    }
+
     return 1;
   }
 
@@ -225,6 +234,11 @@ int HttpServer::start()
 void HttpServer::stop()
 {
   native::stop();
+}
+
+void HttpServer::setServerErrorCallback(function<void()> serverErrorCallback)
+{
+  m_ServerErrorCallback = serverErrorCallback;
 }
 
 void HttpServer::setEventCallback(function<void(HttpEvent*)> eventCallback)

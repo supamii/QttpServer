@@ -93,7 +93,7 @@
   #endif
 
   #ifndef LOG_FATAL
-    #define LOG_FATAL(X) qFatal() << LOG_FUNCTION("FATAL") << X
+    #define LOG_FATAL(X) qFatal(LOG_DATETIME.append("FATAL ").append(LOG_FILE.append(__FUNCTION__).append(":").append(std::to_string(__LINE__).c_str()).append(" ").append(X)).toStdString().c_str())
   #endif
 #endif
 

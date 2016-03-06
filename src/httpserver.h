@@ -36,6 +36,14 @@ class HttpServer : public QObject
     static void stop();
 
     /**
+     * @brief By default the HttpServer will exit if it can't successfully bind
+     * to the desired ip/port.  This allows the caller to override the the
+     * default behavior.
+     * @param serverErrorCallback
+     */
+    void setServerErrorCallback(std::function<void()> serverErrorCallback);
+
+    /**
      * @brief setEventFilter
      * @param callback
      */
@@ -190,6 +198,7 @@ class HttpServer : public QObject
     HttpServer(const HttpServer&) = delete;
     void operator =(const HttpServer&) {}
 
+    std::function<void()> m_ServerErrorCallback;
     /// @brief This callback allows the caller to intercept all responses.
     std::function<void(HttpEvent*)> m_EventCallback;
     QHash<QString, std::shared_ptr<Action>> m_Actions;
