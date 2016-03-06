@@ -12,6 +12,9 @@ class TestHttpServer: public QObject
 
   private slots:
     void initTestCase();
+
+    void testGET_EchoResponse();
+    void testGET_NoEchoResponse();
     void testGET_DefaultResponse();
     void testGET_RandomLocalhostUrl();
     void testPOST_RandomLocalhostUrl();
@@ -46,6 +49,17 @@ void TestHttpServer::initTestCase()
   });
 
   httpSvr.addProcessor<SampleProcessor>();
+
+  result = httpSvr.addAction("echo", [](HttpData& data) {
+      QJsonObject& json = data.getJson();
+      json["response"] = "C++ FTW " + data.getQuery().queryItemValue("id");
+  });
+
+  result = httpSvr.registerRoute("get", "", "/echo/:id");
+  QVERIFY(result == true);
+
+  result = httpSvr.registerRoute("get", "echo", "/echo/:id/data");
+  QVERIFY(result == true);
 
   // Uses the action interface.
   result = httpSvr.addAction<SampleActionWithHttpMethods>();
@@ -109,6 +123,40 @@ void TestHttpServer::initTestCase()
   QVERIFY(result == true);
 
   httpSvr.startServer();
+}
+
+void TestHttpServer::testGET_EchoResponse()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080/echo/123/data")));
+  QVERIFY(result.isEmpty());
+  QTest::qWait(1000);
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"C++ FTW 123\",\"postprocess\":true}").toLatin1());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
+}
+
+void TestHttpServer::testGET_NoEchoResponse()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  netMgr->get(QNetworkRequest(QUrl("http://127.0.0.1:8080/echo/123")));
+  QVERIFY(result.isEmpty());
+  QTest::qWait(1000);
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"C++ FTW\",\"postprocess\":true}").toLatin1());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
 }
 
 void TestHttpServer::testGET_DefaultResponse()
