@@ -15,6 +15,9 @@ class TestHttpServer: public QObject
 
     void testGET_EchoResponse();
     void testGET_NoEchoResponse();
+    void testGET_EchoBodyResponse();
+    void testGET_InvalidEchoBodyResponse();
+
     void testGET_DefaultResponse();
     void testGET_RandomLocalhostUrl();
     void testPOST_RandomLocalhostUrl();
@@ -59,6 +62,14 @@ void TestHttpServer::initTestCase()
   QVERIFY(result == true);
 
   result = httpSvr.registerRoute("get", "echo", "/echo/:id/data");
+  QVERIFY(result == true);
+
+  result = httpSvr.addAction("echobody", [](HttpData& data) {
+      QJsonObject& json = data.getJson();
+      json["response"] = data.getRequestBody();
+  });
+
+  result = httpSvr.registerRoute("post", "echobody", "/echobody");
   QVERIFY(result == true);
 
   // Uses the action interface.
@@ -155,6 +166,48 @@ void TestHttpServer::testGET_NoEchoResponse()
   QTest::qWait(1000);
   QJsonDocument expected;
   expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"C++ FTW\",\"postprocess\":true}").toLatin1());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
+}
+
+void TestHttpServer::testGET_EchoBodyResponse()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  QNetworkRequest networkRequest(QUrl("http://127.0.0.1:8080/echobody"));
+  networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");
+  QString str = "{\"hi\":\"there\"}";
+  netMgr->post(networkRequest, str.toLatin1());
+
+  QVERIFY(result.isEmpty());
+  QTest::qWait(1000);
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":{\"hi\":\"there\"},\"postprocess\":true}").toLatin1());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
+}
+
+void TestHttpServer::testGET_InvalidEchoBodyResponse()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  QNetworkRequest networkRequest(QUrl("http://127.0.0.1:8080/echobody"));
+  networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");
+  QString str = "should be invalid json";
+  netMgr->post(networkRequest, str.toLatin1());
+
+  QVERIFY(result.isEmpty());
+  QTest::qWait(1000);
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":{},\"postprocess\":true}").toLatin1());
   QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
            result.toStdString().c_str());
 }

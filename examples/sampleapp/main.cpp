@@ -26,6 +26,13 @@ int main(int argc, char** argv)
       json["response"] = "Hello World!";
     });
 
+    svr->addAction("echobody", [](HttpData& data) {
+        QJsonObject& json = data.getJson();
+        json["response"] = data.getRequestBody();
+    });
+
+    svr->registerRoute("post", "echobody", "/echobody");
+
     svr->startServer();
 
     result = app.exec();

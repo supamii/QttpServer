@@ -10,6 +10,7 @@ HttpData::HttpData(request* req, response* resp):
     m_Response(resp),
     m_Query(),
     m_Json(),
+    m_RequestBodyJson(),
     m_ControlFlag(None),
     m_Uid(QUuid::createUuid()),
     m_Time()
@@ -33,6 +34,35 @@ response& HttpData::getResponse() const
 {
   Q_ASSERT(!isFinished() && m_Response != nullptr);
   return *m_Response;
+}
+
+QJsonObject& HttpData::getRequestBody()
+{
+  if(!m_RequestBodyJson.isEmpty())
+  {
+    return m_RequestBodyJson;
+  }
+
+  request& req = getRequest();
+
+  string body = req.get_body();
+  auto openBrace = body.find("{");
+  auto closeBrace = body.find("}");
+
+  if(openBrace != string::npos && openBrace == 0 &&
+     closeBrace != string::npos && closeBrace == (body.length() - 1))
+  {
+    QJsonParseError error;
+    m_RequestBodyJson = Utils::toJson(body, &error);
+
+    if(error.error != QJsonParseError::NoError)
+    {
+      LOG_ERROR(error.errorString());
+      m_RequestBodyJson = Utils::toJson(string("{}"));
+    }
+  }
+
+  return m_RequestBodyJson;
 }
 
 QUrlQuery& HttpData::getQuery()

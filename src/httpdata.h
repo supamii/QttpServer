@@ -68,6 +68,8 @@ class HttpData
      */
     native::http::response& getResponse() const;
 
+    QJsonObject& getRequestBody();
+
     QUrlQuery& getQuery();
 
     const QUrlQuery& getQuery() const;
@@ -150,6 +152,7 @@ class HttpData
     native::http::response* m_Response;
     QUrlQuery m_Query;
     QJsonObject m_Json;
+    QJsonObject m_RequestBodyJson;
     quint32 m_ControlFlag;
     QUuid m_Uid;
     QDateTime m_Timestamp;
