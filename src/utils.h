@@ -141,6 +141,11 @@ class Utils
       return Utils::toByteArray(buffer.str());
     }
 
+    static inline QJsonObject toJson(const std::stringstream& buffer, QJsonParseError* error = 0)
+    {
+      return QJsonDocument::fromJson(toByteArray(buffer), error).object();
+    }
+
     static inline QJsonObject toJson(const std::string& str, QJsonParseError* error = 0)
     {
       return QJsonDocument::fromJson(toByteArray(str), error).object();
@@ -149,6 +154,11 @@ class Utils
     static inline QJsonObject toJson(QByteArray bytes, QJsonParseError* error = 0)
     {
       return QJsonDocument::fromJson(bytes, error).object();
+    }
+
+    static inline QJsonArray toArray(const std::stringstream& buffer, QJsonParseError* error = 0)
+    {
+      return QJsonDocument::fromJson(toByteArray(buffer), error).array();
     }
 
     static inline QJsonArray toArray(const std::string& str, QJsonParseError* error = 0)
