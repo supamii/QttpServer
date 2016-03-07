@@ -10,7 +10,7 @@ HttpData::HttpData(request* req, response* resp):
     m_Response(resp),
     m_Query(),
     m_Json(),
-    m_RequestBodyJson(),
+    m_RequestParams(),
     m_ControlFlag(None),
     m_Uid(QUuid::createUuid()),
     m_Time()
@@ -36,11 +36,17 @@ response& HttpData::getResponse() const
   return *m_Response;
 }
 
-QJsonObject& HttpData::getRequestBody()
+QJsonObject& HttpData::getRequestParams()
 {
-  if(!m_RequestBodyJson.isEmpty())
+  if(!m_RequestParams.isEmpty())
   {
-    return m_RequestBodyJson;
+    return m_RequestParams;
+  }
+
+  QList<QPair<QString, QString>> list = getQuery().queryItems();
+  for(auto i = list.begin(); i != list.end(); ++i)
+  {
+    m_RequestParams.insert(i->first, i->second);
   }
 
   request& req = getRequest();
@@ -53,16 +59,16 @@ QJsonObject& HttpData::getRequestBody()
      closeBrace != string::npos && closeBrace == (body.length() - 1))
   {
     QJsonParseError error;
-    m_RequestBodyJson = Utils::toJson(body, &error);
+    m_RequestParams = Utils::toJson(body, &error);
 
     if(error.error != QJsonParseError::NoError)
     {
       LOG_ERROR(error.errorString());
-      m_RequestBodyJson = Utils::toJson(string("{}"));
+      m_RequestParams = Utils::toJson(string("{}"));
     }
   }
 
-  return m_RequestBodyJson;
+  return m_RequestParams;
 }
 
 QUrlQuery& HttpData::getQuery()

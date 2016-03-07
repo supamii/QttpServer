@@ -66,7 +66,7 @@ void TestHttpServer::initTestCase()
 
   result = httpSvr.addAction("echobody", [](HttpData& data) {
       QJsonObject& json = data.getJson();
-      json["response"] = data.getRequestBody();
+      json["response"] = data.getRequestParams();
   });
 
   result = httpSvr.registerRoute("post", "echobody", "/echobody");
