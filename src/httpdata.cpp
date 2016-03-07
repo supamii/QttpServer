@@ -43,12 +43,6 @@ QJsonObject& HttpData::getRequestParams()
     return m_RequestParams;
   }
 
-  QList<QPair<QString, QString>> list = getQuery().queryItems();
-  for(auto i = list.begin(); i != list.end(); ++i)
-  {
-    m_RequestParams.insert(i->first, i->second);
-  }
-
   request& req = getRequest();
 
   string body = req.get_body();
@@ -66,6 +60,12 @@ QJsonObject& HttpData::getRequestParams()
       LOG_ERROR(error.errorString());
       m_RequestParams = Utils::toJson(string("{}"));
     }
+  }
+
+  QList<QPair<QString, QString>> list = getQuery().queryItems();
+  for(auto i = list.begin(); i != list.end(); ++i)
+  {
+    m_RequestParams.insert(i->first, i->second);
   }
 
   return m_RequestParams;
