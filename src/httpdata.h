@@ -68,6 +68,12 @@ class HttpData
      */
     native::http::response& getResponse() const;
 
+    /**
+     * @brief Highly recommended!  This builds and returns a QJsonObject that
+     * consolidates query-string parameters and the reqeust body (JSON only).
+     * This avoids having to grab from the query string and parsing through the
+     * request body separately.
+     */
     QJsonObject& getRequestParams();
 
     QUrlQuery& getQuery();
