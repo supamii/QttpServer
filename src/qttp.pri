@@ -1,9 +1,6 @@
-HEADERS += \
-    $$PWD/*.h \
-    $$PWD/processor.h \
-    $$PWD/processor.h
-
+HEADERS += $$PWD/*.h
 SOURCES += $$PWD/*.cpp
+
 INCLUDEPATH += $$PWD
 
 INCLUDEPATH = $$unique(INCLUDEPATH)

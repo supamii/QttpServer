@@ -1,9 +1,9 @@
 #ifndef QTTPHTTPDATA_H
 #define QTTPHTTPDATA_H
 
-#include <QtCore>
-#include <QtNetwork>
-#include <http.h>
+#include "qttp_global.h"
+#include "httprequest.h"
+#include "httpresponse.h"
 
 namespace qttp
 {
@@ -16,7 +16,7 @@ class HttpServer;
  *
  * @brief
  */
-class HttpData
+class QTTPSHARED_EXPORT HttpData
 {
     friend class HttpServer;
 
@@ -57,6 +57,13 @@ class HttpData
     native::http::request& getRequest() const;
 
     /**
+     * @brief Recommended for qt-centric applications that deal with QStrings.
+     * This will save the user from having to constantly convert to a QString.
+     */
+    const HttpRequest& getHttpRequest() const;
+    HttpRequest& getHttpRequest();
+
+    /**
      * @brief Returns the response object, note that response::end() method is
      * ABSOLUTELY DISCOURAGED from direct invocation since the we have no way of
      * tracking the state of the response socket.
@@ -67,6 +74,13 @@ class HttpData
      * DO NOT to save/use this reference outside of the lifetime of HttpData.
      */
     native::http::response& getResponse() const;
+
+    /**
+     * @brief Recommended for qt-centric applications that deal with QStrings.
+     * This will save the user from having to constantly convert to a QString.
+     */
+    const HttpResponse& getHttpResponse() const;
+    HttpResponse& getHttpResponse();
 
     /**
      * @brief Highly recommended!  This builds and returns a QJsonObject that
@@ -155,7 +169,9 @@ class HttpData
     void setQuery(QUrlQuery&);
 
     native::http::request* m_Request;
+    HttpRequest m_HttpRequest;
     native::http::response* m_Response;
+    HttpResponse m_HttpResponse;
     QUrlQuery m_Query;
     QJsonObject m_Json;
     QJsonObject m_RequestParams;

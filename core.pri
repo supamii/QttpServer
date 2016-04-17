@@ -58,6 +58,10 @@ win32 {
     LIBS += -luv -lhttp_parser -lnode_native
 }
 
+contains(CONFIG, QTTP_LIBRARY) {
+    LIBS += -lqttpserver
+}
+
 CONFIG(debug, debug|release) {
     message('Compiling in DEBUG mode')
     BUILDTYPE = Debug

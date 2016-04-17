@@ -1,0 +1,8 @@
+#ifndef QTTPSERVER_H
+#define QTTPSERVER_H
+
+#include "httpserver.h"
+#include "httpdata.h"
+#include "utils.h"
+
+#endif // QTTPSERVER_H

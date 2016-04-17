@@ -1,11 +1,7 @@
 #ifndef QTTPACTION_H
 #define QTTPACTION_H
 
-#include <QtCore>
-#include <QtNetwork>
-#include <http.h>
-#include <functional>
-
+#include "qttp_global.h"
 #include "httpdata.h"
 
 namespace qttp
@@ -15,7 +11,7 @@ namespace qttp
  * @brief Borrowing ideas from Node.js frameworks like Actionhero.js, an action
  * is ultimately the endpoint of the http request.
  */
-class Action
+class QTTPSHARED_EXPORT Action
 {
   public:
     Action();
@@ -41,7 +37,7 @@ class Action
  * processor is available for frequent and commonly performed tasks.  Again,
  * borrows from the node.js misnomer - known as a "middleware".
  */
-class Processor
+class QTTPSHARED_EXPORT Processor
 {
   public:
     Processor();

@@ -1,10 +1,10 @@
-#include <httpserver.h>
+#include <QCoreApplication>
+#include <qttpserver>
 
 using namespace std;
 using namespace qttp;
-using namespace native::http;
 
-int main(int argc, char** argv)
+int main(int argc, char *argv[])
 {
   auto result = 0;
 

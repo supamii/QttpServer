@@ -1,12 +1,7 @@
 #ifndef QTTPUTILS_H
 #define QTTPUTILS_H
 
-#include <QtCore>
-#include <QFile>
-#include <QJsonDocument>
-#include <iostream>
-#include <sstream>
-#include <typeinfo>
+#include "qttp_global.h"
 
 #ifdef NO_QTTP_LOGGING
   #define LOG_DATETIME QString()
@@ -107,7 +102,7 @@ class HttpServer;
  * @brief This takes from ideas in ACE C++ to print on construction and
  * destruction of the object for easier log-tracing.
  */
-class LogTrace
+class QTTPSHARED_EXPORT LogTrace
 {
   public:
     LogTrace(QString, quint32);
@@ -185,7 +180,7 @@ class Utils
   #define STATS_SET(X, Y)
 #endif
 
-class Stats
+class QTTPSHARED_EXPORT Stats
 {
     friend class HttpServer;
 
@@ -199,7 +194,7 @@ class Stats
     QHash<QString, QVariant> m_Statistics;
 };
 
-class LoggingUtils : public QObject
+class QTTPSHARED_EXPORT LoggingUtils : public QObject
 {
     Q_OBJECT
 

@@ -16,12 +16,27 @@ contains(CONFIG, SAMPLEAPP) {
     }
     message('Including config files')
     include($$PWD/config/config.pri)
+
 } else {
-    message(********* Building static library qttpserver *********)
+
     TEMPLATE = lib
-    CONFIG += staticlib
     VERSION = 0.0.1
     TARGET = qttpserver
+
+    contains(CONFIG, QTTP_LIBRARY) {
+        message(********* Building shared library qttpserver *********)
+
+        DEFINES += QTTP_LIBRARY
+        unix {
+            #target.path = /usr/lib
+            #INSTALLS += target
+        }
+
+    } else {
+        message(********* Building static library qttpserver *********)
+        CONFIG += staticlib
+    }
+
     CONFIG(debug, debug|release) {
         win32 {
             DESTDIR = $$PWD/build/Debug/lib

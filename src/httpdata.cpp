@@ -7,7 +7,9 @@ using namespace qttp;
 
 HttpData::HttpData(request* req, response* resp):
     m_Request(req),
+    m_HttpRequest(req),
     m_Response(resp),
+    m_HttpResponse(resp),
     m_Query(),
     m_Json(),
     m_RequestParams(),
@@ -30,10 +32,34 @@ request& HttpData::getRequest() const
   return *m_Request;
 }
 
+const HttpRequest& HttpData::getHttpRequest() const
+{
+  Q_ASSERT(!isFinished() && m_Request != nullptr);
+  return m_HttpRequest;
+}
+
+HttpRequest& HttpData::getHttpRequest()
+{
+  Q_ASSERT(!isFinished() && m_Request != nullptr);
+  return m_HttpRequest;
+}
+
 response& HttpData::getResponse() const
 {
   Q_ASSERT(!isFinished() && m_Response != nullptr);
   return *m_Response;
+}
+
+const HttpResponse& HttpData::getHttpResponse() const
+{
+  Q_ASSERT(!isFinished() && m_Response != nullptr);
+  return m_HttpResponse;
+}
+
+HttpResponse& HttpData::getHttpResponse()
+{
+  Q_ASSERT(!isFinished() && m_Response != nullptr);
+  return m_HttpResponse;
 }
 
 QJsonObject& HttpData::getRequestParams()

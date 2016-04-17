@@ -1,15 +1,12 @@
 #ifndef QTTPHTTPEVENT_H
 #define QTTPHTTPEVENT_H
 
-#include <QObject>
-#include <QEvent>
-#include <QDateTime>
-#include <http.h>
+#include "qttp_global.h"
 
 namespace qttp
 {
 
-class HttpEvent : public QEvent
+class QTTPSHARED_EXPORT HttpEvent : public QEvent
 {
   public:
     HttpEvent();

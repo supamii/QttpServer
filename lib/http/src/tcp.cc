@@ -21,10 +21,10 @@ std::shared_ptr<tcp> tcp::create()
 }
 
 // TODO: bind and listen
-std::shared_ptr<tcp> tcp::create_server(const std::string& ip, int port)
-{
-    return nullptr;
-}
+//std::shared_ptr<tcp> tcp::create_server(const std::string& ip, int port)
+//{
+//    return nullptr;
+//}
 
 bool tcp::bind(const sockaddr* iAddr, error& oError)
 {

@@ -28,7 +28,7 @@ namespace native
             static std::shared_ptr<tcp> create();
 
             // TODO: bind and listen
-            static std::shared_ptr<tcp> create_server(const std::string& ip, int port);
+            // static std::shared_ptr<tcp> create_server(const std::string& ip, int port);
 
             bool nodelay(bool enable) { return uv_tcp_nodelay(get<uv_tcp_t>(), enable?1:0) == 0; }
             bool keepalive(bool enable, unsigned int delay) { return uv_tcp_keepalive(get<uv_tcp_t>(), enable?1:0, delay) == 0; }
