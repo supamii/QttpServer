@@ -1,8 +1,9 @@
 #ifndef QTTPSAMPLE_H
 #define QTTPSAMPLE_H
 
-#include <QtCore>
+#include <QtTest/QtTest>
 
+#include <qttpserver>
 #include <action.h>
 #include <utils.h>
 

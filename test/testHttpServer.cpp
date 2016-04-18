@@ -1,6 +1,4 @@
-#include <httpserver.h>
-#include "sampleAction.h"
-#include <QtTest/QtTest>
+#include "testHttpServer.h"
 
 using namespace std;
 using namespace qttp;

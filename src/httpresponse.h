@@ -1,5 +1,5 @@
-#ifndef HTTPRESPONSE_H
-#define HTTPRESPONSE_H
+#ifndef QTTPHTTPRESPONSE_H
+#define QTTPHTTPRESPONSE_H
 
 #include "qttp_global.h"
 #include "httpurl.h"
@@ -45,4 +45,4 @@ class QTTPSHARED_EXPORT HttpResponse
 
 }
 
-#endif // HTTPRESPONSE_H
+#endif // QTTPHTTPRESPONSE_H

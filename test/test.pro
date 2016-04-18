@@ -4,7 +4,7 @@ QT += testlib
 QT -= gui
 
 HEADERS += \
-    sampleAction.h
+    testHttpServer.h
 
 SOURCES += \
     testHttpServer.cpp

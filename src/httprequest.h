@@ -1,5 +1,5 @@
-#ifndef HTTPREQUEST_H
-#define HTTPREQUEST_H
+#ifndef QTTPHTTPREQUEST_H
+#define QTTPHTTPREQUEST_H
 
 #include "qttp_global.h"
 #include "httpurl.h"
@@ -39,4 +39,4 @@ class QTTPSHARED_EXPORT HttpRequest
 };
 
 }
-#endif // HTTPREQUEST_H
+#endif // QTTPHTTPREQUEST_H

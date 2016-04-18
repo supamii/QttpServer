@@ -1,5 +1,5 @@
-#ifndef HTTPURL_H
-#define HTTPURL_H
+#ifndef QTTPHTTPURL_H
+#define QTTPHTTPURL_H
 
 #include "qttp_global.h"
 
@@ -45,4 +45,4 @@ class QTTPSHARED_EXPORT HttpUrl
 
 }
 
-#endif // HTTPURL_H
+#endif // QTTPHTTPURL_H
