@@ -23,24 +23,40 @@ class QTTPSHARED_EXPORT HttpUrl
 
   private:
     HttpUrl(native::http::request* req);
-    ~HttpUrl();
 
   public:
-    QString& schema() const;
-    QString& host() const;
-    qint32 port() const;
-    QString& path() const;
-    QString& query() const;
-    QString& fragment() const;
+    ~HttpUrl();
+
+    const QString& schema() const;
+    const QString& host() const;
+
+    inline qint32 port()
+    {
+      m_Request->url().port();
+    }
+
+    const QString& path() const;
+    const QString& query() const;
+    const QString& fragment() const;
 
   private:
     Assert<native::http::request> m_Assertion;
     const native::http::request* m_Request;
-    QString m_Schema;
-    QString m_Host;
-    QString m_Path;
-    QString m_Query;
-    QString m_Fragment;
+
+    /// Mutable because this is inteded to help cache and reduce QString conversions.
+    mutable QSharedPointer<QString> m_Schema;
+
+    /// Mutable because this is inteded to help cache and reduce QString conversions.
+    mutable QSharedPointer<QString> m_Host;
+
+    /// Mutable because this is inteded to help cache and reduce QString conversions.
+    mutable QSharedPointer<QString> m_Path;
+
+    /// Mutable because this is inteded to help cache and reduce QString conversions.
+    mutable QSharedPointer<QString> m_Query;
+
+    /// Mutable because this is inteded to help cache and reduce QString conversions.
+    mutable QSharedPointer<QString> m_Fragment;
 };
 
 }

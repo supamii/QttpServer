@@ -10,6 +10,11 @@ namespace qttp
 class HttpServer;
 class HttpData;
 
+/**
+ * TODO: FIXME: Should probably optionally allow users to omit this entirely
+ * since it may add more bloat if they don't want or need it!
+ *
+ */
 class QTTPSHARED_EXPORT HttpRequest
 {
     friend class HttpServer;
@@ -17,25 +22,28 @@ class QTTPSHARED_EXPORT HttpRequest
 
   private:
     HttpRequest(native::http::request* req);
-    ~HttpRequest();
 
   public:
-    const HttpUrl & url() const;
+    ~HttpRequest();
+
+    const HttpUrl& getUrl() const;
 
     const std::string& get_header(const std::string& key) const;
     bool get_header(const std::string& key, std::string& value) const;
 
-    std::string get_body (void) const;
-    std::stringstream& get_raw_body (void);
+    std::string get_body() const;
+    std::stringstream& get_raw_body();
 
-    const std::string& get_method (void) const;
+    const std::string& get_method() const;
+    const QString& getMethod() const;
 
-    uint64_t get_timestamp(void) const;
+    uint64_t get_timestamp() const;
 
   private:
     Assert<native::http::request> m_Assertion;
     native::http::request* m_Request;
-    HttpUrl m_HttpUrl;
+    mutable QSharedPointer<HttpUrl> m_HttpUrl;
+    mutable QSharedPointer<QString> m_Method;
 };
 
 }

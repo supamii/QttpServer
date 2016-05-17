@@ -10,6 +10,11 @@ namespace qttp
 class HttpServer;
 class HttpData;
 
+/**
+ * TODO: FIXME: Should probably optionally allow users to omit this entirely
+ * since it may add more bloat if they don't want or need it!
+ *
+ */
 class QTTPSHARED_EXPORT HttpResponse
 {
     friend class HttpServer;
@@ -17,9 +22,9 @@ class QTTPSHARED_EXPORT HttpResponse
 
   private:
     HttpResponse(native::http::response* resp);
-    ~HttpResponse();
 
   public:
+    ~HttpResponse();
 
     bool end(const std::string& body);
     bool end(int length, const char* body);

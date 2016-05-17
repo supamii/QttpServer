@@ -169,9 +169,9 @@ class QTTPSHARED_EXPORT HttpData
     void setQuery(QUrlQuery&);
 
     native::http::request* m_Request;
-    HttpRequest m_HttpRequest;
+    mutable QSharedPointer<HttpRequest> m_HttpRequest;
     native::http::response* m_Response;
-    HttpResponse m_HttpResponse;
+    mutable QSharedPointer<HttpResponse> m_HttpResponse;
     QUrlQuery m_Query;
     QJsonObject m_Json;
     QJsonObject m_RequestParams;

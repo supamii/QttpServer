@@ -7,9 +7,9 @@ using namespace qttp;
 
 HttpData::HttpData(request* req, response* resp):
     m_Request(req),
-    m_HttpRequest(req),
+    m_HttpRequest(),
     m_Response(resp),
-    m_HttpResponse(resp),
+    m_HttpResponse(),
     m_Query(),
     m_Json(),
     m_RequestParams(),
@@ -34,14 +34,24 @@ request& HttpData::getRequest() const
 
 const HttpRequest& HttpData::getHttpRequest() const
 {
-  Q_ASSERT(!isFinished() && m_Request != nullptr);
-  return m_HttpRequest;
+  // FIXME: Will probably need to lock this?
+  if(m_HttpRequest.isNull())
+  {
+    Q_ASSERT(!isFinished() && m_Request != nullptr);
+    m_HttpRequest = QSharedPointer<HttpRequest>(new HttpRequest(m_Request));
+  }
+  return *(m_HttpRequest.data());
 }
 
 HttpRequest& HttpData::getHttpRequest()
 {
-  Q_ASSERT(!isFinished() && m_Request != nullptr);
-  return m_HttpRequest;
+  // FIXME: Will probably need to lock this?
+  if(m_HttpRequest.isNull())
+  {
+    Q_ASSERT(!isFinished() && m_Request != nullptr);
+    m_HttpRequest = QSharedPointer<HttpRequest>(new HttpRequest(m_Request));
+  }
+  return *(m_HttpRequest.data());
 }
 
 response& HttpData::getResponse() const
@@ -52,14 +62,24 @@ response& HttpData::getResponse() const
 
 const HttpResponse& HttpData::getHttpResponse() const
 {
-  Q_ASSERT(!isFinished() && m_Response != nullptr);
-  return m_HttpResponse;
+  // FIXME: Will probably need to lock this?
+  if(m_HttpResponse.isNull())
+  {
+    Q_ASSERT(!isFinished() && m_Response != nullptr);
+    m_HttpResponse = QSharedPointer<HttpResponse>(new HttpResponse(m_Response));
+  }
+  return *(m_HttpResponse.data());
 }
 
 HttpResponse& HttpData::getHttpResponse()
 {
-  Q_ASSERT(!isFinished() && m_Response != nullptr);
-  return m_HttpResponse;
+  // FIXME: Will probably need to lock this?
+  if(m_HttpResponse.isNull())
+  {
+    Q_ASSERT(!isFinished() && m_Response != nullptr);
+    m_HttpResponse = QSharedPointer<HttpResponse>(new HttpResponse(m_Response));
+  }
+  return *(m_HttpResponse.data());
 }
 
 QJsonObject& HttpData::getRequestParams()
