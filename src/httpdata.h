@@ -3,7 +3,6 @@
 
 #include "qttp_global.h"
 #include "httprequest.h"
-#include "httpresponse.h"
 
 namespace qttp
 {
