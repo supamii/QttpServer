@@ -26,24 +26,25 @@ class QTTPSHARED_EXPORT HttpRequest
   public:
     ~HttpRequest();
 
-    const HttpUrl& getUrl() const;
-
+    const native::http::url_obj& url() const;
     const std::string& get_header(const std::string& key) const;
     bool get_header(const std::string& key, std::string& value) const;
-
     std::string get_body() const;
     std::stringstream& get_raw_body();
-
     const std::string& get_method() const;
-    const QString& getMethod() const;
 
     uint64_t get_timestamp() const;
+
+    const HttpUrl& getUrl() const;
+    const QString& getBody() const;
+    const QString& getMethod() const;
 
   private:
     Assert<native::http::request> m_Assertion;
     native::http::request* m_Request;
     mutable QSharedPointer<HttpUrl> m_HttpUrl;
     mutable QSharedPointer<QString> m_Method;
+    mutable QSharedPointer<QString> m_Body;
 };
 
 }

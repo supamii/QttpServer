@@ -9,7 +9,6 @@ HttpData::HttpData(request* req, response* resp):
     m_Request(req),
     m_HttpRequest(),
     m_Response(resp),
-    m_HttpResponse(),
     m_Query(),
     m_Json(),
     m_RequestParams(),
@@ -58,28 +57,6 @@ response& HttpData::getResponse() const
 {
   Q_ASSERT(!isFinished() && m_Response != nullptr);
   return *m_Response;
-}
-
-const HttpResponse& HttpData::getHttpResponse() const
-{
-  // FIXME: Will probably need to lock this?
-  if(m_HttpResponse.isNull())
-  {
-    Q_ASSERT(!isFinished() && m_Response != nullptr);
-    m_HttpResponse = QSharedPointer<HttpResponse>(new HttpResponse(m_Response));
-  }
-  return *(m_HttpResponse.data());
-}
-
-HttpResponse& HttpData::getHttpResponse()
-{
-  // FIXME: Will probably need to lock this?
-  if(m_HttpResponse.isNull())
-  {
-    Q_ASSERT(!isFinished() && m_Response != nullptr);
-    m_HttpResponse = QSharedPointer<HttpResponse>(new HttpResponse(m_Response));
-  }
-  return *(m_HttpResponse.data());
 }
 
 QJsonObject& HttpData::getRequestParams()

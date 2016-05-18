@@ -27,17 +27,17 @@ class QTTPSHARED_EXPORT HttpUrl
   public:
     ~HttpUrl();
 
-    const QString& schema() const;
-    const QString& host() const;
+    /**
+     * @brief This defeats the purpose of lazily initializing members.
+     */
+    void initialize();
 
-    inline qint32 port()
-    {
-      m_Request->url().port();
-    }
-
-    const QString& path() const;
-    const QString& query() const;
-    const QString& fragment() const;
+    const QString& getSchema() const;
+    const QString& getHost() const;
+    qint32 getPort() const;
+    const QString& getPath() const;
+    const QString& getQuery() const;
+    const QString& getFragment() const;
 
   private:
     Assert<native::http::request> m_Assertion;

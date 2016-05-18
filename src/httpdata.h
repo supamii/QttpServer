@@ -76,13 +76,6 @@ class QTTPSHARED_EXPORT HttpData
     native::http::response& getResponse() const;
 
     /**
-     * @brief Recommended for qt-centric applications that deal with QStrings.
-     * This will save the user from having to constantly convert to a QString.
-     */
-    const HttpResponse& getHttpResponse() const;
-    HttpResponse& getHttpResponse();
-
-    /**
      * @brief Highly recommended!  This builds and returns a QJsonObject that
      * consolidates query-string parameters and the reqeust body (JSON only).
      * This avoids having to grab from the query string and parsing through the
@@ -171,7 +164,6 @@ class QTTPSHARED_EXPORT HttpData
     native::http::request* m_Request;
     mutable QSharedPointer<HttpRequest> m_HttpRequest;
     native::http::response* m_Response;
-    mutable QSharedPointer<HttpResponse> m_HttpResponse;
     QUrlQuery m_Query;
     QJsonObject m_Json;
     QJsonObject m_RequestParams;

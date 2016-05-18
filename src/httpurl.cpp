@@ -18,7 +18,16 @@ HttpUrl::~HttpUrl()
 {
 }
 
-const QString& HttpUrl::schema() const
+void HttpUrl::initialize()
+{
+  getSchema();
+  getHost();
+  getPath();
+  getQuery();
+  getFragment();
+}
+
+const QString& HttpUrl::getSchema() const
 {
   if(m_Schema.isNull())
   {
@@ -27,7 +36,7 @@ const QString& HttpUrl::schema() const
   return *(m_Schema.data());
 }
 
-const QString& HttpUrl::host() const
+const QString& HttpUrl::getHost() const
 {
   if(m_Host.isNull())
   {
@@ -36,7 +45,12 @@ const QString& HttpUrl::host() const
   return *(m_Host.data());
 }
 
-const QString& HttpUrl::path() const
+qint32 HttpUrl::getPort() const
+{
+  return m_Request->url().port();
+}
+
+const QString& HttpUrl::getPath() const
 {
   if(m_Path.isNull())
   {
@@ -45,7 +59,7 @@ const QString& HttpUrl::path() const
   return *(m_Path.data());
 }
 
-const QString& HttpUrl::query() const
+const QString& HttpUrl::getQuery() const
 {
   if(m_Query.isNull())
   {
@@ -54,7 +68,7 @@ const QString& HttpUrl::query() const
   return *(m_Query.data());
 }
 
-const QString& HttpUrl::fragment() const
+const QString& HttpUrl::getFragment() const
 {
   if(m_Fragment.isNull())
   {
