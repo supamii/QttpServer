@@ -29,6 +29,26 @@ INCLUDEPATH += \
     $$PWD/lib/http/include \
     $$PWD/lib/http/include/native
 
+contains(CONFIG, SSL_TLS) {
+
+    HEADERS += $$PWD/lib/evt_tls/*.h
+
+    SOURCES += \
+        $$PWD/lib/evt_tls/uv_tls.c \
+        $$PWD/lib/evt_tls/evt_tls.c
+
+    INCLUDEPATH += \
+        $$PWD/lib/evt_tls \
+        $$PWD/lib
+
+    # Currently this is specifically for mac + homebrew soft links.
+    macx: {
+        # The user should be able to provide the exact location of openssl.
+        INCLUDEPATH += /usr/local/opt/openssl/include
+        LIBS += -L/usr/local/opt/openssl/lib -lssl -lcrypto
+    }
+}
+
 macx: {
     LIBS += -framework CoreFoundation # -framework CoreServices
     CONFIG += c++14
