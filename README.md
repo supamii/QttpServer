@@ -252,10 +252,11 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 19. ~~File logging~~
 20. Support for remote logging services
 21. Add syslog support
-22. Include diagram of framework
+22. ~~Include diagram of framework~~
 23. ~~Command line arguments for common config values~~
 24. ~~Prevent copy constructor access where it makes sense~~
 25. ~~Revisit common and trivial methods - add inline hint~~
-26. SUPPORT web sockets
+26. SUPPORT web sockets ??
 27. Add oauth support
-28. Support shared library and add exports/import decl macros
+28. ~~Support shared library and add exports/import decl macros~~
+29. Include SSL support
