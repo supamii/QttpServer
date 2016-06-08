@@ -31,6 +31,8 @@ INCLUDEPATH += \
 
 contains(CONFIG, SSL_TLS) {
 
+    DEFINES += SSL_TLS_UV
+
     HEADERS += $$PWD/lib/evt_tls/*.h
 
     SOURCES += \

@@ -261,7 +261,10 @@ http::client_context::client_context(native::net::tcp* server):
 {
     assert(server);
 
-    // TODO: check error
+    // TODO: Check Error.
+    //
+    // TODO: Should this also toggle between SSL?
+
     socket_ = std::shared_ptr<native::net::tcp> (new native::net::tcp);
     server->accept(socket_.get());
 }
@@ -408,6 +411,7 @@ bool http::http::listen(const std::string& ip, int port, std::function<void(requ
     if(!socket_->listen([=](native::error e) {
         if(e)
         {
+            std::cerr << e.str();
             // TODO: handle client connection error
         }
         else

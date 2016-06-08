@@ -28,7 +28,7 @@ std::shared_ptr<tcp> tcp::create()
 
 bool tcp::bind(const sockaddr* iAddr, error& oError)
 {
-    //TODO: add flags
+    // TODO: add flags
     oError = uv_tcp_bind(get<uv_tcp_t>(), iAddr, 0);
     return !oError;
 }
