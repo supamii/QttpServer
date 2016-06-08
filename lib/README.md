@@ -1,3 +1,5 @@
+evt_tls - under prototype for SSL/TLS support via openSSL
+
 gmock - used only by http
 
 http - original node.native project
