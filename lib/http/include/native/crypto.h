@@ -1,7 +1,7 @@
 #ifndef __NATIVE_CRYPTO_H__
 #define __NATIVE_CRYPTO_H__
 
-
+#ifdef TO_BE_DECIDED
 namespace native
 {
     namespace crypto
@@ -32,4 +32,6 @@ namespace native
 
     }
 }
+#endif
+
 #endif
