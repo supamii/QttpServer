@@ -36,7 +36,7 @@ namespace native
 
             /** A general method which iAddr can be ip4 or ip6
              */
-            bool bind(const sockaddr* iAddr, error& oError);
+            virtual bool bind(const sockaddr* iAddr, error& oError);
 
             /** ip4 bind
              */

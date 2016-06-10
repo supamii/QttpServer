@@ -1,5 +1,9 @@
 #include "native/tcp.h"
 
+#ifdef SSL_TLS_UV
+  #include <uv_tls.h>
+#endif
+
 using namespace native;
 using namespace net;
 
@@ -28,8 +32,18 @@ std::shared_ptr<tcp> tcp::create()
 
 bool tcp::bind(const sockaddr* iAddr, error& oError)
 {
+    uv_tcp_t* listener = get<uv_tcp_t>();
+
+    #ifdef SSL_TLS_UV
+      // TODO: FIXME: This only needs to occur once.
+      //evt_ctx_init_ex(&ctx, "server-cert.pem", "server-key.pem");
+      //evt_ctx_set_nio(&ctx, NULL, uv_tls_writer);
+      //evt_ctx_t* ctx = new evt_ctx_t;
+      //listener->data = ctx;
+    #endif
+
     // TODO: add flags
-    oError = uv_tcp_bind(get<uv_tcp_t>(), iAddr, 0);
+    oError = uv_tcp_bind(listener, iAddr, 0);
     return !oError;
 }
 

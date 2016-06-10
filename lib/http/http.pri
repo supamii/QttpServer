@@ -45,6 +45,28 @@ win32 {
         -luserenv
 }
 
+contains(CONFIG, SSL_TLS) {
+
+    DEFINES += SSL_TLS_UV
+
+    HEADERS += $$PWD/../evt_tls/*.h
+
+    SOURCES += \
+        $$PWD/../evt_tls/uv_tls.c \
+        $$PWD/../evt_tls/evt_tls.c
+
+    INCLUDEPATH += \
+        $$PWD/../evt_tls \
+        $$PWD/..
+
+    # Currently this is specifically for mac + homebrew soft links.
+    macx: {
+        # The user should be able to provide the exact location of openssl.
+        INCLUDEPATH += /usr/local/opt/openssl/include
+        LIBS += -L/usr/local/opt/openssl/lib -lssl -lcrypto
+    }
+}
+
 # For ease and quick reference in QtCreator
 OTHER_FILES += \
     $$PWD/../libuv/include/*.h \

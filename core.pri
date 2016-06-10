@@ -33,11 +33,8 @@ contains(CONFIG, SSL_TLS) {
 
     DEFINES += SSL_TLS_UV
 
-    HEADERS += $$PWD/lib/evt_tls/*.h
-
-    SOURCES += \
-        $$PWD/lib/evt_tls/uv_tls.c \
-        $$PWD/lib/evt_tls/evt_tls.c
+    # HEADERS += $$PWD/lib/evt_tls/*.h
+    # SOURCES += $$PWD/lib/evt_tls/uv_tls.c $$PWD/lib/evt_tls/evt_tls.c
 
     INCLUDEPATH += \
         $$PWD/lib/evt_tls \
