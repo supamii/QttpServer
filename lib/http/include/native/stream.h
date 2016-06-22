@@ -25,9 +25,8 @@ namespace native
             bool accept(stream* client);
 
             bool read_start(std::function<void(const char* buf, ssize_t len)> callback);
+            template<size_t max_alloc_size> bool read_start(std::function<void(const char* buf, ssize_t len)> callback);
 
-            template<size_t max_alloc_size>
-            bool read_start(std::function<void(const char* buf, ssize_t len)> callback);
             bool read_stop();
 
             // TODO: implement read2_start()

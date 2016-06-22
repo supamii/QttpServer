@@ -1,9 +1,8 @@
 #ifndef QTTPHTTPDATA_H
 #define QTTPHTTPDATA_H
 
-#include <QtCore>
-#include <QtNetwork>
-#include <http.h>
+#include "qttp_global.h"
+#include "httprequest.h"
 
 namespace qttp
 {
@@ -12,11 +11,13 @@ namespace qttp
 class HttpServer;
 
 /**
- * @todo Add a friend stream operator for pretty-printing
  *
- * @brief
+ * @brief This is the main access point for building a the response.  This is
+ * also an avenue for getting information about the request.
+ *
+ * @todo Add a friend stream operator for pretty-printing
  */
-class HttpData
+class QTTPSHARED_EXPORT HttpData
 {
     friend class HttpServer;
 
@@ -50,11 +51,47 @@ class HttpData
     } eControl;
 
     /**
+     * @brief Build your HTTP response by populating your data into QJsonObject.
+     *
+     * This is the preferred way to build/access a json response - if it is
+     * valid, the QttpServer framework (namely httpserver) will take this object
+     * and populate the HTTP response body automatically.
+     *
+     * As an alternative, the caller may optionally complete the transaction
+     * with finishResponse().
+     */
+    QJsonObject& getJson();
+
+    const QJsonObject& getJson() const;
+
+    /**
+     * @brief Highly recommended!  This builds and returns a QJsonObject that
+     * consolidates query-string parameters and the reqeust body (JSON only).
+     * This avoids having to grab from the query string and parsing through the
+     * request body separately.
+     */
+    QJsonObject& getRequestParams();
+
+    QUrlQuery& getQuery();
+
+    const QUrlQuery& getQuery() const;
+
+    const QUuid& getUid() const;
+
+    /**
      * @brief Beware that accessing this after invoking finishResponse() will
      * result in an exception since alloated memory will be NULL.  Also be sure
      * NOT to save/use this reference outside of the lifetime of HttpData.
      */
     native::http::request& getRequest() const;
+
+    /**
+     * @brief Recommended for qt-centric applications that deal with QStrings.
+     * This will save the user from having to constantly convert members
+     * of native::http::response into a QString.
+     */
+    const HttpRequest& getHttpRequest() const;
+    HttpRequest& getHttpRequest();
 
     /**
      * @brief Returns the response object, note that response::end() method is
@@ -68,14 +105,6 @@ class HttpData
      */
     native::http::response& getResponse() const;
 
-    QJsonObject& getRequestParams();
-
-    QUrlQuery& getQuery();
-
-    const QUrlQuery& getQuery() const;
-
-    const QUuid& getUid() const;
-
     /**
      * @brief A wrapper for native::http::response::end() and writes directly
      * to the response socket.  For direct writes, this is highly encouraged
@@ -84,14 +113,6 @@ class HttpData
      * @see isFinished()
      */
     bool finishResponse(const std::string& body);
-
-    /**
-     * @brief The preferred way to build/access a json response - complete the
-     * transaction with finishResponse().
-     */
-    QJsonObject& getJson();
-
-    const QJsonObject& getJson() const;
 
     /**
      * @brief Preferred method when working with the json object.  Populate
@@ -116,11 +137,6 @@ class HttpData
      * native::http::request and native::http::response if this returns true.
      */
     bool isFinished() const;
-
-    // Not sure how useful these are yet - YAGNI?  Ya ain't gunna need it.
-    // bool isPreprocessed() const;
-    // bool isPostprocessed() const;
-    // bool isActionProcessed() const;
 
     /**
      * @return If this was processed by any processor or action.  Intended to
@@ -149,6 +165,7 @@ class HttpData
     void setQuery(QUrlQuery&);
 
     native::http::request* m_Request;
+    mutable QSharedPointer<HttpRequest> m_HttpRequest;
     native::http::response* m_Response;
     QUrlQuery m_Query;
     QJsonObject m_Json;

@@ -7,6 +7,7 @@ using namespace qttp;
 
 HttpData::HttpData(request* req, response* resp):
     m_Request(req),
+    m_HttpRequest(),
     m_Response(resp),
     m_Query(),
     m_Json(),
@@ -28,6 +29,28 @@ request& HttpData::getRequest() const
 {
   Q_ASSERT(!isFinished() && m_Request != nullptr);
   return *m_Request;
+}
+
+const HttpRequest& HttpData::getHttpRequest() const
+{
+  // FIXME: Will probably need to lock this?
+  if(m_HttpRequest.isNull())
+  {
+    Q_ASSERT(!isFinished() && m_Request != nullptr);
+    m_HttpRequest = QSharedPointer<HttpRequest>(new HttpRequest(m_Request));
+  }
+  return *(m_HttpRequest.data());
+}
+
+HttpRequest& HttpData::getHttpRequest()
+{
+  // FIXME: Will probably need to lock this?
+  if(m_HttpRequest.isNull())
+  {
+    Q_ASSERT(!isFinished() && m_Request != nullptr);
+    m_HttpRequest = QSharedPointer<HttpRequest>(new HttpRequest(m_Request));
+  }
+  return *(m_HttpRequest.data());
 }
 
 response& HttpData::getResponse() const

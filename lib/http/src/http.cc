@@ -261,7 +261,10 @@ http::client_context::client_context(native::net::tcp* server):
 {
     assert(server);
 
-    // TODO: check error
+    // TODO: Check Error.
+    //
+    // TODO: Should this also toggle between SSL?
+
     socket_ = std::shared_ptr<native::net::tcp> (new native::net::tcp);
     server->accept(socket_.get());
 }
@@ -306,7 +309,7 @@ bool http::client_context::parse(std::function<void(request&, response&)> callba
     parser_settings_.on_url = [](http_parser* parser, const char *at, size_t len) {
         auto client = reinterpret_cast<client_context*>(parser->data);
 
-        //  TODO: from_buf() can throw an exception: check
+        // TODO: from_buf() can throw an exception: check
         client->request_->url_.from_buf(at, len);
 
         return 0;
@@ -408,6 +411,7 @@ bool http::http::listen(const std::string& ip, int port, std::function<void(requ
     if(!socket_->listen([=](native::error e) {
         if(e)
         {
+            std::cerr << e.str();
             // TODO: handle client connection error
         }
         else

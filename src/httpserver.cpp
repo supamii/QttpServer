@@ -195,6 +195,7 @@ void HttpServer::startServer()
                    &QCoreApplication::aboutToQuit,
                    quitCB);
 
+  // thread.detach() invokes HttpServer::start()
   HttpServer::getInstance()->m_Thread.detach();
 }
 

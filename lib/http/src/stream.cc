@@ -1,5 +1,9 @@
 #include "native/stream.h"
 
+#ifdef SSL_TLS_UV
+  #include <uv_tls.h>
+#endif
+
 using namespace native;
 using namespace base;
 
@@ -24,7 +28,38 @@ bool stream::listen(std::function<void(native::error)> callback, int backlog)
 
 bool stream::accept(stream* client)
 {
-    return uv_accept(get<uv_stream_t>(), client->get<uv_stream_t>()) == 0;
+#ifdef SSL_TLS_UV
+    uv_tls_t* sclient = new uv_tls_t;
+    memset(sclient, 0, sizeof(uv_tls_t));
+    evt_ctx_t* ctx = (evt_ctx_t*) client->get<uv_stream_t>()->data;
+    evt_tls_t* t = evt_ctx_get_tls(ctx);
+    if(t != nullptr) {
+        // FIXME later when this starts working.
+        // assert( t != NULL );
+        t->data = sclient;
+        sclient->tls = t;
+        sclient->tls_rd_cb = NULL;
+        sclient->tls_cls_cb = NULL;
+        sclient->tls_hsk_cb = NULL;
+        sclient->tls_wr_cb = NULL;
+    }
+#endif
+
+    bool result = uv_accept(get<uv_stream_t>(), client->get<uv_stream_t>()) == 0;
+
+#ifdef SSL_TLS_UV
+    // FIXME won't need (t != nullptr) later when this starts working.
+    if(result && t != nullptr) {
+        assert( sclient != nullptr );
+        int rv = evt_tls_accept(sclient->tls, []( evt_tls_t *t, int status) {
+            uv_tls_t *ut = (uv_tls_t*)t->data;
+            assert( ut != NULL && ut->tls_hsk_cb != NULL);
+            ut->tls_hsk_cb(ut, status -1);
+        });
+    }
+#endif
+
+    return result;
 }
 
 bool stream::read_start(std::function<void(const char* buf, ssize_t len)> callback)

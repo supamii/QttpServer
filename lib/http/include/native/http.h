@@ -2,6 +2,7 @@
 #define __NATIVE_HTTP_H__
 
 #include <sstream>
+#include <iostream>
 #include <http_parser.h>
 #include "base.h"
 #include "handle.h"

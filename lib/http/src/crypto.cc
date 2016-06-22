@@ -1,4 +1,4 @@
 #include <native/crypto.h>
 
-using namespace native;
-using namespace crypto;
+//using namespace native;
+//using namespace crypto;

@@ -1,14 +1,7 @@
 #ifndef QTTPHTTPSERVER_H
 #define QTTPHTTPSERVER_H
 
-#include <QtCore>
-#include <QtNetwork>
-#include <http.h>
-#include <functional>
-#include <vector>
-#include <unordered_map>
-#include <thread>
-
+#include "qttp_global.h"
 #include "action.h"
 #include "httpdata.h"
 #include "httpevent.h"
@@ -17,7 +10,7 @@
 namespace qttp
 {
 
-class HttpServer : public QObject
+class QTTPSHARED_EXPORT HttpServer : public QObject
 {
   Q_OBJECT
 

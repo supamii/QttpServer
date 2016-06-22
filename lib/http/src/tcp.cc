@@ -1,5 +1,10 @@
 #include "native/tcp.h"
 
+#ifdef SSL_TLS_UV
+  #include <uv_tls.h>
+  #include <iostream>
+#endif
+
 using namespace native;
 using namespace net;
 
@@ -7,6 +12,10 @@ tcp::tcp() :
     native::base::stream(new uv_tcp_t)
 {
     uv_tcp_init(uv_default_loop(), get<uv_tcp_t>());
+}
+
+tcp::~tcp()
+{
 }
 
 tcp::tcp(native::loop& l) :
@@ -21,15 +30,34 @@ std::shared_ptr<tcp> tcp::create()
 }
 
 // TODO: bind and listen
-std::shared_ptr<tcp> tcp::create_server(const std::string& ip, int port)
-{
-    return nullptr;
-}
+//std::shared_ptr<tcp> tcp::create_server(const std::string& ip, int port)
+//{
+//    return nullptr;
+//}
 
 bool tcp::bind(const sockaddr* iAddr, error& oError)
 {
-    //TODO: add flags
-    oError = uv_tcp_bind(get<uv_tcp_t>(), iAddr, 0);
+    uv_tcp_t* listener = get<uv_tcp_t>();
+
+#ifdef SSL_TLS_UV
+    evt_ctx_t* ctx = new evt_ctx_t;
+    // TODO: FIXME: This only needs to occur once.
+    int result = evt_ctx_init_ex(ctx, "server-cert.pem", "server-key.pem");
+    if(result != 1) {
+        std::cout << "Warning! TLS certificates did not load [" << result << "]" << std::endl;
+        delete (evt_ctx_t*) ctx;
+    } else {
+        evt_ctx_set_nio(ctx, NULL, ::uv_tls_writer);
+        if(listener->data != nullptr) {
+          std::cout << "Warning! Potential memory leak";
+        }
+        // TODO: FIXME: Callbacks is set here, need to find another place to store it.
+        listener->data = ctx;
+    }
+#endif
+
+    // TODO: add flags
+    oError = uv_tcp_bind(listener, iAddr, 0);
     return !oError;
 }
 
