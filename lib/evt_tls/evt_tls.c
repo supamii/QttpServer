@@ -160,9 +160,10 @@ int evt_ctx_init(evt_ctx_t *tls)
 
     SSL_CTX_set_mode(tls->ctx, SSL_MODE_AUTO_RETRY |
         SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER        |
-        SSL_MODE_ENABLE_PARTIAL_WRITE              //|
-        // FIXME: INVESTIGATE THIS!!! THIS IS MISSING?
-        //SSL_MODE_RELEASE_BUFFERS
+        SSL_MODE_ENABLE_PARTIAL_WRITE
+        #if defined(SSL_MODE_RELEASE_BUFFERS)
+                | SSL_MODE_RELEASE_BUFFERS
+        #endif
     );
 
     tls->cert_set = 0;

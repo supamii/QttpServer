@@ -4,6 +4,10 @@
 #include "base.h"
 #include "callback.h"
 
+#ifdef SSL_TLS_UV
+    #include <evt_tls.h>
+#endif
+
 namespace native
 {
     namespace base

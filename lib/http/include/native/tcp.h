@@ -23,6 +23,8 @@ namespace native
         public:
             tcp();
 
+            ~tcp();
+
             tcp(native::loop& l);
 
             static std::shared_ptr<tcp> create();

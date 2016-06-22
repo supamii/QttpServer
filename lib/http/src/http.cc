@@ -309,7 +309,7 @@ bool http::client_context::parse(std::function<void(request&, response&)> callba
     parser_settings_.on_url = [](http_parser* parser, const char *at, size_t len) {
         auto client = reinterpret_cast<client_context*>(parser->data);
 
-        //  TODO: from_buf() can throw an exception: check
+        // TODO: from_buf() can throw an exception: check
         client->request_->url_.from_buf(at, len);
 
         return 0;

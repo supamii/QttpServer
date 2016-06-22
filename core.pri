@@ -42,6 +42,7 @@ contains(CONFIG, SSL_TLS) {
 
     # Currently this is specifically for mac + homebrew soft links.
     macx: {
+        message('Adding openSSL libraries')
         # The user should be able to provide the exact location of openssl.
         INCLUDEPATH += /usr/local/opt/openssl/include
         LIBS += -L/usr/local/opt/openssl/lib -lssl -lcrypto
