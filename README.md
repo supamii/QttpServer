@@ -1,4 +1,4 @@
-# QttpServer v0.1
+# QttpServer v0.1.0
 
 <b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/node.native).
 
