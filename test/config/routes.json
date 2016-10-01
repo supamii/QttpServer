@@ -23,5 +23,16 @@
   ],
 
   "delete": [
+    {
+      "path": "/testDelete",
+      "action": "sampleWithHttpMethods"
+    }
+  ],
+
+  "del": [
+    {
+      "path": "/testDel",
+      "action": "sampleWithHttpMethods"
+    }
   ]
 }
