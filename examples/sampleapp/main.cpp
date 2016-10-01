@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 
     svr->addAction("echobody", [](HttpData& data) {
         QJsonObject& json = data.getJson();
-        json["response"] = data.getRequestBody();
+        json["response"] = data.getRequestParams();
     });
 
     svr->registerRoute("post", "echobody", "/echobody");
