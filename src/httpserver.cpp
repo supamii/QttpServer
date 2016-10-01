@@ -116,7 +116,10 @@ bool HttpServer::initialize()
   registerRouteFromJSON(put, "put");
 
   QJsonValueRef del = m_RoutesConfig["del"];
-  registerRouteFromJSON(del, "del");
+  registerRouteFromJSON(del, "delete");
+
+  QJsonValueRef delRoute = m_RoutesConfig["delete"];
+  registerRouteFromJSON(delRoute, "delete");
 
   QCoreApplication* app = QCoreApplication::instance();
   Q_ASSERT(app);

@@ -37,6 +37,9 @@ class TestHttpServer: public QObject
     void testGET_TerminateResponse();
     void testPOST_InvalidTerminateResponse();
     void testPUT_TerminateResponse();
+
+    void testDELETE();
+    void testDEL();
 };
 
 void TestHttpServer::initTestCase()
@@ -454,6 +457,40 @@ void TestHttpServer::testPUT_TerminateResponse()
   QTest::qWait(1000);
   QJsonDocument expected;
   expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"Test C++ FTW\"}").toLatin1());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
+}
+
+void TestHttpServer::testDELETE()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  netMgr->deleteResource(QNetworkRequest(QUrl("http://127.0.0.1:8080/testDelete")));
+  QVERIFY(result.isEmpty());
+  QTest::qWait(1000);
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"postprocess\":true,\"preprocess\":true,\"response\":\"Sample C++ FTW Delete\"}").toLatin1());
+  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+           result.toStdString().c_str());
+}
+
+void TestHttpServer::testDEL()
+{
+  QString result;
+  QNetworkAccessManager* netMgr = new QNetworkAccessManager();
+  QObject::connect(netMgr, &QNetworkAccessManager::finished, [&result](QNetworkReply* reply)
+  {
+    result = QString(reply->readAll()).trimmed();
+  });
+  netMgr->deleteResource(QNetworkRequest(QUrl("http://127.0.0.1:8080/testDel")));
+  QVERIFY(result.isEmpty());
+  QTest::qWait(1000);
+  QJsonDocument expected;
+  expected = QJsonDocument::fromJson(QString("{\"postprocess\":true,\"preprocess\":true,\"response\":\"Sample C++ FTW Delete\"}").toLatin1());
   QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
            result.toStdString().c_str());
 }
