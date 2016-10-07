@@ -8,6 +8,7 @@
 #include <QJsonDocument>
 #include <QEvent>
 #include <QDateTime>
+#include <QProcessEnvironment>
 
 #include <http.h>
 #include <functional>
@@ -27,12 +28,12 @@
 
 namespace qttp
 {
-  /// Quick a dirty mechanism to assert ptrs within the initializer list!
-  template<class T> class Assert {
-    public:
-      Assert(T* ptr) {
-        Q_ASSERT(ptr != nullptr);
-      }
-  };
+/// Quick a dirty mechanism to assert ptrs within the initializer list!
+template<class T> class Assert {
+  public:
+    Assert(T* ptr) {
+      Q_ASSERT(ptr != nullptr);
+    }
+};
 }
 #endif // QTTP_GLOBAL_H

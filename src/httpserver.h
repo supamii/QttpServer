@@ -20,6 +20,7 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     static const char* GLOBAL_CONFIG_FILE_PATH;
     static const char* ROUTES_CONFIG_FILE;
     static const char* ROUTES_CONFIG_FILE_PATH;
+    static const char* CONFIG_DIRECTORY_ENV_VAR;
 
     static HttpServer* getInstance();
     virtual ~HttpServer();

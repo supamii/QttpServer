@@ -11,6 +11,7 @@ const char* HttpServer::GLOBAL_CONFIG_FILE = "global.json";
 const char* HttpServer::ROUTES_CONFIG_FILE = "routes.json";
 const char* HttpServer::GLOBAL_CONFIG_FILE_PATH = "./config/global.json";
 const char* HttpServer::ROUTES_CONFIG_FILE_PATH = "./config/routes.json";
+const char* HttpServer::CONFIG_DIRECTORY_ENV_VAR = "QTTP_CONFIG_DIRECTORY";
 const char* HttpServer::SERVER_ERROR_MSG = "Unable to bind to ip/port, exiting...";
 
 HttpServer* HttpServer::getInstance()
@@ -127,6 +128,20 @@ bool HttpServer::initialize()
     LOG_DEBUG("Cmd line port" << port);
   }
 
+  if(env.contains(CONFIG_DIRECTORY_ENV_VAR))
+  {
+    QString var = env.value(CONFIG_DIRECTORY_ENV_VAR);
+    if(!var.isNull() && !var.trimmed().isEmpty())
+    {
+      LOG_INFO("Processing ENVIRONMENT VARIABLE [" << var << "]");
+      initConfigDirectory(var);
+    }
+    else
+    {
+      LOG_WARN("Invalid ENVIRONMENT VARIABLE [" << CONFIG_DIRECTORY_ENV_VAR << "]");
+    }
+  }
+
   QJsonValue d = m_CmdLineParser.value("d");
   if(d.isString() && !d.isNull() && !d.toString().trimmed().isEmpty())
   {
@@ -167,7 +182,7 @@ bool HttpServer::initialize()
 
 void HttpServer::initGlobal(const QString &filepath)
 {
-  LOG_INFO("Processing filepath [" + filepath + "]");
+  LOG_INFO("Processing filepath [" << filepath << "]");
 
   m_GlobalConfig = Utils::readJson(QDir(filepath).absolutePath());
 
@@ -196,7 +211,7 @@ void HttpServer::initGlobal(const QString &filepath)
 
 void HttpServer::initRoutes(const QString &filepath)
 {
-  LOG_INFO("Processing filepath [" + filepath + "]");
+  LOG_INFO("Processing filepath [" << filepath << "]");
 
   m_RoutesConfig = Utils::readJson(QDir(filepath).absolutePath());
 
@@ -218,7 +233,7 @@ void HttpServer::initRoutes(const QString &filepath)
 
 void HttpServer::initConfigDirectory(const QString &path)
 {
-  LOG_INFO("Processing directory [" + path + "]");
+  LOG_INFO("Processing directory [" << path << "]");
   QDir dir = path;
   initGlobal(dir.filePath(GLOBAL_CONFIG_FILE));
   initRoutes(dir.filePath(ROUTES_CONFIG_FILE));
