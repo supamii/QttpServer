@@ -262,3 +262,5 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 27. Add oauth support
 28. ~~Support shared library and add exports/import decl macros~~
 29. Include SSL support
+30. Include periodic TASKS to execute in between libuv call-backs!
+

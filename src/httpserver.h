@@ -15,6 +15,12 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
   Q_OBJECT
 
   public:
+
+    static const char* GLOBAL_CONFIG_FILE;
+    static const char* GLOBAL_CONFIG_FILE_PATH;
+    static const char* ROUTES_CONFIG_FILE;
+    static const char* ROUTES_CONFIG_FILE_PATH;
+
     static HttpServer* getInstance();
     virtual ~HttpServer();
 
@@ -124,6 +130,9 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     }
 
     bool initialize();
+    void initGlobal(const QString& filepath);
+    void initRoutes(const QString& filepath);
+    void initConfigDirectory(const QString& path);
 
     QCommandLineParser& getCommandLineParser();
 
@@ -160,6 +169,7 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     static bool matchUrl(const QStringList& pathParts, const QString& path, QUrlQuery& responseParams);
 
     static HttpServer* m_Instance;
+    static const char* SERVER_ERROR_MSG;
 
     /**
      * @todo The move constructor!
@@ -189,21 +199,22 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
 
     //! Forbid copy constructor
     HttpServer(const HttpServer&) = delete;
-    void operator =(const HttpServer&) {}
+    void operator =(const HttpServer&) {
+    }
 
     std::function<void()> m_ServerErrorCallback;
     /// @brief This callback allows the caller to intercept all responses.
     std::function<void(HttpEvent*)> m_EventCallback;
-    QHash<QString, std::shared_ptr<Action>> m_Actions;
-    QHash<QString, std::function<void(HttpData& data)>> m_ActionCallbacks;
+    QHash<QString, std::shared_ptr<Action> > m_Actions;
+    QHash<QString, std::function<void(HttpData& data)> > m_ActionCallbacks;
     QHash<QString, Route> m_GetRoutes;
     QHash<QString, Route> m_PostRoutes;
     QHash<QString, Route> m_PutRoutes;
     QHash<QString, Route> m_DeleteRoutes;
     QHash<QString, Route> m_PatchRoutes;
-    std::vector<std::shared_ptr<Processor>> m_Processors;
-    std::vector<std::function<void(HttpData& data)>> m_Preprocessors;
-    std::vector<std::function<void(HttpData& data)>> m_Postprocessors;
+    std::vector<std::shared_ptr<Processor> > m_Processors;
+    std::vector<std::function<void(HttpData& data)> > m_Preprocessors;
+    std::vector<std::function<void(HttpData& data)> > m_Postprocessors;
     QJsonObject m_GlobalConfig;
     QJsonObject m_RoutesConfig;
     Stats* m_Stats; //! To work around const captures this is a pointer.

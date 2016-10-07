@@ -26,8 +26,14 @@ Utils::~Utils()
 QJsonObject Utils::readJson(const QString& path)
 {
   QFile file(path);
+  if(!file.exists())
+  {
+    LOG_DEBUG("File does not exist [" + path + "]");
+    return QJsonObject();
+  }
   if(!file.open(QIODevice::ReadOnly))
   {
+    LOG_DEBUG("Unable to open [" + path + "]");
     return QJsonObject();
   }
 
@@ -65,15 +71,15 @@ void Stats::setValue(const QString& key, const QVariant& value)
 }
 
 LoggingUtils::LoggingUtils() :
-    QObject(),
-    m_Mutex(),
-    m_File(QDir::temp().absoluteFilePath(QString("qttp-").
-           append(QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss-")).
-           append(std::to_string(QCoreApplication::applicationPid()).c_str()).
-           append(".log"))),
-    m_Stream(&m_File),
-    m_OriginalMessageHandler(nullptr),
-    m_TimerId(-1)
+  QObject(),
+  m_Mutex(),
+  m_File(QDir::temp().absoluteFilePath(QString("qttp-").
+                                       append(QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss-")).
+                                       append(std::to_string(QCoreApplication::applicationPid()).c_str()).
+                                       append(".log"))),
+  m_Stream(&m_File),
+  m_OriginalMessageHandler(nullptr),
+  m_TimerId(-1)
 {
 }
 

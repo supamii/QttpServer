@@ -7,40 +7,45 @@ using namespace qttp;
 using namespace native::http;
 
 HttpServer* HttpServer::m_Instance = nullptr;
+const char* HttpServer::GLOBAL_CONFIG_FILE = "global.json";
+const char* HttpServer::ROUTES_CONFIG_FILE = "routes.json";
+const char* HttpServer::GLOBAL_CONFIG_FILE_PATH = "./config/global.json";
+const char* HttpServer::ROUTES_CONFIG_FILE_PATH = "./config/routes.json";
+const char* HttpServer::SERVER_ERROR_MSG = "Unable to bind to ip/port, exiting...";
 
 HttpServer* HttpServer::getInstance()
 {
   if(m_Instance == nullptr)
   {
-      m_Instance = new HttpServer();
+    m_Instance = new HttpServer();
   }
   return m_Instance;
 }
 
 HttpServer::HttpServer() :
-    QObject(),
-    m_ServerErrorCallback([](){
-      LOG_FATAL("Unable to bind to ip/port, exiting...");
-    }),
-    m_EventCallback(this->defaultEventCallback()),
-    m_Actions(),
-    m_ActionCallbacks(),
-    m_GetRoutes(),
-    m_PostRoutes(),
-    m_PutRoutes(),
-    m_DeleteRoutes(),
-    m_PatchRoutes(),
-    m_Processors(),
-    m_Preprocessors(),
-    m_Postprocessors(),
-    m_GlobalConfig(),
-    m_RoutesConfig(),
-    m_Stats(new Stats()),
-    m_LoggingUtils(),
-    m_IsInitialized(false),
-    m_CmdLineParser(),
-    m_SendRequestMetadata(false),
-    m_Thread(HttpServer::start)
+  QObject(),
+  m_ServerErrorCallback([](){
+  LOG_FATAL(SERVER_ERROR_MSG);
+}),
+  m_EventCallback(this->defaultEventCallback()),
+  m_Actions(),
+  m_ActionCallbacks(),
+  m_GetRoutes(),
+  m_PostRoutes(),
+  m_PutRoutes(),
+  m_DeleteRoutes(),
+  m_PatchRoutes(),
+  m_Processors(),
+  m_Preprocessors(),
+  m_Postprocessors(),
+  m_GlobalConfig(),
+  m_RoutesConfig(),
+  m_Stats(new Stats()),
+  m_LoggingUtils(),
+  m_IsInitialized(false),
+  m_CmdLineParser(),
+  m_SendRequestMetadata(false),
+  m_Thread(HttpServer::start)
 {
   this->installEventFilter(this);
 }
@@ -71,14 +76,100 @@ bool HttpServer::initialize()
   {
     // Just a quirk for mac, but I wonder if we can apply to all in general.
     #ifdef Q_OS_MAC
-      QDir::setCurrent(qApp->applicationDirPath());
-      LOG_DEBUG("Working directory" << QDir::currentPath());
+    QDir::setCurrent(qApp->applicationDirPath());
+    LOG_DEBUG("Working directory" << QDir::currentPath());
     #else
-      LOG_DEBUG("Working directory" << QDir::currentPath());
+    LOG_DEBUG("Working directory" << QDir::currentPath());
     #endif
   }
 
-  m_GlobalConfig = Utils::readJson(QDir("./config/global.json").absolutePath());
+  m_SendRequestMetadata = m_GlobalConfig["sendRequestMetadata"].toBool(false);
+
+  QCoreApplication* app = QCoreApplication::instance();
+  Q_ASSERT(app);
+
+  m_CmdLineParser.addOptions({
+    {{"i", "ip"},
+     QCoreApplication::translate("main", "ip of the target interface"),
+     QCoreApplication::translate("main", "ip")},
+    {{"p", "port"},
+     QCoreApplication::translate("main", "port to listen on"),
+     QCoreApplication::translate("main", "port")},
+    {{"m", "meta"},
+     QCoreApplication::translate("main", "appends metadata to responses")},
+    {{"c", "config"},
+     QCoreApplication::translate("main", "absolute path to the global config file (json)"),
+     QCoreApplication::translate("main", "config")},
+    {{"r", "routes"},
+     QCoreApplication::translate("main", "absolute path to the routes config file (json)"),
+     QCoreApplication::translate("main", "routes")},
+    {{"d", "dir"},
+     QCoreApplication::translate("main", "absolute path to the config directory, don't combine with -c or -r args"),
+     QCoreApplication::translate("main", "dir")}
+  });
+
+  m_CmdLineParser.addHelpOption();
+  m_CmdLineParser.process(*app);
+
+  QJsonValue i = m_CmdLineParser.value("i");
+  if((i.isString() || i.isDouble()) && !i.toString().trimmed().isEmpty())
+  {
+    QString ip = i.toString();
+    m_GlobalConfig["bindIp"] = ip;
+    LOG_DEBUG("Cmd line ip" << ip);
+  }
+
+  QJsonValue p = m_CmdLineParser.value("p");
+  if((p.isString() || p.isDouble()) && !p.toString().trimmed().isEmpty())
+  {
+    qint32 port = p.toInt();
+    m_GlobalConfig["bindPort"] = port;
+    LOG_DEBUG("Cmd line port" << port);
+  }
+
+  QJsonValue d = m_CmdLineParser.value("d");
+  if(d.isString() && !d.isNull() && !d.toString().trimmed().isEmpty())
+  {
+    initConfigDirectory(d.toString());
+  }
+  else
+  {
+    QJsonValue c = m_CmdLineParser.value("c");
+    if(c.isString() && !c.isNull() && !c.toString().trimmed().isEmpty())
+    {
+      initGlobal(c.toString());
+    }
+    else
+    {
+      initGlobal(GLOBAL_CONFIG_FILE_PATH);
+    }
+
+    QJsonValue r = m_CmdLineParser.value("r");
+    if(r.isString() && !r.isNull() && !r.toString().trimmed().isEmpty())
+    {
+      initRoutes(r.toString());
+    }
+    else
+    {
+      initRoutes(ROUTES_CONFIG_FILE_PATH);
+    }
+  }
+
+  if(!m_SendRequestMetadata)
+  {
+    m_SendRequestMetadata = m_CmdLineParser.isSet("r");
+  }
+
+  m_IsInitialized = true;
+
+  return true;
+}
+
+void HttpServer::initGlobal(const QString &filepath)
+{
+  LOG_INFO("Processing filepath [" + filepath + "]");
+
+  m_GlobalConfig = Utils::readJson(QDir(filepath).absolutePath());
 
   QJsonValue loggingObj = m_GlobalConfig["logfile"];
   if(loggingObj.isObject())
@@ -101,10 +192,13 @@ bool HttpServer::initialize()
       }
     }
   }
+}
 
-  m_SendRequestMetadata = m_GlobalConfig["sendRequestMetadata"].toBool(false);
+void HttpServer::initRoutes(const QString &filepath)
+{
+  LOG_INFO("Processing filepath [" + filepath + "]");
 
-  m_RoutesConfig = Utils::readJson(QDir("./config/routes.json").absolutePath());
+  m_RoutesConfig = Utils::readJson(QDir(filepath).absolutePath());
 
   QJsonValueRef get = m_RoutesConfig["get"];
   registerRouteFromJSON(get, "get");
@@ -120,48 +214,14 @@ bool HttpServer::initialize()
 
   QJsonValueRef delRoute = m_RoutesConfig["delete"];
   registerRouteFromJSON(delRoute, "delete");
+}
 
-  QCoreApplication* app = QCoreApplication::instance();
-  Q_ASSERT(app);
-
-  m_CmdLineParser.addOptions({
-      {{"i", "ip"},
-      QCoreApplication::translate("main", "ip of the target interface"),
-      QCoreApplication::translate("main", "ip")},
-      {{"p", "port"},
-      QCoreApplication::translate("main", "port to listen on"),
-      QCoreApplication::translate("main", "port")},
-      {{"r", "meta"},
-      QCoreApplication::translate("main", "appends metadata to responses")}
-  });
-
-  m_CmdLineParser.addHelpOption();
-  m_CmdLineParser.process(*app);
-
-  QJsonValue i = m_CmdLineParser.value("i");
-  if((i.isString() || i.isDouble()) && !i.toString().isEmpty())
-  {
-    QString ip = i.toString();
-    m_GlobalConfig["bindIp"] = ip;
-    LOG_DEBUG("Cmd line ip" << ip);
-  }
-
-  QJsonValue p = m_CmdLineParser.value("p");
-  if((p.isString() || p.isDouble()) && !p.toString().isEmpty())
-  {
-    qint32 port = p.toInt();
-    m_GlobalConfig["bindPort"] = port;
-    LOG_DEBUG("Cmd line port" << port);
-  }
-
-  if(!m_SendRequestMetadata)
-  {
-    m_SendRequestMetadata = m_CmdLineParser.isSet("r");
-  }
-
-  m_IsInitialized = true;
-
-  return true;
+void HttpServer::initConfigDirectory(const QString &path)
+{
+  LOG_INFO("Processing directory [" + path + "]");
+  QDir dir = path;
+  initGlobal(dir.filePath(GLOBAL_CONFIG_FILE));
+  initRoutes(dir.filePath(ROUTES_CONFIG_FILE));
 }
 
 void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const QString& method)
@@ -190,9 +250,9 @@ void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const QString& method
 void HttpServer::startServer()
 {
   auto quitCB = [](){
-    LOG_TRACE;
-    HttpServer::getInstance()->stop();
-  };
+                  LOG_TRACE;
+                  HttpServer::getInstance()->stop();
+                };
 
   QObject::connect(QCoreApplication::instance(),
                    &QCoreApplication::aboutToQuit,
@@ -210,9 +270,9 @@ int HttpServer::start()
   auto port = svr.m_GlobalConfig["bindPort"].toInt(8080);
 
   auto serverCB = [](request& req, response& resp) {
-    HttpEvent* event = new HttpEvent(&req, &resp);
-    QCoreApplication::postEvent(HttpServer::getInstance(), event);
-  };
+                    HttpEvent* event = new HttpEvent(&req, &resp);
+                    QCoreApplication::postEvent(HttpServer::getInstance(), event);
+                  };
 
   native::http::http server;
   auto result = server.listen(ip.toStdString(), port, serverCB);
@@ -257,202 +317,202 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
   //
   // TODO: Perhaps should lock/wrap m_Routes to guarantee atomicity.
 
-  return [&](HttpEvent* event) mutable
-  {
-    request* req = event->getRequest();
-    response* resp = event->getResponse();
+  return [&](HttpEvent * event) mutable
+         {
+           request* req = event->getRequest();
+           response* resp = event->getResponse();
 
-    STATS_INC("http:hits");
+           STATS_INC("http:hits");
 
-    HttpData data(req, resp);
-    data.setTimestamp(event->getTimestamp());
+           HttpData data(req, resp);
+           data.setTimestamp(event->getTimestamp());
 
-    const QHash<QString, Route>* routes = &m_GetRoutes;
-    QString method = QString(req->get_method().c_str()).toUpper().trimmed();
+           const QHash<QString, Route>* routes = &m_GetRoutes;
+           QString method = QString(req->get_method().c_str()).toUpper().trimmed();
 
-    if(method == "GET")
-    {
-      STATS_INC("http:method:get");
-      routes = &m_GetRoutes;
-    }
-    else if(method == "POST")
-    {
-      STATS_INC("http:method:post");
-      routes = &m_PostRoutes;
-    }
-    else if(method == "PUT")
-    {
-      STATS_INC("http:method:put");
-      routes = &m_PutRoutes;
-    }
-    else if(method == "DELETE")
-    {
-      STATS_INC("http:method:delete");
-      routes = &m_DeleteRoutes;
-    }
-    else
-    {
-      STATS_INC("http:method:unknown");
-    }
+           if(method == "GET")
+           {
+             STATS_INC("http:method:get");
+             routes = &m_GetRoutes;
+           }
+           else if(method == "POST")
+           {
+             STATS_INC("http:method:post");
+             routes = &m_PostRoutes;
+           }
+           else if(method == "PUT")
+           {
+             STATS_INC("http:method:put");
+             routes = &m_PutRoutes;
+           }
+           else if(method == "DELETE")
+           {
+             STATS_INC("http:method:delete");
+             routes = &m_DeleteRoutes;
+           }
+           else
+           {
+             STATS_INC("http:method:unknown");
+           }
 
-    QUrlQuery parameters;
-    QString urlPath = QString::fromStdString(req->url().path()).trimmed();
-    auto route = routes->begin();
+           QUrlQuery parameters;
+           QString urlPath = QString::fromStdString(req->url().path()).trimmed();
+           auto route = routes->begin();
 
-    // TODO: ROOM FOR IMPROVEMENT: We can reduce the total number of searches
-    // for the worst case scenario.
+           // TODO: ROOM FOR IMPROVEMENT: We can reduce the total number of searches
+           // for the worst case scenario.
 
-    for(; route != routes->end(); ++route)
-    {
-      parameters.clear();
+           for(; route != routes->end(); ++route)
+           {
+             parameters.clear();
 
-      if(HttpServer::matchUrl(route.value().parts, urlPath, parameters))
-      {
-        // Since this request is going to be processed, let's also parse the
-        // query strings for easy access.
-        QUrlQuery params(QString::fromStdString(req->url().query()));
-        for(auto i : params.queryItems())
-        {
-          // Should note that existing itms are not replaced!  These are simply
-          // appended to the query string.
-          parameters.addQueryItem(i.first, i.second);
-        }
-        data.setQuery(parameters);
-        break;
-      }
-    }
+             if(HttpServer::matchUrl(route.value().parts, urlPath, parameters))
+             {
+               // Since this request is going to be processed, let's also parse the
+               // query strings for easy access.
+               QUrlQuery params(QString::fromStdString(req->url().query()));
+               for(auto i : params.queryItems())
+               {
+                 // Should note that existing itms are not replaced!  These are simply
+                 // appended to the query string.
+                 parameters.addQueryItem(i.first, i.second);
+               }
+               data.setQuery(parameters);
+               break;
+             }
+           }
 
-    try
-    {
-      // Previously we had hard-routes that weren't dynamic.
-      // auto route = routes->find(urlPath);
+           try
+           {
+             // Previously we had hard-routes that weren't dynamic.
+             // auto route = routes->find(urlPath);
 
-      if(route != routes->end())
-      {
-        auto callback = m_ActionCallbacks.find(route.value().action);
-        if(callback != m_ActionCallbacks.end())
-        {
-          performPreprocessing(data);
-          if(data.shouldContinue())
-          {
-            data.setControlFlag(HttpData::ActionProcessed);
-            (callback.value())(data);
-          }
-          if(data.shouldContinue()) performPostprocessing(data);
-        }
-        else
-        {
-          auto action = m_Actions.find(route.value().action);
-          if(action != m_Actions.end() && action.value().get() != nullptr)
-          {
-            performPreprocessing(data);
-            if(data.shouldContinue())
-            {
-              data.setControlFlag(HttpData::ActionProcessed);
-              (action.value())->onAction(data);
-            }
-            if(data.shouldContinue()) performPostprocessing(data);
-          }
-        }
-      }
+             if(route != routes->end())
+             {
+               auto callback = m_ActionCallbacks.find(route.value().action);
+               if(callback != m_ActionCallbacks.end())
+               {
+                 performPreprocessing(data);
+                 if(data.shouldContinue())
+                 {
+                   data.setControlFlag(HttpData::ActionProcessed);
+                   (callback.value())(data);
+                 }
+                 if(data.shouldContinue()) performPostprocessing(data);
+               }
+               else
+               {
+                 auto action = m_Actions.find(route.value().action);
+                 if(action != m_Actions.end() && action.value().get() != nullptr)
+                 {
+                   performPreprocessing(data);
+                   if(data.shouldContinue())
+                   {
+                     data.setControlFlag(HttpData::ActionProcessed);
+                     (action.value())->onAction(data);
+                   }
+                   if(data.shouldContinue()) performPostprocessing(data);
+                 }
+               }
+             }
 
-      // Check the control flag bit mask to determine if it was processed above.
-      if(!data.isProcessed())
-      {
-        LOG_DEBUG("No route found for" << urlPath << ", "
-                  "checking default routes");
+             // Check the control flag bit mask to determine if it was processed above.
+             if(!data.isProcessed())
+             {
+               LOG_DEBUG("No route found for" << urlPath << ", "
+                         "checking default routes");
 
-        // Even if the action is not yet found, we'll give the user a chance to
-        // intercept and process it.
-        performPreprocessing(data);
+               // Even if the action is not yet found, we'll give the user a chance to
+               // intercept and process it.
+               performPreprocessing(data);
 
-        if(data.shouldContinue())
-        {
-          // TODO: Describe this in the header file.
+               if(data.shouldContinue())
+               {
+                 // TODO: Describe this in the header file.
 
-          // TODO: Can also perform this check once in a while instead to reduce
-          // performance lookup costs.
+                 // TODO: Can also perform this check once in a while instead to reduce
+                 // performance lookup costs.
 
-          // Actions registered under "" is the default handler.
-          auto callback = m_ActionCallbacks.find("");
-          if(callback != m_ActionCallbacks.end())
-          {
-            data.setControlFlag(HttpData::ActionProcessed);
-            callback.value()(data);
-            if(data.shouldContinue()) performPostprocessing(data);
-          }
-          else
-          {
-            auto action = m_Actions.find("");
-            if(action != m_Actions.end())
-            {
-              data.setControlFlag(HttpData::ActionProcessed);
-              (action.value())->onAction(data);
-              if(data.shouldContinue()) performPostprocessing(data);
-            }
-            else
-            {
-              resp->set_status(400);
-              QJsonObject& json = data.getJson();
-              json["error"] = "Invalid request";
-              performPostprocessing(data);
-            }
-          }
-        } // End if(data.shouldContinue())
-      } // End if(!data.isProcessed())
-    }
-    catch(const std::exception& e)
-    {
-      LOG_ERROR("Exception caught" << e.what());
-      resp->set_status(500);
-      QJsonObject& json = data.getJson();
-      json["error"] = e.what();
-    }
-    catch(const QJsonObject& e)
-    {
-      LOG_ERROR("JSON caught" << e);
-      resp->set_status(500);
-      data.getJson() = e;
-    }
-    catch(...)
-    {
-      resp->set_status(500);
-      QJsonObject& json = data.getJson();
-      json["error"] = "Internal server error";
-    }
+                 // Actions registered under "" is the default handler.
+                 auto callback = m_ActionCallbacks.find("");
+                 if(callback != m_ActionCallbacks.end())
+                 {
+                   data.setControlFlag(HttpData::ActionProcessed);
+                   callback.value()(data);
+                   if(data.shouldContinue()) performPostprocessing(data);
+                 }
+                 else
+                 {
+                   auto action = m_Actions.find("");
+                   if(action != m_Actions.end())
+                   {
+                     data.setControlFlag(HttpData::ActionProcessed);
+                     (action.value())->onAction(data);
+                     if(data.shouldContinue()) performPostprocessing(data);
+                   }
+                   else
+                   {
+                     resp->set_status(400);
+                     QJsonObject& json = data.getJson();
+                     json["error"] = "Invalid request";
+                     performPostprocessing(data);
+                   }
+                 }
+               } // End if(data.shouldContinue())
+             } // End if(!data.isProcessed())
+           }
+           catch(const std::exception& e)
+           {
+             LOG_ERROR("Exception caught" << e.what());
+             resp->set_status(500);
+             QJsonObject& json = data.getJson();
+             json["error"] = e.what();
+           }
+           catch(const QJsonObject& e)
+           {
+             LOG_ERROR("JSON caught" << e);
+             resp->set_status(500);
+             data.getJson() = e;
+           }
+           catch(...)
+           {
+             resp->set_status(500);
+             QJsonObject& json = data.getJson();
+             json["error"] = "Internal server error";
+           }
 
-    if(!data.getJson().isEmpty() && !data.isFinished())
-    {
-      if(m_SendRequestMetadata)
-      {
-        QJsonObject obj;
-        bool ip4;
-        std::string ip;
-        int port;
+           if(!data.getJson().isEmpty() && !data.isFinished())
+           {
+             if(m_SendRequestMetadata)
+             {
+               QJsonObject obj;
+               bool ip4;
+               std::string ip;
+               int port;
 
-        if(resp->getpeername(ip4, ip, port))
-        {
-          obj["remoteIp"] = ip.c_str();
-          obj["remotePort"] = port;
-        }
+               if(resp->getpeername(ip4, ip, port))
+               {
+                 obj["remoteIp"] = ip.c_str();
+                 obj["remotePort"] = port;
+               }
 
-        obj["query"] = data.getQuery().toString();
-        obj["uid"] = data.getUid().toString();
-        obj["timestamp"] = data.getTimestamp().toString("yyyy/MM/dd hh:mm:ss:zzz");
-        obj["timeElapsed"] = data.getTime().elapsed();
-        obj["timeElapsedMs"] = (qreal)(uv_hrtime() - req->get_timestamp()) /
-                               (qreal)1000000.00;
+               obj["query"] = data.getQuery().toString();
+               obj["uid"] = data.getUid().toString();
+               obj["timestamp"] = data.getTimestamp().toString("yyyy/MM/dd hh:mm:ss:zzz");
+               obj["timeElapsed"] = data.getTime().elapsed();
+               obj["timeElapsedMs"] = (qreal)(uv_hrtime() - req->get_timestamp()) /
+                                      (qreal)1000000.00;
 
-        QJsonObject& json = data.getJson();
-        json["requestMetadata"] = obj;
-      }
+               QJsonObject& json = data.getJson();
+               json["requestMetadata"] = obj;
+             }
 
-      if( !data.finishResponse())
-      {
-        LOG_WARN("Failed to finish response");
-      }
-    }
-  };
+             if( !data.finishResponse())
+             {
+               LOG_WARN("Failed to finish response");
+             }
+           }
+         };
 }
 
 bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QUrlQuery& params)
@@ -508,13 +568,13 @@ bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QU
 
 void HttpServer::performPreprocessing(HttpData& data) const
 {
-  for(auto& callback : m_Preprocessors)
+  for(auto & callback : m_Preprocessors)
   {
     callback(data);
     data.setControlFlag(HttpData::Preprocessed);
   }
 
-  for(auto& processor : m_Processors)
+  for(auto & processor : m_Processors)
   {
     if(processor.get())
     {
@@ -540,7 +600,7 @@ void HttpServer::performPostprocessing(HttpData& data) const
     ++processor;
   }
 
-  for(auto& callback : m_Postprocessors)
+  for(auto & callback : m_Postprocessors)
   {
     callback(data);
     data.setControlFlag(HttpData::Postprocessed);
