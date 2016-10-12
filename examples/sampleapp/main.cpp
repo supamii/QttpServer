@@ -1,8 +1,39 @@
 #include <httpserver.h>
+#include <swagger.h>
 
 using namespace std;
 using namespace qttp;
 using namespace native::http;
+
+class Simple : public Action
+{
+  public:
+    Simple() : Action()
+    {
+    }
+
+    const char* getName() const
+    {
+      return "simple";
+    }
+
+    const QStringList& getTags() const
+    {
+      static const QStringList list = { "tag1", "tag2" };
+      return list;
+    }
+
+    const QList<Input>& getInputs() const
+    {
+      static const QList<Input> list =
+      {
+        Input("someinput"),
+        RequiredInput("reqinput"),
+        Input("options", { "selectone", "selectanother" })
+      };
+      return list;
+    }
+};
 
 int main(int argc, char** argv)
 {
@@ -23,16 +54,20 @@ int main(int argc, char** argv)
     svr->addAction("helloworld", [](HttpData& data) {
       QJsonObject& json = data.getJson();
       json["response"] = "Hello World!";
-
-      //json["response"] = data.getHttpRequest().getBody() +
-      //                   data.getHttpRequest().getUrl().getPath();
     });
 
     svr->registerRoute("post", "echobody", "/echobody");
     svr->addAction("echobody", [](HttpData& data) {
-        QJsonObject& json = data.getJson();
-        json["response"] = data.getRequestParams();
+      QJsonObject& json = data.getJson();
+      json["response"] = data.getRequestParams();
     });
+
+    svr->addAction<Simple>();
+    svr->registerRoute(HttpMethod::GET, "simple", "/simple");
+    svr->registerRoute(HttpMethod::POST, "simple", "/simple");
+
+    svr->addAction<Swagger>();
+    svr->registerRoute(HttpMethod::GET, "swagger", "/swagger");
 
     svr->startServer();
 

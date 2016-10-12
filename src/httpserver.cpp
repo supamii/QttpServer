@@ -7,6 +7,7 @@ using namespace qttp;
 using namespace native::http;
 
 HttpServer* HttpServer::m_Instance = nullptr;
+const char* HttpServer::SERVE_FILES_PATH = "/usr/local/qttpfiles";
 const char* HttpServer::GLOBAL_CONFIG_FILE = "global.json";
 const char* HttpServer::ROUTES_CONFIG_FILE = "routes.json";
 const char* HttpServer::GLOBAL_CONFIG_FILE_PATH = "./config/global.json";
@@ -30,6 +31,7 @@ HttpServer::HttpServer() :
 }),
   m_EventCallback(this->defaultEventCallback()),
   m_Actions(),
+  m_ConstActions(),
   m_ActionCallbacks(),
   m_GetRoutes(),
   m_PostRoutes(),
@@ -46,6 +48,8 @@ HttpServer::HttpServer() :
   m_IsInitialized(false),
   m_CmdLineParser(),
   m_SendRequestMetadata(false),
+  m_ShouldServeFiles(true),
+  m_ServeFilesDirectory(SERVE_FILES_PATH),
   m_Thread(HttpServer::start)
 {
   this->installEventFilter(this);
@@ -84,7 +88,8 @@ bool HttpServer::initialize()
     #endif
   }
 
-  m_SendRequestMetadata = m_GlobalConfig["sendRequestMetadata"].toBool(false);
+  QJsonObject responseConfig = m_GlobalConfig["response"].toObject();
+  m_SendRequestMetadata = responseConfig["requestMetaData"].toBool(false);
 
   QCoreApplication* app = QCoreApplication::instance();
   Q_ASSERT(app);
@@ -186,10 +191,10 @@ void HttpServer::initGlobal(const QString &filepath)
 
   m_GlobalConfig = Utils::readJson(QDir(filepath).absolutePath());
 
-  QJsonValue loggingObj = m_GlobalConfig["logfile"];
-  if(loggingObj.isObject())
+  QJsonValue loggingValue = m_GlobalConfig["logfile"];
+  if(loggingValue.isObject())
   {
-    QJsonObject logging = loggingObj.toObject();
+    QJsonObject logging = loggingValue.toObject();
     if(logging["isEnabled"].isBool() && logging["isEnabled"].toBool())
     {
       QString filename;
@@ -204,6 +209,22 @@ void HttpServer::initGlobal(const QString &filepath)
       else
       {
         m_LoggingUtils.initializeFile(filename);
+      }
+    }
+  }
+
+  QJsonValue httpFilesValue = m_GlobalConfig["httpFiles"];
+  if(httpFilesValue.isObject())
+  {
+    QJsonObject httpFiles = httpFilesValue.toObject();
+    m_ShouldServeFiles = httpFiles["isEnabled"].toBool();
+    if(m_ShouldServeFiles)
+    {
+      m_ServeFilesDirectory = httpFiles["directory"].toString();
+      if(!m_ServeFilesDirectory.exists())
+      {
+        LOG_ERROR("Unable to serve files from invalid directory [" << m_ServeFilesDirectory.absolutePath() << "]");
+        m_ShouldServeFiles = false;
       }
     }
   }
@@ -240,6 +261,11 @@ void HttpServer::initConfigDirectory(const QString &path)
 }
 
 void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const QString& method)
+{
+  return registerRouteFromJSON(obj, Utils::fromString(method));
+}
+
+void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, HttpMethod method)
 {
   if(obj.isArray())
   {
@@ -342,32 +368,52 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
            HttpData data(req, resp);
            data.setTimestamp(event->getTimestamp());
 
-           const QHash<QString, Route>* routes = &m_GetRoutes;
-           QString method = QString(req->get_method().c_str()).toUpper().trimmed();
+           const QHash<QString, Route>* routes = nullptr;
+           HttpMethod method = Utils::fromString(QString(req->get_method().c_str()).toUpper().trimmed());
 
-           if(method == "GET")
+           switch(method)
            {
-             STATS_INC("http:method:get");
-             routes = &m_GetRoutes;
+             case HttpMethod::GET:
+               STATS_INC("http:method:get");
+               routes = &m_GetRoutes;
+               break;
+
+             case HttpMethod::POST:
+               STATS_INC("http:method:post");
+               routes = &m_PostRoutes;
+               break;
+
+             case HttpMethod::PUT:
+               STATS_INC("http:method:put");
+               routes = &m_PutRoutes;
+               break;
+
+             case HttpMethod::DELETE:
+               STATS_INC("http:method:delete");
+               routes = &m_DeleteRoutes;
+               break;
+
+             case HttpMethod::PATCH:
+               STATS_INC("http:method:patch");
+               routes = &m_PatchRoutes;
+               break;
+
+             default:
+               STATS_INC("http:method:unknown");
+               resp->set_status(400);
+               QJsonObject& json = data.getJson();
+               json["error"] = "Invalid HTTP method";
+               return;
            }
-           else if(method == "POST")
+
+           // Err on the side of caution since this ptr may be null.
+           if(routes == nullptr)
            {
-             STATS_INC("http:method:post");
-             routes = &m_PostRoutes;
-           }
-           else if(method == "PUT")
-           {
-             STATS_INC("http:method:put");
-             routes = &m_PutRoutes;
-           }
-           else if(method == "DELETE")
-           {
-             STATS_INC("http:method:delete");
-             routes = &m_DeleteRoutes;
-           }
-           else
-           {
-             STATS_INC("http:method:unknown");
+             LOG_ERROR("Invalid route");
+             resp->set_status(500);
+             QJsonObject& json = data.getJson();
+             json["error"] = "Internal error";
+             return;
            }
 
            QUrlQuery parameters;
@@ -467,10 +513,14 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                    }
                    else
                    {
-                     resp->set_status(400);
-                     QJsonObject& json = data.getJson();
-                     json["error"] = "Invalid request";
-                     performPostprocessing(data);
+                     // Check out files as a last resort.
+                     if(!searchAndServeFile(data))
+                     {
+                       resp->set_status(400);
+                       QJsonObject& json = data.getJson();
+                       json["error"] = "Invalid request";
+                       performPostprocessing(data);
+                     }
                    }
                  }
                } // End if(data.shouldContinue())
@@ -496,35 +546,38 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
              json["error"] = "Internal server error";
            }
 
-           if(!data.getJson().isEmpty() && !data.isFinished())
+           if(!data.isFinished())
            {
-             if(m_SendRequestMetadata)
+             if(!data.getJson().isEmpty())
              {
-               QJsonObject obj;
-               bool ip4;
-               std::string ip;
-               int port;
-
-               if(resp->getpeername(ip4, ip, port))
+               if(m_SendRequestMetadata)
                {
-                 obj["remoteIp"] = ip.c_str();
-                 obj["remotePort"] = port;
+                 QJsonObject obj;
+                 bool ip4;
+                 std::string ip;
+                 int port;
+
+                 if(resp->getpeername(ip4, ip, port))
+                 {
+                   obj["remoteIp"] = ip.c_str();
+                   obj["remotePort"] = port;
+                 }
+
+                 obj["query"] = data.getQuery().toString();
+                 obj["uid"] = data.getUid().toString();
+                 obj["timestamp"] = data.getTimestamp().toString("yyyy/MM/dd hh:mm:ss:zzz");
+                 obj["timeElapsed"] = data.getTime().elapsed();
+                 obj["timeElapsedMs"] = (qreal)(uv_hrtime() - req->get_timestamp()) /
+                                        (qreal)1000000.00;
+
+                 QJsonObject& json = data.getJson();
+                 json["requestMetadata"] = obj;
                }
 
-               obj["query"] = data.getQuery().toString();
-               obj["uid"] = data.getUid().toString();
-               obj["timestamp"] = data.getTimestamp().toString("yyyy/MM/dd hh:mm:ss:zzz");
-               obj["timeElapsed"] = data.getTime().elapsed();
-               obj["timeElapsedMs"] = (qreal)(uv_hrtime() - req->get_timestamp()) /
-                                      (qreal)1000000.00;
-
-               QJsonObject& json = data.getJson();
-               json["requestMetadata"] = obj;
-             }
-
-             if( !data.finishResponse())
-             {
-               LOG_WARN("Failed to finish response");
+               if( !data.finishResponse())
+               {
+                 LOG_WARN("Failed to finish response");
+               }
              }
            }
          };
@@ -622,6 +675,74 @@ void HttpServer::performPostprocessing(HttpData& data) const
   }
 }
 
+bool HttpServer::searchAndServeFile(HttpData& data) const
+{
+  if(!m_ShouldServeFiles)
+  {
+    return false;
+  }
+
+  LOG_TRACE;
+
+  // TODO: WOULD BE NICE TO CACHE STRING CONSTRUCTION.
+
+  //QString urlFragment = data.getHttpRequest().getUrl().getFragment();
+  QString urlPath = data.getHttpRequest().getUrl().getPath();
+  if(urlPath.at(0) == '/')
+  {
+    urlPath = urlPath.mid(1);
+  }
+  QString filepath = m_ServeFilesDirectory.absoluteFilePath(urlPath);
+  QFile file(filepath);
+
+  if(!file.open(QIODevice::ReadOnly))
+  {
+    LOG_DEBUG("Unable to read file [" << filepath << "]");
+    return false;
+  }
+
+  string contentType = "text/html";
+
+  if(urlPath.endsWith(".html", Qt::CaseInsensitive) ||
+     urlPath.endsWith(".htm", Qt::CaseInsensitive))
+  {
+    // contentType = "text/html";
+  }
+  else if(urlPath.endsWith(".js", Qt::CaseInsensitive))
+  {
+    contentType = "text/javascript";
+  }
+  else if(urlPath.endsWith(".json", Qt::CaseInsensitive))
+  {
+    contentType = "application/javascript";
+  }
+  else if(urlPath.endsWith(".css", Qt::CaseInsensitive) ||
+          urlPath.endsWith(".less", Qt::CaseInsensitive))
+  {
+    contentType = "text/css";
+  }
+  else if(urlPath.endsWith(".png", Qt::CaseInsensitive) ||
+          urlPath.endsWith(".gif", Qt::CaseInsensitive) ||
+          urlPath.endsWith(".jpg", Qt::CaseInsensitive) ||
+          urlPath.endsWith(".jpeg", Qt::CaseInsensitive) ||
+          urlPath.endsWith(".ico", Qt::CaseInsensitive))
+  {
+    contentType = "image";
+  }
+  else if(urlPath.endsWith(".svg", Qt::CaseInsensitive))
+  {
+    contentType = "image/svg+xml";
+  }
+  else if(urlPath.endsWith(".xml", Qt::CaseInsensitive))
+  {
+    contentType = "application/xml";
+  }
+
+  data.getResponse().set_header("Content-Type", contentType);
+
+  return data.finishResponse(file.readAll());
+}
+
 bool HttpServer::eventFilter(QObject* /* object */, QEvent* event)
 {
   if(!event || event->type() != QEvent::None)
@@ -647,8 +768,10 @@ bool HttpServer::eventFilter(QObject* /* object */, QEvent* event)
 
 bool HttpServer::addAction(std::shared_ptr<Action>& action)
 {
-  bool containsKey = (m_Actions.find(action->getActionName()) != m_Actions.end());
-  m_Actions[action->getActionName()] = action;
+  bool containsKey = (m_Actions.find(action->getName()) != m_Actions.end());
+  QString name = action->getName();
+  m_Actions[name] = action;
+  m_ConstActions[name] = action;
   // Let the caller know that we kicked out another action handler.
   return !containsKey;
 }
@@ -660,38 +783,89 @@ bool HttpServer::addAction(const QString& actionName, function<void(HttpData& da
   return !containsKey;
 }
 
+const QHash<QString, HttpServer::Route>& HttpServer::getRoutes(HttpMethod method) const
+{
+  switch(method)
+  {
+    case HttpMethod::GET:
+      return m_GetRoutes;
+
+    case HttpMethod::POST:
+      return m_PostRoutes;
+
+    case HttpMethod::PUT:
+      return m_PutRoutes;
+
+    case HttpMethod::DELETE:
+      return m_DeleteRoutes;
+
+    case HttpMethod::PATCH:
+      return m_PatchRoutes;
+  }
+
+  throw QttpException("Invalid route method");
+}
+
+const QHash<QString, HttpServer::Route>& HttpServer::getRoutes(const QString& method) const
+{
+  return getRoutes(Utils::fromString(method));
+}
+
+const QJsonObject& HttpServer::getGlobalConfig() const
+{
+  return m_GlobalConfig;
+}
+
+const QJsonObject& HttpServer::getRoutesConfig() const
+{
+  return m_RoutesConfig;
+}
+
+const QHash<QString, std::shared_ptr<const Action> >& HttpServer::getActions() const
+{
+  return m_ConstActions;
+}
+
 bool HttpServer::registerRoute(const QString& method, const QString& actionName, const QString& route)
 {
+  return registerRoute(Utils::fromString(method), actionName, route);
+}
+
+bool HttpServer::registerRoute(HttpMethod method, const QString& actionName, const QString& route)
+{
   QHash<QString, Route>* routeContainer = nullptr;
-  QString methodStr = method.trimmed().toLower();
-  if(methodStr == "get")
+  switch(method)
   {
-    routeContainer = &m_GetRoutes;
-  }
-  else if(methodStr == "post")
-  {
-    routeContainer = &m_PostRoutes;
-  }
-  else if(methodStr == "put")
-  {
-    routeContainer = &m_PutRoutes;
-  }
-  else if(methodStr == "delete")
-  {
-    routeContainer = &m_DeleteRoutes;
+    case HttpMethod::GET:
+      routeContainer = &m_GetRoutes;
+      break;
+
+    case HttpMethod::POST:
+      routeContainer = &m_PostRoutes;
+      break;
+
+    case HttpMethod::PUT:
+      routeContainer = &m_PutRoutes;
+      break;
+
+    case HttpMethod::PATCH:
+      routeContainer = &m_PatchRoutes;
+      break;
+
+    case HttpMethod::DELETE:
+      routeContainer = &m_DeleteRoutes;
+      break;
   }
 
   if(routeContainer == nullptr)
   {
-    LOG_WARN("Invalid http "
-             "method [" << method << "] "
-             "action [" << actionName << "] "
-             "route [" << route << "]");
-
+    LOG_ERROR("Invalid http "
+              "action [" << actionName << "] "
+              "route [" << route << "]");
     return false;
   }
 
-  LOG_DEBUG("method [" << method << "] "
+  LOG_DEBUG("method [" << Utils::toString(method) << "] "
             "action [" << actionName << "] "
             "route [" << route << "]");
 

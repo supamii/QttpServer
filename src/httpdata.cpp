@@ -5,16 +5,16 @@ using namespace std;
 using namespace native::http;
 using namespace qttp;
 
-HttpData::HttpData(request* req, response* resp):
-    m_Request(req),
-    m_HttpRequest(),
-    m_Response(resp),
-    m_Query(),
-    m_Json(),
-    m_RequestParams(),
-    m_ControlFlag(None),
-    m_Uid(QUuid::createUuid()),
-    m_Time()
+HttpData::HttpData(request* req, response* resp) :
+  m_Request(req),
+  m_HttpRequest(),
+  m_Response(resp),
+  m_Query(),
+  m_Json(),
+  m_RequestParams(),
+  m_ControlFlag(None),
+  m_Uid(QUuid::createUuid()),
+  m_Time()
 {
   Q_ASSERT(m_Request != nullptr);
   Q_ASSERT(m_Response != nullptr);
@@ -85,7 +85,7 @@ QJsonObject& HttpData::getRequestParams()
     }
   }
 
-  QList<QPair<QString, QString>> list = getQuery().queryItems();
+  QList<QPair<QString, QString> > list = getQuery().queryItems();
   for(auto i = list.begin(); i != list.end(); ++i)
   {
     m_RequestParams.insert(i->first, i->second);
@@ -125,6 +125,13 @@ bool HttpData::finishResponse(const std::string& body)
 
   // TODO: Handle error response codes and possibly infer other details.
   m_Response->write(body);
+  return m_Response->close();
+}
+
+bool HttpData::finishResponse(const QByteArray& bytes)
+{
+  setControlFlag(Finished);
+  m_Response->write(bytes.length(), bytes.data());
   return m_Response->close();
 }
 

@@ -1,11 +1,24 @@
 {
     "bindIp": "0.0.0.0",
     "bindPort": 8080,
-    "sendRequestMetadata": true,
-    "logfile":
-    {
+    "response": {
+        "requestMetaData": true
+    },
+    "logfile": {
         "isEnabled": true,
         "filename": null,
         "writeFrequency": 300
+    },
+    "swagger": {
+        "isEnabled": true,
+        "version": "0.1",
+        "description": "QttpServerDescription",
+        "title": "QttpServerTitle",
+        "host": "127.0.0.1:8080",
+        "basePath": "/"
+    },
+    "httpFiles": {
+        "isEnabled": true,
+        "directory": "/usr/local/qttpfiles"
     }
 }

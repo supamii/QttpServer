@@ -21,7 +21,7 @@
     #endif
   #endif
 
-  // TODO If we're running as a unit test - ignore time stamps!?
+// TODO If we're running as a unit test - ignore time stamps!?
   #ifndef LOG_DATETIME
     #define LOG_DATETIME QDateTime::currentDateTime().toString("yyyy/MM/dd-hh:mm:ss:zzz").append(' ')
   #endif
@@ -30,12 +30,12 @@
     #define LOG_DATETIME QString()
   #endif
 
-  // A bit nasty and expensive string creation - strictly for debugging so
-  // in release mode the build should define NO_LOG_FILE or NO_LOG_FUNCTION
+// A bit nasty and expensive string creation - strictly for debugging so
+// in release mode the build should define NO_LOG_FILE or NO_LOG_FUNCTION
   #ifndef LOG_FILE
-    // TODO This doesn't check cygwin but we also need to address the fact that
-    // MSVC tends to attach the demangled namespace to the __FUNCTION__ macro
-    // anyway
+// TODO This doesn't check cygwin but we also need to address the fact that
+// MSVC tends to attach the demangled namespace to the __FUNCTION__ macro
+// anyway
     #ifdef Q_OS_WIN
       #define LOG_FILE QString(__FILE__).mid(QString(__FILE__).lastIndexOf('\\') + 1).append(":")
     #else
@@ -48,13 +48,13 @@
   #endif
 
   #ifndef LOG_FUNCTION
-    // Sample below confuses QtCreator syntax editor:
-    // QString(__FUNCTION__":%1").arg(__LINE__)
+// Sample below confuses QtCreator syntax editor:
+// QString(__FUNCTION__":%1").arg(__LINE__)
     #define LOG_FUNCTION(LEVEL) LOG_DATETIME.append(LEVEL) << LOG_FILE.append(__FUNCTION__).append(":").append(std::to_string(__LINE__).c_str())
   #endif
 
-  // If the function and line numbers are too noisy then define
-  // NO_LOG_FUNCTION to remove it from print statements
+// If the function and line numbers are too noisy then define
+// NO_LOG_FUNCTION to remove it from print statements
   #ifdef NO_LOG_FUNCTION
     #define LOG_FUNCTION(LEVEL) LOG_DATETIME.append(LEVEL)
   #endif
@@ -111,11 +111,29 @@ class QTTPSHARED_EXPORT LogTrace
     quint32 line;
 };
 
-class Utils
+enum class HttpMethod
+{
+  GET = 0,
+  POST = 1,
+  PUT = 2,
+  DELETE = 3,
+  PATCH = 4
+};
+
+class QTTPSHARED_EXPORT Utils
 {
   public:
+
     Utils();
     ~Utils();
+
+    static const QList<HttpMethod> HTTP_METHODS;
+
+    static QString toString(HttpMethod method);
+
+    static HttpMethod fromString(const QString& method);
+
+    static HttpMethod fromStdString(const std::string& method);
 
     /**
      * @brief Throws a std::runtime_error with a message of any JSON validation
@@ -167,6 +185,15 @@ class Utils
     }
 };
 
+class QTTPSHARED_EXPORT QttpException : public std::exception
+{
+  public:
+    QttpException(const std::string& message);
+    const char* what() const _NOEXCEPT;
+  private:
+    std::string m_Message;
+};
+
 #ifndef STATS_INC
   #define STATS_INC(X) m_Stats->increment( X )
 #endif
@@ -182,7 +209,7 @@ class Utils
 
 class QTTPSHARED_EXPORT Stats
 {
-    friend class HttpServer;
+  friend class HttpServer;
 
   public:
     Stats();
@@ -196,7 +223,7 @@ class QTTPSHARED_EXPORT Stats
 
 class QTTPSHARED_EXPORT LoggingUtils : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 
   public:
     LoggingUtils();

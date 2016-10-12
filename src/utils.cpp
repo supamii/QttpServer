@@ -15,12 +15,86 @@ LogTrace::~LogTrace()
   qDebug().noquote().nospace() << LOG_DATETIME.append("EXIT  ") << function << ":" << line;
 }
 
+QttpException::QttpException(const std::string& message) :
+  m_Message("QttpException: " + message)
+{
+}
+
+const char* QttpException::what() const _NOEXCEPT
+{
+  return m_Message.c_str();
+}
+
+const QList<HttpMethod> Utils::HTTP_METHODS =
+{
+  HttpMethod::GET,
+  HttpMethod::POST,
+  HttpMethod::PUT,
+  HttpMethod::PATCH,
+  HttpMethod::DELETE
+};
+
 Utils::Utils()
 {
 }
 
 Utils::~Utils()
 {
+}
+
+QString Utils::toString(HttpMethod method)
+{
+  switch(method)
+  {
+    case HttpMethod::GET:
+      return "GET";
+
+    case HttpMethod::POST:
+      return "POST";
+
+    case HttpMethod::PUT:
+      return "PUT";
+
+    case HttpMethod::DELETE:
+      return "DELETE";
+
+    case HttpMethod::PATCH:
+      return "PATCH";
+
+    default:
+      return "";
+  }
+}
+
+HttpMethod Utils::fromString(const QString& method)
+{
+  QString str = method.trimmed().toUpper();
+  if(str == "GET")
+  {
+    return HttpMethod::GET;
+  }
+  if(str == "POST")
+  {
+    return HttpMethod::POST;
+  }
+  if(str == "PUT")
+  {
+    return HttpMethod::PUT;
+  }
+  if(str == "DELETE")
+  {
+    return HttpMethod::DELETE;
+  }
+  if(str == "PATCH")
+  {
+    return HttpMethod::PATCH;
+  }
+  throw QttpException("Unrecognized http method " + method.toStdString());
+}
+
+HttpMethod Utils::fromStdString(const std::string& method)
+{
+  return fromString(QString::fromStdString(method));
 }
 
 QJsonObject Utils::readJson(const QString& path)

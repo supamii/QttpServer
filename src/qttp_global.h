@@ -9,6 +9,7 @@
 #include <QEvent>
 #include <QDateTime>
 #include <QProcessEnvironment>
+#include <QJsonObject>
 
 #include <http.h>
 #include <functional>
@@ -19,6 +20,7 @@
 #include <vector>
 #include <unordered_map>
 #include <thread>
+#include <initializer_list>
 
 #if defined(QTTP_LIBRARY)
 #  define QTTPSHARED_EXPORT Q_DECL_EXPORT
@@ -28,10 +30,13 @@
 
 namespace qttp
 {
+
 /// Quick a dirty mechanism to assert ptrs within the initializer list!
-template<class T> class Assert {
+template<class T> class Assert
+{
   public:
-    Assert(T* ptr) {
+    Assert(T* ptr)
+    {
       Q_ASSERT(ptr != nullptr);
     }
 };

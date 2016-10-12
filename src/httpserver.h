@@ -16,6 +16,7 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
 
   public:
 
+    static const char* SERVE_FILES_PATH;
     static const char* GLOBAL_CONFIG_FILE;
     static const char* GLOBAL_CONFIG_FILE_PATH;
     static const char* ROUTES_CONFIG_FILE;
@@ -86,7 +87,8 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
      * @brief More of an association than a registration - binds an action name
      * to a route url.
      */
-    bool registerRoute(const QString& type, const QString& actionName, const QString& route);
+    bool registerRoute(const QString& method, const QString& actionName, const QString& route);
+    bool registerRoute(HttpMethod method, const QString& actionName, const QString& route);
 
     /**
      * @brief A template method to register a processor via the Processor interface.
@@ -137,9 +139,43 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
 
     QCommandLineParser& getCommandLineParser();
 
+    /**
+     * @todo The move constructor!
+     * @brief The Route class
+     */
+    class QTTPSHARED_EXPORT Route
+    {
+      public:
+        Route() : route(), action(), parts()
+        {
+        }
+
+        Route(const QString& r, const QString& a) :
+          route(r),
+          action(a),
+          parts(route.split('/', QString::SkipEmptyParts))
+        {
+        }
+
+        QString route;
+        QString action;
+        QStringList parts;
+    };
+
+    const QHash<QString, Route>& getRoutes(HttpMethod method) const;
+
+    const QHash<QString, Route>& getRoutes(const QString& method) const;
+
+    const QJsonObject& getGlobalConfig() const;
+
+    const QJsonObject& getRoutesConfig() const;
+
+    const QHash<QString, std::shared_ptr<const Action> >& getActions() const;
+
   private:
 
     void registerRouteFromJSON(QJsonValueRef& obj, const QString& method);
+    void registerRouteFromJSON(QJsonValueRef& obj, HttpMethod method);
 
     /**
      * @brief defaultCallback
@@ -151,6 +187,8 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     void performPreprocessing(HttpData& data) const;
 
     void performPostprocessing(HttpData& data) const;
+
+    bool searchAndServeFile(HttpData& data) const;
 
     /**
      * @brief Initial entry point for all incomming http requests from libuv.
@@ -172,29 +210,6 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     static HttpServer* m_Instance;
     static const char* SERVER_ERROR_MSG;
 
-    /**
-     * @todo The move constructor!
-     * @brief The Route class
-     */
-    class Route
-    {
-      public:
-        Route() : route(), action(), parts()
-        {
-        }
-
-        Route(const QString& r, const QString& a) :
-          route(r),
-          action(a),
-          parts(route.split('/', QString::SkipEmptyParts))
-        {
-        }
-
-        QString route;
-        QString action;
-        QStringList parts;
-    };
-
     /// @brief Private constructor per singleton design.
     HttpServer();
 
@@ -207,6 +222,7 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     /// @brief This callback allows the caller to intercept all responses.
     std::function<void(HttpEvent*)> m_EventCallback;
     QHash<QString, std::shared_ptr<Action> > m_Actions;
+    QHash<QString, std::shared_ptr<const Action> > m_ConstActions;
     QHash<QString, std::function<void(HttpData& data)> > m_ActionCallbacks;
     QHash<QString, Route> m_GetRoutes;
     QHash<QString, Route> m_PostRoutes;
@@ -223,6 +239,8 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     bool m_IsInitialized;
     QCommandLineParser m_CmdLineParser;
     bool m_SendRequestMetadata;
+    bool m_ShouldServeFiles;
+    QDir m_ServeFilesDirectory;
     std::thread m_Thread;
 };
 

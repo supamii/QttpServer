@@ -3,9 +3,41 @@
 
 #include "qttp_global.h"
 #include "httpdata.h"
+#include "utils.h"
 
 namespace qttp
 {
+
+class Action;
+
+class QTTPSHARED_EXPORT Input
+{
+  public:
+    Input();
+    Input(const QString& name);
+    Input(const QString& n, const QStringList& e);
+
+    QString name;
+    QString description;
+    bool required;
+
+    //! Should match "in"
+    QString paramType;
+
+    //! Should match "type"
+    QString dataType;
+
+    //! Should match "enum"
+    QStringList enums;
+};
+
+class QTTPSHARED_EXPORT RequiredInput : public Input
+{
+  public:
+    RequiredInput();
+    RequiredInput(const QString& name);
+    RequiredInput(const QString& n, const QStringList& e);
+};
 
 /**
  * @brief Borrowing ideas from Node.js frameworks like Actionhero.js, an action
@@ -16,6 +48,7 @@ class QTTPSHARED_EXPORT Action
   public:
     Action();
     virtual ~Action();
+
     /**
      * @brief Primary entry point for processing actions. Default implementation
      * will invoke corresponding members against the HTTP methods: onGet(),
@@ -26,10 +59,19 @@ class QTTPSHARED_EXPORT Action
     virtual void onGet(HttpData& data);
     virtual void onPost(HttpData& data);
     virtual void onPut(HttpData& data);
+    virtual void onPatch(HttpData& data);
     virtual void onDelete(HttpData& data);
     virtual void onUnknown(HttpData& data);
 
-    virtual const QString getActionName() const = 0;
+    virtual const char* getName() const = 0;
+    virtual const char* getSummary() const;
+    virtual const char* getDescription() const;
+    virtual const QStringList& getTags() const;
+    virtual const QList<Input>& getInputs() const;
+
+  private:
+    static const QList<Input> m_EmptyInputList;
+    static const QStringList m_EmptyTagList;
 };
 
 /**

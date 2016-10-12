@@ -19,7 +19,7 @@ class HttpServer;
  */
 class QTTPSHARED_EXPORT HttpData
 {
-    friend class HttpServer;
+  friend class HttpServer;
 
   private:
     /**
@@ -113,6 +113,7 @@ class QTTPSHARED_EXPORT HttpData
      * @see isFinished()
      */
     bool finishResponse(const std::string& body);
+    bool finishResponse(const QByteArray& bytes);
 
     /**
      * @brief Preferred method when working with the json object.  Populate
