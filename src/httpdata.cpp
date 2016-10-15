@@ -204,3 +204,13 @@ const QTime& HttpData::getTime() const
 {
   return m_Time;
 }
+
+void HttpData::setMethod(HttpMethod method)
+{
+  m_Method = method;
+}
+
+HttpMethod HttpData::getMethod() const
+{
+  return m_Method;
+}

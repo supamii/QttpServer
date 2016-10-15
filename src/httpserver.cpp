@@ -1,6 +1,7 @@
 #include "httpserver.h"
-
 #include "httpevent.h"
+#include "swagger.h"
+#include "defaults.h"
 
 using namespace std;
 using namespace qttp;
@@ -33,11 +34,7 @@ HttpServer::HttpServer() :
   m_Actions(),
   m_ConstActions(),
   m_ActionCallbacks(),
-  m_GetRoutes(),
-  m_PostRoutes(),
-  m_PutRoutes(),
-  m_DeleteRoutes(),
-  m_PatchRoutes(),
+  m_Routes(),
   m_Processors(),
   m_Preprocessors(),
   m_Postprocessors(),
@@ -48,11 +45,20 @@ HttpServer::HttpServer() :
   m_IsInitialized(false),
   m_CmdLineParser(),
   m_SendRequestMetadata(false),
+  m_StrictHttpMethod(false),
   m_ShouldServeFiles(true),
+  m_IsSwaggerEnabled(false),
   m_ServeFilesDirectory(SERVE_FILES_PATH),
   m_Thread(HttpServer::start)
 {
   this->installEventFilter(this);
+
+  for(auto method = Utils::HTTP_METHODS.begin();
+      method != Utils::HTTP_METHODS.end();
+      ++method)
+  {
+    m_Routes[*method] = QHash<QString, Route>();
+  }
 }
 
 HttpServer::~HttpServer()
@@ -88,8 +94,9 @@ bool HttpServer::initialize()
     #endif
   }
 
-  QJsonObject responseConfig = m_GlobalConfig["response"].toObject();
-  m_SendRequestMetadata = responseConfig["requestMetaData"].toBool(false);
+  QJsonObject serverConfig = m_GlobalConfig["server"].toObject();
+  m_SendRequestMetadata = serverConfig["metadata"].toBool(false);
+  m_StrictHttpMethod = serverConfig["strictHttpMethod"].toBool(false);
 
   QCoreApplication* app = QCoreApplication::instance();
   Q_ASSERT(app);
@@ -177,7 +184,7 @@ bool HttpServer::initialize()
 
   if(!m_SendRequestMetadata)
   {
-    m_SendRequestMetadata = m_CmdLineParser.isSet("r");
+    m_SendRequestMetadata = m_CmdLineParser.isSet("m");
   }
 
   m_IsInitialized = true;
@@ -191,7 +198,7 @@ void HttpServer::initGlobal(const QString &filepath)
 
   m_GlobalConfig = Utils::readJson(QDir(filepath).absolutePath());
 
-  QJsonValue loggingValue = m_GlobalConfig["logfile"];
+  QJsonValueRef loggingValue = m_GlobalConfig["logfile"];
   if(loggingValue.isObject())
   {
     QJsonObject logging = loggingValue.toObject();
@@ -213,7 +220,7 @@ void HttpServer::initGlobal(const QString &filepath)
     }
   }
 
-  QJsonValue httpFilesValue = m_GlobalConfig["httpFiles"];
+  QJsonValueRef httpFilesValue = m_GlobalConfig["httpFiles"];
   if(httpFilesValue.isObject())
   {
     QJsonObject httpFiles = httpFilesValue.toObject();
@@ -228,6 +235,9 @@ void HttpServer::initGlobal(const QString &filepath)
       }
     }
   }
+
+  QJsonObject swagger = m_GlobalConfig["swagger"].toObject();
+  m_IsSwaggerEnabled = swagger["isEnabled"].toBool();
 }
 
 void HttpServer::initRoutes(const QString &filepath)
@@ -245,11 +255,27 @@ void HttpServer::initRoutes(const QString &filepath)
   QJsonValueRef put = m_RoutesConfig["put"];
   registerRouteFromJSON(put, "put");
 
+  QJsonValueRef patch = m_RoutesConfig["patch"];
+  registerRouteFromJSON(patch, "patch");
+
+  QJsonValueRef head = m_RoutesConfig["head"];
+  registerRouteFromJSON(head, "head");
+
+  // This only really here because of an older bug - doh.  Should remove later.
   QJsonValueRef del = m_RoutesConfig["del"];
   registerRouteFromJSON(del, "delete");
 
   QJsonValueRef delRoute = m_RoutesConfig["delete"];
   registerRouteFromJSON(delRoute, "delete");
+
+  QJsonValueRef options = m_RoutesConfig["options"];
+  registerRouteFromJSON(options, "options");
+
+  QJsonValueRef trace = m_RoutesConfig["trace"];
+  registerRouteFromJSON(trace, "trace");
+
+  QJsonValueRef conn = m_RoutesConfig["connect"];
+  registerRouteFromJSON(conn, "connect");
 }
 
 void HttpServer::initConfigDirectory(const QString &path)
@@ -262,7 +288,7 @@ void HttpServer::initConfigDirectory(const QString &path)
 
 void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const QString& method)
 {
-  return registerRouteFromJSON(obj, Utils::fromString(method));
+  return registerRouteFromJSON(obj, Utils::fromString(method.toUpper()));
 }
 
 void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, HttpMethod method)
@@ -290,6 +316,15 @@ void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, HttpMethod method)
 
 void HttpServer::startServer()
 {
+  HttpServer& svr = *(HttpServer::getInstance());
+
+  if(svr.m_IsSwaggerEnabled)
+  {
+    svr.addActionAndRegister<Swagger>();
+  }
+
+  svr.addProcessor<OptionsPreprocessor>();
+
   auto quitCB = [](){
                   LOG_TRACE;
                   HttpServer::getInstance()->stop();
@@ -300,7 +335,7 @@ void HttpServer::startServer()
                    quitCB);
 
   // thread.detach() invokes HttpServer::start()
-  HttpServer::getInstance()->m_Thread.detach();
+  svr.m_Thread.detach();
 }
 
 int HttpServer::start()
@@ -368,34 +403,48 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
            HttpData data(req, resp);
            data.setTimestamp(event->getTimestamp());
 
-           const QHash<QString, Route>* routes = nullptr;
-           HttpMethod method = Utils::fromString(QString(req->get_method().c_str()).toUpper().trimmed());
+           HttpMethod method = m_StrictHttpMethod ?
+                               Utils::fromString(QString(req->get_method().c_str()).toUpper().trimmed()) :
+                               Utils::fromPartialString(req->get_method());
+
+           data.setMethod(method);
 
            switch(method)
            {
              case HttpMethod::GET:
                STATS_INC("http:method:get");
-               routes = &m_GetRoutes;
                break;
 
              case HttpMethod::POST:
                STATS_INC("http:method:post");
-               routes = &m_PostRoutes;
                break;
 
              case HttpMethod::PUT:
                STATS_INC("http:method:put");
-               routes = &m_PutRoutes;
-               break;
-
-             case HttpMethod::DELETE:
-               STATS_INC("http:method:delete");
-               routes = &m_DeleteRoutes;
                break;
 
              case HttpMethod::PATCH:
                STATS_INC("http:method:patch");
-               routes = &m_PatchRoutes;
+               break;
+
+             case HttpMethod::HEAD:
+               STATS_INC("http:method:head");
+               break;
+
+             case HttpMethod::DELETE:
+               STATS_INC("http:method:delete");
+               break;
+
+             case HttpMethod::OPTIONS:
+               STATS_INC("http:method:options");
+               break;
+
+             case HttpMethod::CONNECT:
+               STATS_INC("http:method:connect");
+               break;
+
+             case HttpMethod::TRACE:
+               STATS_INC("http:method:trace");
                break;
 
              default:
@@ -406,8 +455,10 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                return;
            }
 
+           auto routes = m_Routes.find(method);
+
            // Err on the side of caution since this ptr may be null.
-           if(routes == nullptr)
+           if(routes == m_Routes.end())
            {
              LOG_ERROR("Invalid route");
              resp->set_status(500);
@@ -470,7 +521,9 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                    if(data.shouldContinue())
                    {
                      data.setControlFlag(HttpData::ActionProcessed);
-                     (action.value())->onAction(data);
+                     auto a = action.value();
+                     a->applyHeaders(data);
+                     a->onAction(data);
                    }
                    if(data.shouldContinue()) performPostprocessing(data);
                  }
@@ -508,7 +561,9 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                    if(action != m_Actions.end())
                    {
                      data.setControlFlag(HttpData::ActionProcessed);
-                     (action.value())->onAction(data);
+                     auto a = action.value();
+                     a->applyHeaders(data);
+                     a->onAction(data);
                      if(data.shouldContinue()) performPostprocessing(data);
                    }
                    else
@@ -703,14 +758,14 @@ bool HttpServer::searchAndServeFile(HttpData& data) const
 
   string contentType = "text/html";
 
-  if(urlPath.endsWith(".html", Qt::CaseInsensitive) ||
-     urlPath.endsWith(".htm", Qt::CaseInsensitive))
-  {
-    // contentType = "text/html";
-  }
-  else if(urlPath.endsWith(".js", Qt::CaseInsensitive))
+  if(urlPath.endsWith(".js", Qt::CaseInsensitive))
   {
     contentType = "text/javascript";
+  }
+  else if(urlPath.endsWith(".html", Qt::CaseInsensitive) ||
+          urlPath.endsWith(".htm", Qt::CaseInsensitive))
+  {
+    // No-op. Meant to help reduce constantly checking for other types.
   }
   else if(urlPath.endsWith(".json", Qt::CaseInsensitive))
   {
@@ -783,32 +838,43 @@ bool HttpServer::addAction(const QString& actionName, function<void(HttpData& da
   return !containsKey;
 }
 
+const Action* HttpServer::getAction(const QString& name) const
+{
+  auto action = m_Actions.find(name);
+  if(action != m_Actions.end())
+  {
+    return action.value().get();
+  }
+  return nullptr;
+}
+
+std::shared_ptr<Action> HttpServer::getAction(const QString& name)
+{
+  auto action = m_Actions.find(name);
+  if(action != m_Actions.end())
+  {
+    return action.value();
+  }
+  return nullptr;
+}
+
 const QHash<QString, HttpServer::Route>& HttpServer::getRoutes(HttpMethod method) const
 {
-  switch(method)
+  auto route = m_Routes.find(method);
+  if(route == m_Routes.end())
   {
-    case HttpMethod::GET:
-      return m_GetRoutes;
-
-    case HttpMethod::POST:
-      return m_PostRoutes;
-
-    case HttpMethod::PUT:
-      return m_PutRoutes;
-
-    case HttpMethod::DELETE:
-      return m_DeleteRoutes;
-
-    case HttpMethod::PATCH:
-      return m_PatchRoutes;
+    THROW_EXCEPTION("Invalid route method [" << (int) method << "]");
   }
-
-  throw QttpException("Invalid route method");
+  return route.value();
 }
 
 const QHash<QString, HttpServer::Route>& HttpServer::getRoutes(const QString& method) const
 {
-  return getRoutes(Utils::fromString(method));
+  if(m_StrictHttpMethod)
+  {
+    return getRoutes(Utils::fromString(method));
+  }
+  return getRoutes(Utils::fromPartialString(method));
 }
 
 const QJsonObject& HttpServer::getGlobalConfig() const
@@ -828,36 +894,13 @@ const QHash<QString, std::shared_ptr<const Action> >& HttpServer::getActions() c
 
 bool HttpServer::registerRoute(const QString& method, const QString& actionName, const QString& route)
 {
-  return registerRoute(Utils::fromString(method), actionName, route);
+  return registerRoute(Utils::fromString(method.toUpper()), actionName, route);
 }
 
 bool HttpServer::registerRoute(HttpMethod method, const QString& actionName, const QString& route)
 {
-  QHash<QString, Route>* routeContainer = nullptr;
-  switch(method)
-  {
-    case HttpMethod::GET:
-      routeContainer = &m_GetRoutes;
-      break;
-
-    case HttpMethod::POST:
-      routeContainer = &m_PostRoutes;
-      break;
-
-    case HttpMethod::PUT:
-      routeContainer = &m_PutRoutes;
-      break;
-
-    case HttpMethod::PATCH:
-      routeContainer = &m_PatchRoutes;
-      break;
-
-    case HttpMethod::DELETE:
-      routeContainer = &m_DeleteRoutes;
-      break;
-  }
-
-  if(routeContainer == nullptr)
+  auto routes = m_Routes.find(method);
+  if(routes == m_Routes.end())
   {
     LOG_ERROR("Invalid http "
               "action [" << actionName << "] "
@@ -869,10 +912,10 @@ bool HttpServer::registerRoute(HttpMethod method, const QString& actionName, con
             "action [" << actionName << "] "
             "route [" << route << "]");
 
-  bool containsKey = (routeContainer->find(route) != routeContainer->end());
+  bool containsKey = (routes->find(route) != routes->end());
 
   // Initialize and assign the Route struct.
-  (*routeContainer)[route] = Route(route, actionName);
+  routes->insert(route, Route(route, actionName));
 
   return !containsKey;
 }

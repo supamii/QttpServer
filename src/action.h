@@ -39,12 +39,16 @@ class QTTPSHARED_EXPORT RequiredInput : public Input
     RequiredInput(const QString& n, const QStringList& e);
 };
 
+class HttpServer;
+
 /**
  * @brief Borrowing ideas from Node.js frameworks like Actionhero.js, an action
  * is ultimately the endpoint of the http request.
  */
 class QTTPSHARED_EXPORT Action
 {
+  friend class HttpServer;
+
   public:
     Action();
     virtual ~Action();
@@ -60,8 +64,18 @@ class QTTPSHARED_EXPORT Action
     virtual void onPost(HttpData& data);
     virtual void onPut(HttpData& data);
     virtual void onPatch(HttpData& data);
+    virtual void onHead(HttpData& data);
     virtual void onDelete(HttpData& data);
+    virtual void onOptions(HttpData& data);
+    virtual void onTrace(HttpData& data);
+    virtual void onConnect(HttpData& data);
     virtual void onUnknown(HttpData& data);
+
+    /**
+     * @brief Override  in order to associate this action to a specific
+     * HttpMethod and route (e.g. "/myroute/").
+     */
+    virtual const QList<std::pair<HttpMethod, QString> >& getRoutes() const;
 
     virtual const char* getName() const = 0;
     virtual const char* getSummary() const;
@@ -69,9 +83,23 @@ class QTTPSHARED_EXPORT Action
     virtual const QStringList& getTags() const;
     virtual const QList<Input>& getInputs() const;
 
+  protected:
+
+    /**
+     * @brief Override in order to return a list of headers to automatically
+     * append to each response.
+     */
+    virtual const QList<std::pair<std::string, std::string> >& getHeaders() const;
+
+    /**
+     * @brief Helps apply, modify, or prune headers in each response.
+     */
+    virtual void applyHeaders(HttpData& data) const;
+
   private:
     static const QList<Input> m_EmptyInputList;
-    static const QStringList m_EmptyTagList;
+    static const QStringList m_EmptyStringList;
+    static const QList<std::pair<std::string, std::string> > m_EmptyStringPairList;
 };
 
 /**
@@ -85,7 +113,7 @@ class QTTPSHARED_EXPORT Processor
     Processor();
     virtual ~Processor();
 
-    virtual const QString getProcessorName() const = 0;
+    virtual const char* getName() const = 0;
 
     /// @brief Invoked before qttp::Action::onAction().
     virtual void preprocess(HttpData& data);

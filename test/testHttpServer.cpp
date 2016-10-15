@@ -4,7 +4,7 @@ using namespace std;
 using namespace qttp;
 using namespace native::http;
 
-class TestHttpServer: public QObject
+class TestHttpServer : public QObject
 {
   Q_OBJECT
 
@@ -48,15 +48,15 @@ void TestHttpServer::initTestCase()
   QVERIFY(HttpServer::getInstance() != nullptr);
 
   bool result = httpSvr.addAction("", [](HttpData& data) {
-      QJsonObject& json = data.getJson();
-      json["response"] = "C++ FTW";
+    QJsonObject& json = data.getJson();
+    json["response"] = "C++ FTW";
   });
 
   httpSvr.addProcessor<SampleProcessor>();
 
   result = httpSvr.addAction("echo", [](HttpData& data) {
-      QJsonObject& json = data.getJson();
-      json["response"] = "C++ FTW " + data.getQuery().queryItemValue("id");
+    QJsonObject& json = data.getJson();
+    json["response"] = "C++ FTW " + data.getQuery().queryItemValue("id");
   });
 
   result = httpSvr.registerRoute("get", "", "/echo/:id");
@@ -66,8 +66,8 @@ void TestHttpServer::initTestCase()
   QVERIFY(result == true);
 
   result = httpSvr.addAction("echobody", [](HttpData& data) {
-      QJsonObject& json = data.getJson();
-      json["response"] = data.getRequestParams();
+    QJsonObject& json = data.getJson();
+    json["response"] = data.getRequestParams();
   });
 
   result = httpSvr.registerRoute("post", "echobody", "/echobody");
@@ -150,7 +150,9 @@ void TestHttpServer::testGET_EchoResponse()
   QTest::qWait(1000);
   QJsonDocument expected;
   expected = QJsonDocument::fromJson(QString("{\"preprocess\":true,\"response\":\"C++ FTW 123\",\"postprocess\":true}").toLatin1());
-  QVERIFY2(result.toStdString() == expected.toJson().trimmed().toStdString(),
+
+  string expectedStr = expected.toJson().trimmed().toStdString();
+  QVERIFY2(result.toStdString() == expectedStr,
            result.toStdString().c_str());
 }
 

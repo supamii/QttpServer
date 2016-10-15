@@ -76,6 +76,18 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
      */
     bool addAction(std::shared_ptr<Action>& action);
 
+    template<class T> bool addActionAndRegister()
+    {
+      std::shared_ptr<Action> action(new T());
+      bool containsKey = addAction(action);
+      auto routes = action->getRoutes();
+      for(auto iter = routes.begin(); iter != routes.end(); ++iter)
+      {
+        registerRoute(iter->first, action->getName(), iter->second);
+      }
+      return containsKey;
+    }
+
     /**
      * @brief Encouraged for those who need a quick and easy way to setup an
      * action.
@@ -162,6 +174,10 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
         QStringList parts;
     };
 
+    const Action* getAction(const QString& name) const;
+
+    std::shared_ptr<Action> getAction(const QString& name);
+
     const QHash<QString, Route>& getRoutes(HttpMethod method) const;
 
     const QHash<QString, Route>& getRoutes(const QString& method) const;
@@ -224,11 +240,7 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     QHash<QString, std::shared_ptr<Action> > m_Actions;
     QHash<QString, std::shared_ptr<const Action> > m_ConstActions;
     QHash<QString, std::function<void(HttpData& data)> > m_ActionCallbacks;
-    QHash<QString, Route> m_GetRoutes;
-    QHash<QString, Route> m_PostRoutes;
-    QHash<QString, Route> m_PutRoutes;
-    QHash<QString, Route> m_DeleteRoutes;
-    QHash<QString, Route> m_PatchRoutes;
+    QMap<HttpMethod, QHash<QString, Route> > m_Routes;
     std::vector<std::shared_ptr<Processor> > m_Processors;
     std::vector<std::function<void(HttpData& data)> > m_Preprocessors;
     std::vector<std::function<void(HttpData& data)> > m_Postprocessors;
@@ -239,7 +251,9 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     bool m_IsInitialized;
     QCommandLineParser m_CmdLineParser;
     bool m_SendRequestMetadata;
+    bool m_StrictHttpMethod;
     bool m_ShouldServeFiles;
+    bool m_IsSwaggerEnabled;
     QDir m_ServeFilesDirectory;
     std::thread m_Thread;
 };

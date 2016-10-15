@@ -10,6 +10,7 @@
 #include <QDateTime>
 #include <QProcessEnvironment>
 #include <QJsonObject>
+#include <QList>
 
 #include <http.h>
 #include <functional>
@@ -26,6 +27,10 @@
 #  define QTTPSHARED_EXPORT Q_DECL_EXPORT
 #else
 #  define QTTPSHARED_EXPORT Q_DECL_IMPORT
+#endif
+
+#ifndef QTTP_SERVER_VERSION
+#  define QTTP_SERVER_VERSION "QttpServer/1.0.0"
 #endif
 
 namespace qttp

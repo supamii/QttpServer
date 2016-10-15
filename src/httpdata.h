@@ -3,6 +3,7 @@
 
 #include "qttp_global.h"
 #include "httprequest.h"
+#include "utils.h"
 
 namespace qttp
 {
@@ -151,6 +152,10 @@ class QTTPSHARED_EXPORT HttpData
 
     const QTime& getTime() const;
 
+    void setMethod(HttpMethod method);
+
+    HttpMethod getMethod() const;
+
   private:
 
     /**
@@ -175,6 +180,7 @@ class QTTPSHARED_EXPORT HttpData
     QUuid m_Uid;
     QDateTime m_Timestamp;
     QTime m_Time;
+    HttpMethod m_Method;
 };
 
 }

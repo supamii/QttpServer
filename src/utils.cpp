@@ -31,7 +31,11 @@ const QList<HttpMethod> Utils::HTTP_METHODS =
   HttpMethod::POST,
   HttpMethod::PUT,
   HttpMethod::PATCH,
-  HttpMethod::DELETE
+  HttpMethod::HEAD,
+  HttpMethod::DELETE,
+  HttpMethod::OPTIONS,
+  HttpMethod::TRACE,
+  HttpMethod::CONNECT
 };
 
 Utils::Utils()
@@ -42,7 +46,7 @@ Utils::~Utils()
 {
 }
 
-QString Utils::toString(HttpMethod method)
+const char* Utils::toString(HttpMethod method)
 {
   switch(method)
   {
@@ -55,46 +59,65 @@ QString Utils::toString(HttpMethod method)
     case HttpMethod::PUT:
       return "PUT";
 
-    case HttpMethod::DELETE:
-      return "DELETE";
-
     case HttpMethod::PATCH:
       return "PATCH";
 
+    case HttpMethod::HEAD:
+      return "HEAD";
+
+    case HttpMethod::DELETE:
+      return "DELETE";
+
+    case HttpMethod::OPTIONS:
+      return "OPTIONS";
+
+    case HttpMethod::CONNECT:
+      return "CONNECT";
+
+    case HttpMethod::TRACE:
+      return "TRACE";
+
     default:
+      LOG_WARN("Unknown [" << (int) method << "]");
       return "";
   }
 }
 
-HttpMethod Utils::fromString(const QString& method)
+const char* Utils::toStringLower(HttpMethod method)
 {
-  QString str = method.trimmed().toUpper();
-  if(str == "GET")
+  switch(method)
   {
-    return HttpMethod::GET;
-  }
-  if(str == "POST")
-  {
-    return HttpMethod::POST;
-  }
-  if(str == "PUT")
-  {
-    return HttpMethod::PUT;
-  }
-  if(str == "DELETE")
-  {
-    return HttpMethod::DELETE;
-  }
-  if(str == "PATCH")
-  {
-    return HttpMethod::PATCH;
-  }
-  throw QttpException("Unrecognized http method " + method.toStdString());
-}
+    case HttpMethod::GET:
+      return "get";
 
-HttpMethod Utils::fromStdString(const std::string& method)
-{
-  return fromString(QString::fromStdString(method));
+    case HttpMethod::POST:
+      return "post";
+
+    case HttpMethod::PUT:
+      return "put";
+
+    case HttpMethod::PATCH:
+      return "patch";
+
+    case HttpMethod::HEAD:
+      return "head";
+
+    case HttpMethod::DELETE:
+      return "delete";
+
+    case HttpMethod::OPTIONS:
+      return "options";
+
+    case HttpMethod::CONNECT:
+      return "connect";
+
+    case HttpMethod::TRACE:
+      return "trace";
+
+    default:
+      LOG_WARN("Unknown [" << (int) method << "]");
+      return "";
+  }
 }
 
 QJsonObject Utils::readJson(const QString& path)
@@ -116,7 +139,7 @@ QJsonObject Utils::readJson(const QString& path)
 
   if(parseError.error != QJsonParseError::NoError)
   {
-    THROW_EXCEPTION((path + ": " + parseError.errorString()).toStdString());
+    THROW_EXCEPTION(path + ": " + parseError.errorString());
   }
 
   if(doc.isNull())

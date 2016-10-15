@@ -4,7 +4,8 @@ using namespace std;
 using namespace qttp;
 
 const QList<Input> Action::m_EmptyInputList;
-const QStringList Action::m_EmptyTagList;
+const QStringList Action::m_EmptyStringList;
+const QList<std::pair<string, string> > Action::m_EmptyStringPairList;
 
 Action::Action()
 {
@@ -16,7 +17,7 @@ Action::~Action()
 
 void Action::onAction(HttpData &data)
 {
-  HttpMethod method = Utils::fromStdString(data.getRequest().get_method());
+  HttpMethod method = Utils::fromPartialString(data.getRequest().get_method());
   switch(method)
   {
     case HttpMethod::GET:
@@ -37,6 +38,22 @@ void Action::onAction(HttpData &data)
 
     case HttpMethod::PATCH:
       this->onPatch(data);
+      break;
+
+    case HttpMethod::HEAD:
+      this->onHead(data);
+      break;
+
+    case HttpMethod::OPTIONS:
+      this->onOptions(data);
+      break;
+
+    case HttpMethod::TRACE:
+      this->onTrace(data);
+      break;
+
+    case HttpMethod::CONNECT:
+      this->onConnect(data);
       break;
 
     default:
@@ -65,7 +82,27 @@ void Action::onPatch(HttpData &data)
   Q_UNUSED(data);
 }
 
+void Action::onHead(HttpData& data)
+{
+  Q_UNUSED(data);
+}
+
 void Action::onDelete(HttpData& data)
+{
+  Q_UNUSED(data);
+}
+
+void Action::onOptions(HttpData& data)
+{
+  Q_UNUSED(data);
+}
+
+void Action::onTrace(HttpData& data)
+{
+  Q_UNUSED(data);
+}
+
+void Action::onConnect(HttpData& data)
 {
   Q_UNUSED(data);
 }
@@ -73,6 +110,12 @@ void Action::onDelete(HttpData& data)
 void Action::onUnknown(HttpData& data)
 {
   Q_UNUSED(data);
+}
+
+const QList<pair<HttpMethod, QString> >& Action::getRoutes() const
+{
+  const static QList<pair<HttpMethod, QString> > list;
+  return list;
 }
 
 const char* Action::getSummary() const
@@ -87,12 +130,34 @@ const char* Action::getDescription() const
 
 const QStringList& Action::getTags() const
 {
-  return m_EmptyTagList;
+  return m_EmptyStringList;
 }
 
 const QList<Input>& Action::getInputs() const
 {
   return m_EmptyInputList;
+}
+
+const QList<pair<string, string> >& Action::getHeaders() const
+{
+  static const QList<pair<string, string> > defaultHeaders =
+  {
+    { "Content-Type", "application/json" },
+    { "Access-Control-Allow-Headers", "Content-Type, Authorization" },
+    { "Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, PATCH, HEAD, OPTIONS, TRACE" },
+    { "Access-Control-Allow-Origin", "*" },
+    { "Server", QTTP_SERVER_VERSION }
+  };
+  return defaultHeaders;
+}
+
+void Action::applyHeaders(HttpData& data) const
+{
+  auto & resp = data.getResponse();
+  for(auto & header : getHeaders())
+  {
+    resp.set_header(header.first, header.second);
+  }
 }
 
 Input::Input() :

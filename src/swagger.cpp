@@ -4,12 +4,13 @@
 using namespace std;
 using namespace qttp;
 
+const char* Swagger::ACTION_NAME = "swagger";
+
 Swagger::Swagger() :
   Action(),
   m_IsEnabled(true),
   m_Response()
 {
-  // TODO: FIXME: HttpServer should have a special hook for this.
   initialize();
 }
 
@@ -19,7 +20,16 @@ Swagger::~Swagger()
 
 const char* Swagger::getName() const
 {
-  return "swagger";
+  return ACTION_NAME;
+}
+
+const QList<pair<HttpMethod, QString> >& Swagger::getRoutes() const
+{
+  const static QList<pair<HttpMethod, QString> > list =
+  {
+    { HttpMethod::GET, "/swagger" }
+  };
+  return list;
 }
 
 void Swagger::initialize()
@@ -56,13 +66,13 @@ void Swagger::initialize()
 
   QJsonObject definitions;
   QJsonObject paths;
+  QJsonObject parameters;
 
   const QHash<QString, shared_ptr<const Action> >& actions = svr->getActions();
 
   for(const auto & action : actions)
   {
     QJsonObject properties;
-    QJsonObject parameters;
 
     QJsonArray refParams;
     QJsonArray required;
@@ -87,7 +97,7 @@ void Swagger::initialize()
         { "type", input.dataType },
         { "description", input.description },
         { "required", input.required },
-        { "enum", enums }
+        { "enum", enums.size() == 0 ? QJsonValue() : enums }
       };
 
       if(input.required)
@@ -102,14 +112,12 @@ void Swagger::initialize()
       properties[input.name] = QJsonObject { { "type", "string" } };
     }
 
-    definitions.insert(actionName + version, QJsonValue({
-      { "properties", properties },
-      { "parameters", parameters }
+    definitions.insert(actionName + version, QJsonValue(QJsonObject {
+      { "properties", properties }
     }));
 
     for(auto httpMethod : Utils::HTTP_METHODS)
     {
-      QString method = Utils::toString(httpMethod).toLower();
       const QHash<QString, HttpServer::Route>& routes = svr->getRoutes(httpMethod);
 
       QJsonArray routeParameters(refParams);
@@ -139,7 +147,7 @@ void Swagger::initialize()
           paths.insert(route.route, QJsonObject());
         }
         QJsonObject pathRoute = paths[route.route].toObject();
-        pathRoute.insert(method, QJsonObject {
+        pathRoute.insert(Utils::toStringLower(httpMethod), QJsonObject {
           { "summary", action->getSummary() },
           { "description", action->getDescription() },
           { "operationId", route.route },
@@ -156,6 +164,7 @@ void Swagger::initialize()
 
   m_Response["definitions"] = definitions;
   m_Response["paths"] = paths;
+  m_Response["parameters"] = parameters;
 
 }
 

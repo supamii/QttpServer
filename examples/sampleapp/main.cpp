@@ -33,6 +33,16 @@ class Simple : public Action
       };
       return list;
     }
+
+    void onGet(HttpData& data)
+    {
+      data.getJson()["data"] = "GET ok";
+    }
+
+    void onPost(HttpData& data)
+    {
+      data.getJson()["data"] = "POST ok";
+    }
 };
 
 int main(int argc, char** argv)
@@ -65,9 +75,6 @@ int main(int argc, char** argv)
     svr->addAction<Simple>();
     svr->registerRoute(HttpMethod::GET, "simple", "/simple");
     svr->registerRoute(HttpMethod::POST, "simple", "/simple");
-
-    svr->addAction<Swagger>();
-    svr->registerRoute(HttpMethod::GET, "swagger", "/swagger");
 
     svr->startServer();
 

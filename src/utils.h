@@ -3,6 +3,18 @@
 
 #include "qttp_global.h"
 
+#ifndef THROW_RUNTIME
+#define THROW_RUNTIME(X) std::stringstream x; x << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": " << X; throw std::runtime_error(x.str().c_str())
+#endif
+
+#ifndef THROW_STD_EXCEPTION
+#define THROW_STD_EXCEPTION(X) std::stringstream x; x << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": " << X; throw qttp::QttpException(x.str())
+#endif
+
+#ifndef THROW_EXCEPTION
+#define THROW_EXCEPTION(X) QString s; QTextStream x(&s); x << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": " << X; throw qttp::QttpException(s.toStdString());
+#endif
+
 #ifdef NO_QTTP_LOGGING
   #define LOG_DATETIME QString()
   #define LOG_FILE QString()
@@ -21,14 +33,14 @@
     #endif
   #endif
 
+#ifdef NO_LOG_DATETIME
+  #define LOG_DATETIME QString()
+#else
 // TODO If we're running as a unit test - ignore time stamps!?
   #ifndef LOG_DATETIME
     #define LOG_DATETIME QDateTime::currentDateTime().toString("yyyy/MM/dd-hh:mm:ss:zzz").append(' ')
   #endif
-
-  #ifdef NO_LOG_DATETIME
-    #define LOG_DATETIME QString()
-  #endif
+#endif
 
 // A bit nasty and expensive string creation - strictly for debugging so
 // in release mode the build should define NO_LOG_FILE or NO_LOG_FUNCTION
@@ -111,13 +123,27 @@ class QTTPSHARED_EXPORT LogTrace
     quint32 line;
 };
 
+class QTTPSHARED_EXPORT QttpException : public std::exception
+{
+  public:
+    QttpException(const std::string& message);
+    const char* what() const _NOEXCEPT;
+  private:
+    std::string m_Message;
+};
+
 enum class HttpMethod
 {
+  UNKNOWN = -1,
   GET = 0,
   POST = 1,
   PUT = 2,
   DELETE = 3,
-  PATCH = 4
+  PATCH = 4,
+  HEAD = 5,
+  OPTIONS = 6,
+  CONNECT = 7,
+  TRACE = 8,
 };
 
 class QTTPSHARED_EXPORT Utils
@@ -129,11 +155,116 @@ class QTTPSHARED_EXPORT Utils
 
     static const QList<HttpMethod> HTTP_METHODS;
 
-    static QString toString(HttpMethod method);
+    static const char* toString(HttpMethod method);
 
-    static HttpMethod fromString(const QString& method);
+    static const char* toStringLower(HttpMethod method);
 
-    static HttpMethod fromStdString(const std::string& method);
+    template<class T> static HttpMethod fromString(const T& method)
+    {
+      if(method == "GET")
+      {
+        return HttpMethod::GET;
+      }
+      if(method == "POST")
+      {
+        return HttpMethod::POST;
+      }
+      if(method == "PUT")
+      {
+        return HttpMethod::PUT;
+      }
+      if(method == "PATCH")
+      {
+        return HttpMethod::PATCH;
+      }
+      if(method == "HEAD")
+      {
+        return HttpMethod::HEAD;
+      }
+      if(method == "OPTIONS")
+      {
+        return HttpMethod::OPTIONS;
+      }
+      if(method == "DELETE")
+      {
+        return HttpMethod::DELETE;
+      }
+      if(method == "TRACE")
+      {
+        return HttpMethod::TRACE;
+      }
+      if(method == "CONNECT")
+      {
+        return HttpMethod::CONNECT;
+      }
+
+#ifdef QTTP_PRODUCTION_MODE
+      return HttpMethod::UNKNOWN;
+#else
+      // Make sure we throw to fail fast in dev mode.
+      THROW_EXCEPTION("Unrecognized http method [" << method << "]");
+#endif
+    }
+
+    template<class T> static HttpMethod fromPartialString(const T& str)
+    {
+      auto firstChar = str[0];
+
+      if(firstChar == 'G'|| firstChar == 'g')
+      {
+        return HttpMethod::GET;
+      }
+
+      if(firstChar == 'P'|| firstChar == 'p')
+      {
+        auto secondChar = str[1];
+
+        if(secondChar == 'U'|| secondChar == 'u')
+        {
+          return HttpMethod::PUT;
+        }
+        if(secondChar == 'O'|| secondChar == 'o')
+        {
+          return HttpMethod::POST;
+        }
+        if(secondChar == 'A'|| secondChar == 'a')
+        {
+          return HttpMethod::PATCH;
+        }
+      }
+
+      if(firstChar == 'H'|| firstChar == 'h')
+      {
+        return HttpMethod::HEAD;
+      }
+
+      if(firstChar == 'O' || firstChar == 'o')
+      {
+        return HttpMethod::OPTIONS;
+      }
+
+      if(firstChar == 'D'|| firstChar == 'd')
+      {
+        return HttpMethod::DELETE;
+      }
+
+      if(firstChar == 'T' || firstChar == 't')
+      {
+        return HttpMethod::TRACE;
+      }
+
+      if(firstChar == 'C' || firstChar == 'c')
+      {
+        return HttpMethod::CONNECT;
+      }
+
+#ifdef QTTP_PRODUCTION_MODE
+      return HttpMethod::UNKNOWN;
+#else
+      // Make sure we throw to fail fast in dev mode.
+      THROW_EXCEPTION("Unrecognized http method");
+#endif
+    }
 
     /**
      * @brief Throws a std::runtime_error with a message of any JSON validation
@@ -183,15 +314,6 @@ class QTTPSHARED_EXPORT Utils
     {
       return QJsonDocument::fromJson(bytes, error).array();
     }
-};
-
-class QTTPSHARED_EXPORT QttpException : public std::exception
-{
-  public:
-    QttpException(const std::string& message);
-    const char* what() const _NOEXCEPT;
-  private:
-    std::string m_Message;
 };
 
 #ifndef STATS_INC
@@ -259,10 +381,6 @@ class QTTPSHARED_EXPORT LoggingUtils : public QObject
     QtMessageHandler m_OriginalMessageHandler;
     qint32 m_TimerId;
 };
-
-#ifndef THROW_EXCEPTION
-#define THROW_EXCEPTION(X) std::stringstream x; x << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": " << X; throw std::runtime_error(x.str().c_str())
-#endif
 
 } // End namespace qttp
 

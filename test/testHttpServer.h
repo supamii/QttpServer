@@ -10,7 +10,7 @@
 namespace qttp
 {
 
-class SampleAction: public Action
+class SampleAction : public Action
 {
   public:
     void onAction(HttpData& data)
@@ -20,13 +20,13 @@ class SampleAction: public Action
       json["response"] = "Sample C++ FTW";
     }
 
-    const QString getActionName() const
+    const char* getName() const
     {
       return "sample";
     }
 };
 
-class SampleActionWithHttpMethods: public Action
+class SampleActionWithHttpMethods : public Action
 {
   public:
     void onGet(HttpData& data)
@@ -57,13 +57,13 @@ class SampleActionWithHttpMethods: public Action
       json["response"] = "Sample C++ FTW Delete";
     }
 
-    const QString getActionName() const
+    const char* getName() const
     {
       return "sampleWithHttpMethods";
     }
 };
 
-class ActionWithParameter: public Action
+class ActionWithParameter : public Action
 {
   public:
     ActionWithParameter(QString param) : Action(), m_Param(param)
@@ -77,7 +77,7 @@ class ActionWithParameter: public Action
       json["response"] = "Sample C++ FTW With Parameter " + m_Param;
     }
 
-    const QString getActionName() const
+    const char* getName() const
     {
       return "sampleWithParameter";
     }
@@ -85,10 +85,10 @@ class ActionWithParameter: public Action
     QString m_Param;
 };
 
-class SampleProcessor: public Processor
+class SampleProcessor : public Processor
 {
   public:
-    const QString getProcessorName() const
+    const char* getName() const
     {
       return "SampleProcessor";
     }

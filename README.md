@@ -1,4 +1,4 @@
-# QttpServer 
+# QttpServer 1.0.0
 
 See Current Release: [QttpServer v0.1.0](https://github.com/supamii/QttpServer/tree/QTTPv0.1.0)
 
@@ -71,7 +71,7 @@ class Sample : public Action {
     QJsonObject& json = data.getJson();
     json["response"] = "Sample C++ FTW";
   }
-  const QString getActionName() const { return "sample"; }
+  const const char* getName() const { return "sample"; }
 };
 ```
 
@@ -263,4 +263,6 @@ As a side note, if you want to run a quick sample application you can add `CONFI
 28. ~~Support shared library and add exports/import decl macros~~
 29. Include SSL support
 30. Include periodic TASKS to execute in between libuv call-backs!
+31. Swagger suppport
+32. ~~Serve basic http files~~
 

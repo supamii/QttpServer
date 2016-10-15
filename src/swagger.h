@@ -17,11 +17,14 @@ class QTTPSHARED_EXPORT Swagger : public Action
     Swagger();
     ~Swagger();
 
+    void initialize();
+
     const char* getName() const;
+    const QList<std::pair<HttpMethod, QString> >& getRoutes() const;
+
+    static const char* ACTION_NAME;
 
   private:
-
-    void initialize();
 
     /**
      * @brief Returns swagger-ready json for consumption

@@ -1,8 +1,9 @@
 {
     "bindIp": "0.0.0.0",
     "bindPort": 8080,
-    "response": {
-        "requestMetaData": true
+    "server": {
+        "strictHttpMethod": false,
+        "metadata": true
     },
     "logfile": {
         "isEnabled": true,
