@@ -5,7 +5,6 @@
 #include "action.h"
 #include "httpdata.h"
 #include "httpevent.h"
-#include "utils.h"
 
 namespace qttp
 {

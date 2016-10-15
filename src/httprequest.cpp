@@ -4,11 +4,13 @@ using namespace std;
 using namespace qttp;
 
 HttpRequest::HttpRequest(native::http::request* req) :
-    m_Assertion(req),
-    m_Request(req),
-    m_HttpUrl(),
-    m_Method(),
-    m_Body()
+  m_Assertion(req),
+  m_Request(req),
+  m_HttpUrl(),
+  m_MethodStr(),
+  m_MethodEnum(HttpMethod::UNKNOWN),
+  m_Json(),
+  m_Query()
 {
 }
 
@@ -16,37 +18,23 @@ HttpRequest::~HttpRequest()
 {
 }
 
-const native::http::url_obj& HttpRequest::url() const
+bool HttpRequest::containsHeader(const std::string& key) const
 {
-  return m_Request->url();
+  auto headers = m_Request->get_headers();
+  return headers.find(key) != headers.end();
 }
 
-const std::string& HttpRequest::get_header(const std::string& key) const
+const std::string& HttpRequest::getHeader(const std::string& key) const
 {
   return m_Request->get_header(key);
 }
 
-bool HttpRequest::get_header(const std::string& key, std::string& value) const
+bool HttpRequest::getHeader(const std::string& key, std::string& value) const
 {
   return m_Request->get_header(key, value);
 }
 
-std::string HttpRequest::get_body() const
-{
-  return m_Request->get_body();
-}
-
-std::stringstream& HttpRequest::get_raw_body()
-{
-  return m_Request->get_raw_body();
-}
-
-const std::string& HttpRequest::get_method() const
-{
-  return m_Request->get_method();
-}
-
-uint64_t HttpRequest::get_timestamp() const
+uint64_t HttpRequest::getTimestamp() const
 {
   return m_Request->get_timestamp();
 }
@@ -60,20 +48,83 @@ const HttpUrl& HttpRequest::getUrl() const
   return *(m_HttpUrl.data());
 }
 
-const QString& HttpRequest::getBody() const
+const QString& HttpRequest::getMethodStr() const
 {
-  if(m_Body.isNull())
+  if(m_MethodStr.isNull())
   {
-    m_Body = QSharedPointer<QString>(new QString(get_body().c_str()));
+    m_MethodStr = QSharedPointer<QString>(new QString(m_Request->get_method().c_str()));
   }
-  return *(m_Body.data());
+  return *(m_MethodStr.data());
 }
 
-const QString& HttpRequest::getMethod() const
+HttpMethod HttpRequest::getMethod(bool strictComparison) const
 {
-  if(m_Method.isNull())
+  if(m_MethodEnum == HttpMethod::UNKNOWN)
   {
-    m_Method = QSharedPointer<QString>(new QString(get_method().c_str()));
+    m_MethodEnum = strictComparison ?
+                   Utils::fromString(getMethodStr()) :
+                   Utils::fromPartialString(getMethodStr());
   }
-  return *(m_Method.data());
+  return m_MethodEnum;
+}
+
+const std::stringstream& HttpRequest::getRawBody() const
+{
+  return m_Request->get_raw_body();
+}
+
+native::http::request* HttpRequest::getRequest()
+{
+  return m_Request;
+}
+
+const QJsonObject& HttpRequest::getJson() const
+{
+  if(!m_Json.isEmpty())
+  {
+    return m_Json;
+  }
+
+  // TODO: MUTEX!
+  // FIXME: MUTEX!
+
+  string body = m_Request->get_body();
+  auto openBrace = body.find("{");
+  auto closeBrace = body.find("}");
+
+  if(openBrace != string::npos && openBrace == 0 &&
+     closeBrace != string::npos && closeBrace == (body.length() - 1))
+  {
+    QJsonParseError error;
+    m_Json = Utils::toJson(body, &error);
+
+    if(error.error != QJsonParseError::NoError)
+    {
+      LOG_ERROR(error.errorString());
+      m_Json = Utils::toJson(string("{}"));
+    }
+  }
+
+  QList<QPair<QString, QString> > list = getQuery().queryItems();
+  for(auto i = list.begin(); i != list.end(); ++i)
+  {
+    m_Json.insert(i->first, i->second);
+  }
+
+  return m_Json;
+}
+
+QUrlQuery& HttpRequest::getQuery()
+{
+  return m_Query;
+}
+
+const QUrlQuery& HttpRequest::getQuery() const
+{
+  return m_Query;
+}
+
+void HttpRequest::setQuery(QUrlQuery& params)
+{
+  m_Query.swap(params);
 }

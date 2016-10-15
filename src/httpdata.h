@@ -3,7 +3,7 @@
 
 #include "qttp_global.h"
 #include "httprequest.h"
-#include "utils.h"
+#include "httpresponse.h"
 
 namespace qttp
 {
@@ -34,155 +34,38 @@ class QTTPSHARED_EXPORT HttpData
 
   public:
 
-    typedef enum eControl
-    {
-      // Provided for Processors to abort/terminate processing.
-      Terminated = 0x0001,
-      // Set internally to indicate that the response was sent.
-      Finished = 0x0002,
-      // Set internally to indicate that preprocessors operated on this.
-      Preprocessed = 0x0004,
-      // Set internally to indicate that postprocessors operated on this.
-      Postprocessed = 0x0008,
-      // Set internally to indicate this was operated on by an Action.
-      ActionProcessed = 0x0010,
-      // Default value.
-      None = 0x0000
-
-    } eControl;
+    /**
+     * @brief
+     */
+    const HttpRequest& getRequest() const;
+    HttpRequest& getRequest();
 
     /**
-     * @brief Build your HTTP response by populating your data into QJsonObject.
-     *
-     * This is the preferred way to build/access a json response - if it is
-     * valid, the QttpServer framework (namely httpserver) will take this object
-     * and populate the HTTP response body automatically.
-     *
-     * As an alternative, the caller may optionally complete the transaction
-     * with finishResponse().
+     * @brief
      */
-    QJsonObject& getJson();
-
-    const QJsonObject& getJson() const;
+    const HttpResponse& getResponse() const;
+    HttpResponse& getResponse();
 
     /**
-     * @brief Highly recommended!  This builds and returns a QJsonObject that
-     * consolidates query-string parameters and the reqeust body (JSON only).
-     * This avoids having to grab from the query string and parsing through the
-     * request body separately.
+     * @brief Quickly and easily assign JSON responses.
+     *
+     * This is the same as getResponse().setJson();
      */
-    QJsonObject& getRequestParams();
-
-    QUrlQuery& getQuery();
-
-    const QUrlQuery& getQuery() const;
+    void setResponse(const QJsonObject& json);
 
     const QUuid& getUid() const;
-
-    /**
-     * @brief Beware that accessing this after invoking finishResponse() will
-     * result in an exception since alloated memory will be NULL.  Also be sure
-     * NOT to save/use this reference outside of the lifetime of HttpData.
-     */
-    native::http::request& getRequest() const;
-
-    /**
-     * @brief Recommended for qt-centric applications that deal with QStrings.
-     * This will save the user from having to constantly convert members
-     * of native::http::response into a QString.
-     */
-    const HttpRequest& getHttpRequest() const;
-    HttpRequest& getHttpRequest();
-
-    /**
-     * @brief Returns the response object, note that response::end() method is
-     * ABSOLUTELY DISCOURAGED from direct invocation since the we have no way of
-     * tracking the state of the response socket.
-     *
-     * Similar to getRequest(), this method will raise an exception if
-     * finishResponse() has been invoked since memory too will be invalid.
-     *
-     * DO NOT to save/use this reference outside of the lifetime of HttpData.
-     */
-    native::http::response& getResponse() const;
-
-    /**
-     * @brief A wrapper for native::http::response::end() and writes directly
-     * to the response socket.  For direct writes, this is highly encouraged
-     * since it helps track the state of the response - i.e. if the response was
-     * written to the socket already.
-     * @see isFinished()
-     */
-    bool finishResponse(const std::string& body);
-    bool finishResponse(const QByteArray& bytes);
-
-    /**
-     * @brief Preferred method when working with the json object.  Populate
-     * response data using getJson() and then invoke this method to send it off.
-     */
-    bool finishResponse();
-
-    bool finishResponse(const QJsonObject& json);
-
-    quint32 getControlFlag() const;
-
-    bool shouldContinue() const;
-
-    void setTerminated();
-
-    bool isTerminated() const;
-
-    /**
-     * @return Boolean indicating if finishResponse() has been called.
-     *
-     * It's important to actually avoid using any references to
-     * native::http::request and native::http::response if this returns true.
-     */
-    bool isFinished() const;
-
-    /**
-     * @return If this was processed by any processor or action.  Intended to
-     * track if this data object was operated on already.
-     */
-    bool isProcessed() const;
-
     void setTimestamp(const QDateTime& timestamp);
-
     const QDateTime& getTimestamp() const;
-
     const QTime& getTime() const;
-
-    void setMethod(HttpMethod method);
-
-    HttpMethod getMethod() const;
 
   private:
 
-    /**
-     * @brief Sets a flag to indicate if the action should continue processing
-     * or simply marks this data as having been processed e.g. preprocess was
-     * performed already.
-     */
-    void setControlFlag(eControl flag);
-
-    /**
-     * @brief This will swap data - beware
-     */
-    void setQuery(QUrlQuery&);
-
-    native::http::request* m_Request;
-    mutable QSharedPointer<HttpRequest> m_HttpRequest;
-    native::http::response* m_Response;
-    QUrlQuery m_Query;
-    QJsonObject m_Json;
-    QJsonObject m_RequestParams;
-    quint32 m_ControlFlag;
+    HttpRequest m_HttpRequest;
+    HttpResponse m_HttpResponse;
     QUuid m_Uid;
     QDateTime m_Timestamp;
     QTime m_Time;
-    HttpMethod m_Method;
 };
 
 }
-
 #endif // QTTPHTTPDATA_H

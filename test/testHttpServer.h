@@ -16,7 +16,7 @@ class SampleAction : public Action
     void onAction(HttpData& data)
     {
       LOG_TRACE;
-      QJsonObject& json = data.getJson();
+      QJsonObject& json = data.getResponse().getJson();
       json["response"] = "Sample C++ FTW";
     }
 
@@ -32,28 +32,28 @@ class SampleActionWithHttpMethods : public Action
     void onGet(HttpData& data)
     {
       LOG_TRACE;
-      QJsonObject& json = data.getJson();
+      QJsonObject& json = data.getResponse().getJson();
       json["response"] = "Sample C++ FTW Get";
     }
 
     void onPost(HttpData& data)
     {
       LOG_TRACE;
-      QJsonObject& json = data.getJson();
+      QJsonObject& json = data.getResponse().getJson();
       json["response"] = "Sample C++ FTW Post";
     }
 
     void onPut(HttpData& data)
     {
       LOG_TRACE;
-      QJsonObject& json = data.getJson();
+      QJsonObject& json = data.getResponse().getJson();
       json["response"] = "Sample C++ FTW Put";
     }
 
     void onDelete(HttpData& data)
     {
       LOG_TRACE;
-      QJsonObject& json = data.getJson();
+      QJsonObject& json = data.getResponse().getJson();
       json["response"] = "Sample C++ FTW Delete";
     }
 
@@ -73,7 +73,7 @@ class ActionWithParameter : public Action
     void onAction(HttpData& data)
     {
       LOG_TRACE;
-      QJsonObject& json = data.getJson();
+      QJsonObject& json = data.getResponse().getJson();
       json["response"] = "Sample C++ FTW With Parameter " + m_Param;
     }
 
@@ -96,13 +96,13 @@ class SampleProcessor : public Processor
     void preprocess(HttpData& data)
     {
       LOG_TRACE;
-      data.getJson()["preprocess"] = true;
+      data.getResponse().getJson()["preprocess"] = true;
     }
 
     void postprocess(HttpData& data)
     {
       LOG_TRACE;
-      data.getJson()["postprocess"] = true;
+      data.getResponse().getJson()["postprocess"] = true;
     }
 };
 

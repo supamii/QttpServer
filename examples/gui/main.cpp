@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
   svr->initialize();
   svr->registerRoute("get", "helloworld", "/helloworld");
   svr->addAction("helloworld", [&](HttpData& data) {
-    QJsonObject& json = data.getJson();
+    QJsonObject& json = data.getResponse().getJson();
     json["response"] = "Hello World!";
 
     w.getModel().addData(data);

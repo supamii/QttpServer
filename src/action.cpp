@@ -17,7 +17,7 @@ Action::~Action()
 
 void Action::onAction(HttpData &data)
 {
-  HttpMethod method = Utils::fromPartialString(data.getRequest().get_method());
+  HttpMethod method = data.getRequest().getMethod(false);
   switch(method)
   {
     case HttpMethod::GET:
@@ -153,10 +153,10 @@ const QList<pair<string, string> >& Action::getHeaders() const
 
 void Action::applyHeaders(HttpData& data) const
 {
-  auto & resp = data.getResponse();
+  auto& resp = data.getResponse();
   for(auto & header : getHeaders())
   {
-    resp.set_header(header.first, header.second);
+    resp.setHeader(header.first, header.second);
   }
 }
 
@@ -180,9 +180,29 @@ Input::Input(const QString& n) :
 {
 }
 
+Input::Input(const QString& n, const QString& desc) :
+  name(n),
+  description(desc),
+  required(false),
+  paramType("query"),
+  dataType("string"),
+  enums()
+{
+}
+
 Input::Input(const QString& n, const QStringList& e) :
   name(n),
   description(),
+  required(false),
+  paramType("query"),
+  dataType("string"),
+  enums(e)
+{
+}
+
+Input::Input(const QString& n, const QStringList& e, const QString& desc) :
+  name(n),
+  description(desc),
   required(false),
   paramType("query"),
   dataType("string"),
@@ -201,8 +221,20 @@ RequiredInput::RequiredInput(const QString& n) :
   required = true;
 }
 
+RequiredInput::RequiredInput(const QString& n, const QString& desc) :
+  Input(n, desc)
+{
+  required = true;
+}
+
 RequiredInput::RequiredInput(const QString& n, const QStringList& e) :
   Input(n, e)
+{
+  required = true;
+}
+
+RequiredInput::RequiredInput(const QString& n, const QStringList& e, const QString& desc) :
+  Input(n, e, desc)
 {
   required = true;
 }

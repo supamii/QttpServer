@@ -172,7 +172,7 @@ void Swagger::onGet(HttpData& data)
 {
   if(m_IsEnabled)
   {
-    data.getJson() = m_Response;
+    data.getResponse().setJson(m_Response);
   }
   else
   {

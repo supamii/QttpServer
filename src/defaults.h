@@ -1,5 +1,5 @@
-#ifndef DEFAULTS_H
-#define DEFAULTS_H
+#ifndef QTTP_DEFAULTS_H
+#define QTTP_DEFAULTS_H
 
 #include "qttp_global.h"
 #include "action.h"
@@ -16,4 +16,4 @@ class OptionsPreprocessor : public Processor
 };
 
 }
-#endif // DEFAULTS_H
+#endif // QTTP_DEFAULTS_H

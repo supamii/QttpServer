@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 
       QByteArray bytes = Utils::toByteArray(p.jsonString(Strict));
 
-      QJsonObject& json = data.getJson();
+      QJsonObject& json = data.getResponse().getJson();
       json["response"] = Utils::toJson(bytes);
     });
 
@@ -62,12 +62,12 @@ int main(int argc, char** argv)
 
     httpSvr.addAction("getPerson", [&](HttpData& data)
     {
-      QJsonObject& json = data.getJson();
+      QJsonObject& json = data.getResponse().getJson();
 
       BSONObj bson;
 
       // Supports querying a person by name.
-      QUrlQuery& params = data.getQuery();
+      QUrlQuery& params = data.getRequest().getQuery();
       if(params.hasQueryItem("name"))
       {
         bson = BSON("name" << params.queryItemValue("name").toStdString());

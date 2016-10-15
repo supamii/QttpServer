@@ -1,4 +1,4 @@
-# QttpServer 1.0.0
+# QttpServer 1.0.0 beta
 
 See Current Release: [QttpServer v0.1.0](https://github.com/supamii/QttpServer/tree/QTTPv0.1.0)
 
@@ -16,6 +16,8 @@ Check out the examples and samples to get started with your RESTful API server!
 * Pre & Post processing hooks and chaining
 * Submodules ready to support [MongoDb](https://github.com/mongodb/mongo-cxx-driver), [Redis](https://github.com/uglide/qredisclient)
 * Logging support
+* Swagger-UI support
+* Very basic support for HTTP files (html, js, css, etc)
 
 ## Example 1: 
 Using a raw std::function based callback
@@ -38,7 +40,7 @@ int main(int argc, char** argv)
   // Associate this call-back with the action named, "test"
   httpSvr->addAction("test", [](HttpData& data) {
     // Form the JSON content and let the framework handle the rest.
-    QJsonObject& json = data.getJson();
+    QJsonObject& json = data.getResponse().getJson();
     json["response"] = "Test C++ FTW";
   });
 
@@ -68,7 +70,7 @@ httpSvr->registerRoute("post", "sample", "/sampleAgain");
 
 class Sample : public Action {
   void onAction(HttpData& data) {
-    QJsonObject& json = data.getJson();
+    QJsonObject& json = data.getResponse().getJson();
     json["response"] = "Sample C++ FTW";
   }
   const const char* getName() const { return "sample"; }

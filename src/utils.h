@@ -132,20 +132,6 @@ class QTTPSHARED_EXPORT QttpException : public std::exception
     std::string m_Message;
 };
 
-enum class HttpMethod
-{
-  UNKNOWN = -1,
-  GET = 0,
-  POST = 1,
-  PUT = 2,
-  DELETE = 3,
-  PATCH = 4,
-  HEAD = 5,
-  OPTIONS = 6,
-  CONNECT = 7,
-  TRACE = 8,
-};
-
 class QTTPSHARED_EXPORT Utils
 {
   public:

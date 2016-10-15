@@ -20,7 +20,7 @@ MainWindow::~MainWindow()
 
 HttpDataModel& MainWindow::getModel()
 {
-  return  m_HttpDataModel;
+  return m_HttpDataModel;
 }
 
 HttpDataModel::HttpDataModel(QWidget* parent) :
@@ -57,7 +57,7 @@ int HttpDataModel::columnCount(const QModelIndex& parent) const
 void HttpDataModel::addData(qttp::HttpData& data)
 {
   LOG_TRACE;
-  m_Data.push_back(data.getRequest().url().path().c_str());
+  m_Data.push_back(data.getRequest().getUrl().getPath());
   emit layoutChanged();
 }
 

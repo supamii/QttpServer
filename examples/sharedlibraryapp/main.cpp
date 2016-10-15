@@ -21,14 +21,14 @@ int main(int argc, char *argv[])
 
     svr->registerRoute("get", "helloworld", "/helloworld");
     svr->addAction("helloworld", [](HttpData& data) {
-      QJsonObject& json = data.getJson();
+      QJsonObject& json = data.getResponse().getJson();
       json["response"] = "Hello World!";
     });
 
     svr->registerRoute("post", "echobody", "/echobody");
     svr->addAction("echobody", [](HttpData& data) {
-        QJsonObject& json = data.getJson();
-        json["response"] = data.getRequestParams();
+      QJsonObject& json = data.getResponse().getJson();
+      json["response"] = data.getRequest().getJson();
     });
 
     svr->startServer();

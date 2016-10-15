@@ -48,15 +48,16 @@ void TestHttpServer::initTestCase()
   QVERIFY(HttpServer::getInstance() != nullptr);
 
   bool result = httpSvr.addAction("", [](HttpData& data) {
-    QJsonObject& json = data.getJson();
+    QJsonObject& json = data.getResponse().getJson();
     json["response"] = "C++ FTW";
   });
 
   httpSvr.addProcessor<SampleProcessor>();
 
   result = httpSvr.addAction("echo", [](HttpData& data) {
-    QJsonObject& json = data.getJson();
-    json["response"] = "C++ FTW " + data.getQuery().queryItemValue("id");
+    QJsonObject& json = data.getResponse().getJson();
+    auto& query = data.getRequest().getQuery();
+    json["response"] = "C++ FTW " + query.queryItemValue("id");
   });
 
   result = httpSvr.registerRoute("get", "", "/echo/:id");
@@ -66,8 +67,8 @@ void TestHttpServer::initTestCase()
   QVERIFY(result == true);
 
   result = httpSvr.addAction("echobody", [](HttpData& data) {
-    QJsonObject& json = data.getJson();
-    json["response"] = data.getRequestParams();
+    QJsonObject& json = data.getResponse().getJson();
+    json["response"] = data.getRequest().getJson();
   });
 
   result = httpSvr.registerRoute("post", "echobody", "/echobody");
@@ -109,11 +110,11 @@ void TestHttpServer::initTestCase()
 
   // Uses a raw std::function based callback.
   result = httpSvr.addAction("test", [](HttpData& data) {
-    QJsonObject& json = data.getJson();
+    QJsonObject& json = data.getResponse().getJson();
     json["response"] = "Test C++ FTW";
 
     // NOTE: This terminates early so we should not expect any post-processing.
-    data.finishResponse();
+    data.getResponse().finish();
   });
   QVERIFY(result == true);
 
@@ -124,10 +125,10 @@ void TestHttpServer::initTestCase()
   QVERIFY(result == true);
 
   result = httpSvr.addAction("terminates", [](HttpData& data) {
-    QJsonObject& json = data.getJson();
+    QJsonObject& json = data.getResponse().getJson();
     json["response"] = "Test C++ FTW";
     // NOTE: This terminates early so we should not expect any post-processing.
-    data.setTerminated();
+    data.getResponse().terminate();
   });
   QVERIFY(result == true);
 

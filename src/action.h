@@ -3,7 +3,6 @@
 
 #include "qttp_global.h"
 #include "httpdata.h"
-#include "utils.h"
 
 namespace qttp
 {
@@ -15,7 +14,9 @@ class QTTPSHARED_EXPORT Input
   public:
     Input();
     Input(const QString& name);
-    Input(const QString& n, const QStringList& e);
+    Input(const QString& name, const QString& desc);
+    Input(const QString& name, const QStringList& enums);
+    Input(const QString& name, const QStringList& enums, const QString& desc);
 
     QString name;
     QString description;
@@ -36,7 +37,9 @@ class QTTPSHARED_EXPORT RequiredInput : public Input
   public:
     RequiredInput();
     RequiredInput(const QString& name);
-    RequiredInput(const QString& n, const QStringList& e);
+    RequiredInput(const QString& name, const QString& desc);
+    RequiredInput(const QString& name, const QStringList& enums);
+    RequiredInput(const QString& name, const QStringList& enums, const QString& desc);
 };
 
 class HttpServer;

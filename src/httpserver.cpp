@@ -395,20 +395,15 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
 
   return [&](HttpEvent * event) mutable
          {
-           request* req = event->getRequest();
-           response* resp = event->getResponse();
-
            STATS_INC("http:hits");
 
-           HttpData data(req, resp);
+           HttpData data(event->getRequest(), event->getResponse());
            data.setTimestamp(event->getTimestamp());
 
-           HttpMethod method = m_StrictHttpMethod ?
-                               Utils::fromString(QString(req->get_method().c_str()).toUpper().trimmed()) :
-                               Utils::fromPartialString(req->get_method());
+           HttpResponse& response = data.getResponse();
+           HttpRequest& request = data.getRequest();
 
-           data.setMethod(method);
-
+           HttpMethod method = request.getMethod(m_StrictHttpMethod);
            switch(method)
            {
              case HttpMethod::GET:
@@ -449,8 +444,8 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
 
              default:
                STATS_INC("http:method:unknown");
-               resp->set_status(400);
-               QJsonObject& json = data.getJson();
+               response.setStatus(HttpStatus::BAD_REQUEST);
+               QJsonObject& json = data.getResponse().getJson();
                json["error"] = "Invalid HTTP method";
                return;
            }
@@ -461,14 +456,14 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
            if(routes == m_Routes.end())
            {
              LOG_ERROR("Invalid route");
-             resp->set_status(500);
-             QJsonObject& json = data.getJson();
+             response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
+             QJsonObject& json = data.getResponse().getJson();
              json["error"] = "Internal error";
              return;
            }
 
            QUrlQuery parameters;
-           QString urlPath = QString::fromStdString(req->url().path()).trimmed();
+           const QString& urlPath = request.getUrl().getPath();
            auto route = routes->begin();
 
            // TODO: ROOM FOR IMPROVEMENT: We can reduce the total number of searches
@@ -482,14 +477,14 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
              {
                // Since this request is going to be processed, let's also parse the
                // query strings for easy access.
-               QUrlQuery params(QString::fromStdString(req->url().query()));
+               QUrlQuery params(request.getUrl().getQuery());
                for(auto i : params.queryItems())
                {
                  // Should note that existing itms are not replaced!  These are simply
                  // appended to the query string.
                  parameters.addQueryItem(i.first, i.second);
                }
-               data.setQuery(parameters);
+               request.setQuery(parameters);
                break;
              }
            }
@@ -505,12 +500,12 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                if(callback != m_ActionCallbacks.end())
                {
                  performPreprocessing(data);
-                 if(data.shouldContinue())
+                 if(response.shouldContinue())
                  {
-                   data.setControlFlag(HttpData::ActionProcessed);
+                   response.setFlag(DataControl::ActionProcessed);
                    (callback.value())(data);
                  }
-                 if(data.shouldContinue()) performPostprocessing(data);
+                 if(response.shouldContinue()) performPostprocessing(data);
                }
                else
                {
@@ -518,20 +513,20 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                  if(action != m_Actions.end() && action.value().get() != nullptr)
                  {
                    performPreprocessing(data);
-                   if(data.shouldContinue())
+                   if(response.shouldContinue())
                    {
-                     data.setControlFlag(HttpData::ActionProcessed);
+                     response.setFlag(DataControl::ActionProcessed);
                      auto a = action.value();
                      a->applyHeaders(data);
                      a->onAction(data);
                    }
-                   if(data.shouldContinue()) performPostprocessing(data);
+                   if(response.shouldContinue()) performPostprocessing(data);
                  }
                }
              }
 
              // Check the control flag bit mask to determine if it was processed above.
-             if(!data.isProcessed())
+             if(!response.isProcessed())
              {
                LOG_DEBUG("No route found for" << urlPath << ", "
                          "checking default routes");
@@ -540,7 +535,7 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                // intercept and process it.
                performPreprocessing(data);
 
-               if(data.shouldContinue())
+               if(response.shouldContinue())
                {
                  // TODO: Describe this in the header file.
 
@@ -551,28 +546,28 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                  auto callback = m_ActionCallbacks.find("");
                  if(callback != m_ActionCallbacks.end())
                  {
-                   data.setControlFlag(HttpData::ActionProcessed);
+                   response.setFlag(DataControl::ActionProcessed);
                    callback.value()(data);
-                   if(data.shouldContinue()) performPostprocessing(data);
+                   if(response.shouldContinue()) performPostprocessing(data);
                  }
                  else
                  {
                    auto action = m_Actions.find("");
                    if(action != m_Actions.end())
                    {
-                     data.setControlFlag(HttpData::ActionProcessed);
+                     response.setFlag(DataControl::ActionProcessed);
                      auto a = action.value();
                      a->applyHeaders(data);
                      a->onAction(data);
-                     if(data.shouldContinue()) performPostprocessing(data);
+                     if(response.shouldContinue()) performPostprocessing(data);
                    }
                    else
                    {
                      // Check out files as a last resort.
                      if(!searchAndServeFile(data))
                      {
-                       resp->set_status(400);
-                       QJsonObject& json = data.getJson();
+                       response.setStatus(HttpStatus::BAD_REQUEST);
+                       QJsonObject& json = data.getResponse().getJson();
                        json["error"] = "Invalid request";
                        performPostprocessing(data);
                      }
@@ -584,26 +579,26 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
            catch(const std::exception& e)
            {
              LOG_ERROR("Exception caught" << e.what());
-             resp->set_status(500);
-             QJsonObject& json = data.getJson();
+             response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
+             QJsonObject& json = data.getResponse().getJson();
              json["error"] = e.what();
            }
            catch(const QJsonObject& e)
            {
              LOG_ERROR("JSON caught" << e);
-             resp->set_status(500);
-             data.getJson() = e;
+             response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
+             data.getResponse().getJson() = e;
            }
            catch(...)
            {
-             resp->set_status(500);
-             QJsonObject& json = data.getJson();
+             response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
+             QJsonObject& json = data.getResponse().getJson();
              json["error"] = "Internal server error";
            }
 
-           if(!data.isFinished())
+           if(!response.isFinished())
            {
-             if(!data.getJson().isEmpty())
+             if(!data.getResponse().getJson().isEmpty())
              {
                if(m_SendRequestMetadata)
                {
@@ -612,24 +607,24 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                  std::string ip;
                  int port;
 
-                 if(resp->getpeername(ip4, ip, port))
+                 if(response.getResponse()->getpeername(ip4, ip, port))
                  {
                    obj["remoteIp"] = ip.c_str();
                    obj["remotePort"] = port;
                  }
 
-                 obj["query"] = data.getQuery().toString();
+                 obj["query"] = request.getQuery().toString();
                  obj["uid"] = data.getUid().toString();
                  obj["timestamp"] = data.getTimestamp().toString("yyyy/MM/dd hh:mm:ss:zzz");
                  obj["timeElapsed"] = data.getTime().elapsed();
-                 obj["timeElapsedMs"] = (qreal)(uv_hrtime() - req->get_timestamp()) /
+                 obj["timeElapsedMs"] = (qreal)(uv_hrtime() - request.getTimestamp()) /
                                         (qreal)1000000.00;
 
-                 QJsonObject& json = data.getJson();
+                 QJsonObject& json = data.getResponse().getJson();
                  json["requestMetadata"] = obj;
                }
 
-               if( !data.finishResponse())
+               if( !response.finish())
                {
                  LOG_WARN("Failed to finish response");
                }
@@ -691,10 +686,11 @@ bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QU
 
 void HttpServer::performPreprocessing(HttpData& data) const
 {
+  auto& response = data.getResponse();
   for(auto & callback : m_Preprocessors)
   {
     callback(data);
-    data.setControlFlag(HttpData::Preprocessed);
+    response.setFlag(DataControl::Preprocessed);
   }
 
   for(auto & processor : m_Processors)
@@ -702,13 +698,14 @@ void HttpServer::performPreprocessing(HttpData& data) const
     if(processor.get())
     {
       processor->preprocess(data);
-      data.setControlFlag(HttpData::Preprocessed);
+      response.setFlag(DataControl::Preprocessed);
     }
   }
 }
 
 void HttpServer::performPostprocessing(HttpData& data) const
 {
+  auto& response = data.getResponse();
   auto processor = m_Processors.rbegin();
   auto end = m_Processors.rend();
 
@@ -718,7 +715,7 @@ void HttpServer::performPostprocessing(HttpData& data) const
     if(p)
     {
       p->postprocess(data);
-      data.setControlFlag(HttpData::Postprocessed);
+      response.setFlag(DataControl::Postprocessed);
     }
     ++processor;
   }
@@ -726,7 +723,7 @@ void HttpServer::performPostprocessing(HttpData& data) const
   for(auto & callback : m_Postprocessors)
   {
     callback(data);
-    data.setControlFlag(HttpData::Postprocessed);
+    response.setFlag(DataControl::Postprocessed);
   }
 }
 
@@ -742,7 +739,7 @@ bool HttpServer::searchAndServeFile(HttpData& data) const
   // TODO: WOULD BE NICE TO CACHE STRING CONSTRUCTION.
 
   //QString urlFragment = data.getHttpRequest().getUrl().getFragment();
-  QString urlPath = data.getHttpRequest().getUrl().getPath();
+  QString urlPath = data.getRequest().getUrl().getPath();
   if(urlPath.at(0) == '/')
   {
     urlPath = urlPath.mid(1);
@@ -793,9 +790,9 @@ bool HttpServer::searchAndServeFile(HttpData& data) const
     contentType = "application/xml";
   }
 
-  data.getResponse().set_header("Content-Type", contentType);
-
-  return data.finishResponse(file.readAll());
+  auto& response = data.getResponse();
+  response.setHeader("Content-Type", contentType);
+  return response.finish(file.readAll());
 }
 
 bool HttpServer::eventFilter(QObject* /* object */, QEvent* event)

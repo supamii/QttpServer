@@ -16,7 +16,7 @@ const char* OptionsPreprocessor::getName() const
 
 void OptionsPreprocessor::preprocess(HttpData& data)
 {
-  if(data.getMethod() == HttpMethod::OPTIONS)
+  if(data.getRequest().getMethod() == HttpMethod::OPTIONS)
   {
     static const QList<pair<string, string> > defaultHeaders =
     {
@@ -27,11 +27,8 @@ void OptionsPreprocessor::preprocess(HttpData& data)
       { "Server", QTTP_SERVER_VERSION }
     };
 
-    auto & resp = data.getResponse();
-    for(auto & header : defaultHeaders)
-    {
-      resp.set_header(header.first, header.second);
-    }
-    data.finishResponse(string());
+    auto response = data.getResponse();
+    response.setHeader(defaultHeaders);
+    response.finish();
   }
 }
