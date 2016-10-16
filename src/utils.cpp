@@ -20,7 +20,7 @@ QttpException::QttpException(const std::string& message) :
 {
 }
 
-const char* QttpException::what() const _NOEXCEPT
+const char* QttpException::what() const noexcept
 {
   return m_Message.c_str();
 }
