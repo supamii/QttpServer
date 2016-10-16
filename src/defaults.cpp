@@ -30,7 +30,7 @@ void OptionsPreprocessor::preprocess(HttpData& data)
       { "Server", QTTP_SERVER_VERSION }
     };
 
-    auto response = data.getResponse();
+    auto& response = data.getResponse();
     response.setHeader(defaultHeaders);
     response.finish();
   }

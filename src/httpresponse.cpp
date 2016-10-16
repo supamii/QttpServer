@@ -63,7 +63,6 @@ void HttpResponse::setJson(const QJsonObject& json)
 
 bool HttpResponse::finish()
 {
-  setFlag(DataControl::Finished);
   if(m_Json.isEmpty())
   {
     return finish(string());
@@ -84,7 +83,6 @@ bool HttpResponse::finish(const string& body)
 bool HttpResponse::finish(const QJsonObject& json)
 {
   LOG_TRACE;
-  setFlag(DataControl::Finished);
   setHeader("Content-Type", "application/json");
   QJsonDocument doc(json);
   return finish(doc.toJson());
@@ -129,5 +127,5 @@ quint32 HttpResponse::getFlag() const
 
 void HttpResponse::setFlag(DataControl flag)
 {
-  m_ControlFlag |= flag;
+  m_ControlFlag |= static_cast<quint32>(flag);
 }

@@ -515,7 +515,7 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                // Since this request is going to be processed, let's also parse the
                // query strings for easy access.
                QUrlQuery params(request.getUrl().getQuery());
-               for(auto i : params.queryItems())
+               for(auto & i : params.queryItems())
                {
                  // Should note that existing itms are not replaced!  These are simply
                  // appended to the query string.
@@ -553,7 +553,7 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                    if(response.shouldContinue())
                    {
                      response.setFlag(DataControl::ActionProcessed);
-                     auto a = action.value();
+                     auto& a = action.value();
                      a->applyHeaders(data);
                      a->onAction(data);
                    }
@@ -572,6 +572,7 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                // intercept and process it.
                performPreprocessing(data);
 
+               bool checkThis = data.getResponse().shouldContinue();
                if(response.shouldContinue())
                {
                  // TODO: Describe this in the header file.
@@ -593,7 +594,7 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                    if(action != m_Actions.end())
                    {
                      response.setFlag(DataControl::ActionProcessed);
-                     auto a = action.value();
+                     auto& a = action.value();
                      a->applyHeaders(data);
                      a->onAction(data);
                      if(response.shouldContinue()) performPostprocessing(data);

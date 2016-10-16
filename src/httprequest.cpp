@@ -20,7 +20,7 @@ HttpRequest::~HttpRequest()
 
 bool HttpRequest::containsHeader(const std::string& key) const
 {
-  auto headers = m_Request->get_headers();
+  auto & headers = m_Request->get_headers();
   return headers.find(key) != headers.end();
 }
 
