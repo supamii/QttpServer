@@ -140,15 +140,7 @@ const QList<Input>& Action::getInputs() const
 
 const QList<pair<string, string> >& Action::getHeaders() const
 {
-  static const QList<pair<string, string> > defaultHeaders =
-  {
-    { "Content-Type", "application/json" },
-    { "Access-Control-Allow-Headers", "Content-Type, Authorization" },
-    { "Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, PATCH, HEAD, OPTIONS, TRACE" },
-    { "Access-Control-Allow-Origin", "*" },
-    { "Server", QTTP_SERVER_VERSION }
-  };
-  return defaultHeaders;
+  return Global::getDefaultHeaders();
 }
 
 void Action::applyHeaders(HttpData& data) const

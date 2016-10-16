@@ -11,13 +11,16 @@ OptionsPreprocessor::OptionsPreprocessor() :
 
 const char* OptionsPreprocessor::getName() const
 {
-  return "optionsPreprocessor";
+  return "options";
 }
 
 void OptionsPreprocessor::preprocess(HttpData& data)
 {
   if(data.getRequest().getMethod() == HttpMethod::OPTIONS)
   {
+    // For now we won't use Global::getDefaultHeaders() until we can figure
+    // out how to ensure the OPTIONS method will always work as expected.
+
     static const QList<pair<string, string> > defaultHeaders =
     {
       { "Content-Type", "application/json" },

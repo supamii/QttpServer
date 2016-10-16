@@ -116,7 +116,7 @@ void Swagger::initialize()
       { "properties", properties }
     }));
 
-    for(auto httpMethod : Utils::HTTP_METHODS)
+    for(auto httpMethod : Global::HTTP_METHODS)
     {
       const QHash<QString, HttpServer::Route>& routes = svr->getRoutes(httpMethod);
 

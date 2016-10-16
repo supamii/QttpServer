@@ -49,12 +49,13 @@ HttpServer::HttpServer() :
   m_ShouldServeFiles(true),
   m_IsSwaggerEnabled(false),
   m_ServeFilesDirectory(SERVE_FILES_PATH),
-  m_Thread(HttpServer::start)
+  m_Thread(HttpServer::start),
+  m_EnabledProcessors()
 {
   this->installEventFilter(this);
 
-  for(auto method = Utils::HTTP_METHODS.begin();
-      method != Utils::HTTP_METHODS.end();
+  for(auto method = Global::HTTP_METHODS.begin();
+      method != Global::HTTP_METHODS.end();
       ++method)
   {
     m_Routes[*method] = QHash<QString, Route>();
@@ -93,10 +94,6 @@ bool HttpServer::initialize()
     LOG_DEBUG("Working directory" << QDir::currentPath());
     #endif
   }
-
-  QJsonObject serverConfig = m_GlobalConfig["server"].toObject();
-  m_SendRequestMetadata = serverConfig["metadata"].toBool(false);
-  m_StrictHttpMethod = serverConfig["strictHttpMethod"].toBool(false);
 
   QCoreApplication* app = QCoreApplication::instance();
   Q_ASSERT(app);
@@ -202,7 +199,7 @@ void HttpServer::initGlobal(const QString &filepath)
   if(loggingValue.isObject())
   {
     QJsonObject logging = loggingValue.toObject();
-    if(logging["isEnabled"].isBool() && logging["isEnabled"].toBool())
+    if(logging["isEnabled"].toBool(true))
     {
       QString filename;
       if(logging["filename"].isString())
@@ -224,7 +221,7 @@ void HttpServer::initGlobal(const QString &filepath)
   if(httpFilesValue.isObject())
   {
     QJsonObject httpFiles = httpFilesValue.toObject();
-    m_ShouldServeFiles = httpFiles["isEnabled"].toBool();
+    m_ShouldServeFiles = httpFiles["isEnabled"].toBool(false);
     if(m_ShouldServeFiles)
     {
       m_ServeFilesDirectory = httpFiles["directory"].toString();
@@ -237,7 +234,47 @@ void HttpServer::initGlobal(const QString &filepath)
   }
 
   QJsonObject swagger = m_GlobalConfig["swagger"].toObject();
-  m_IsSwaggerEnabled = swagger["isEnabled"].toBool();
+  m_IsSwaggerEnabled = swagger["isEnabled"].toBool(false);
+
+  QJsonObject headers = m_GlobalConfig["defaultHeaders"].toObject();
+  QStringList keys = headers.keys();
+
+  if(!keys.isEmpty())
+  {
+    Global::DEFAULT_HEADERS.clear();
+    for(QString key : keys)
+    {
+      QString value = headers.value(key).toString();
+      Global::DEFAULT_HEADERS.append({ key.toStdString(), value.toStdString() });
+      LOG_DEBUG("Adding default-header [" << key << ", " << value << "]");
+    }
+
+    // We'll always force the QttpServer version in here.
+    Global::DEFAULT_HEADERS.append({ "Server", QTTP_SERVER_VERSION });
+  }
+  else
+  {
+    LOG_DEBUG("Did not read headers in config file, using default headers");
+  }
+
+  QJsonObject serverConfig = m_GlobalConfig["server"].toObject();
+  m_SendRequestMetadata = serverConfig["metadata"].toBool(false);
+  m_StrictHttpMethod = serverConfig["strictHttpMethod"].toBool(false);
+
+  QJsonObject processors = serverConfig["processors"].toObject();
+  keys = processors.keys();
+  for(QString key : keys)
+  {
+    bool isEnabled = processors.value(key).toBool(false);
+
+    LOG_DEBUG("Processor [" << key << "] is " <<
+              (isEnabled ? "ENABLED" : "NOT ENABLED"));
+
+    if(isEnabled)
+    {
+      m_EnabledProcessors.append(key);
+    }
+  }
 }
 
 void HttpServer::initRoutes(const QString &filepath)
@@ -323,7 +360,7 @@ void HttpServer::startServer()
     svr.addActionAndRegister<Swagger>();
   }
 
-  svr.addProcessor<OptionsPreprocessor>();
+  svr.addDefaultProcessor<OptionsPreprocessor>();
 
   auto quitCB = [](){
                   LOG_TRACE;
@@ -923,8 +960,26 @@ bool HttpServer::addProcessor(std::shared_ptr<Processor>& processor)
   {
     return false;
   }
+
+  LOG_DEBUG("Adding processor [" << processor->getName() << "]");
   m_Processors.push_back(processor);
   return true;
+}
+
+bool HttpServer::addDefaultProcessor(std::shared_ptr<Processor>& processor)
+{
+  if(processor.get() == nullptr)
+  {
+    return false;
+  }
+
+  if(!m_EnabledProcessors.contains(processor->getName()))
+  {
+    LOG_DEBUG("Processor not enabled [" << processor->getName() << "]");
+    return false;
+  }
+
+  return addProcessor(processor);
 }
 
 void HttpServer::addPreprocessor(std::function<void(HttpData& data)> callback)

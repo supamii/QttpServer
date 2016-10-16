@@ -3,7 +3,10 @@
     "bindPort": 8080,
     "server": {
         "strictHttpMethod": false,
-        "metadata": true
+        "metadata": true,
+        "processors": {
+            "options" : true
+        }
     },
     "logfile": {
         "isEnabled": true,
@@ -21,5 +24,11 @@
     "httpFiles": {
         "isEnabled": true,
         "directory": "/usr/local/qttpfiles"
+    },
+    "defaultHeaders" : {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization" ,
+        "Access-Control-Allow-Methods": "GET, POST, DELETE, PUT, PATCH, HEAD, OPTIONS, TRACE" ,
+        "Access-Control-Allow-Origin": "*"
     }
 }

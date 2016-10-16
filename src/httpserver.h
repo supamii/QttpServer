@@ -189,6 +189,14 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
 
   private:
 
+    template<class T> bool addDefaultProcessor()
+    {
+      std::shared_ptr<Processor> processor(new T());
+      return addDefaultProcessor(processor);
+    }
+
+    bool addDefaultProcessor(std::shared_ptr<Processor>& processor);
+
     void registerRouteFromJSON(QJsonValueRef& obj, const QString& method);
     void registerRouteFromJSON(QJsonValueRef& obj, HttpMethod method);
 
@@ -255,6 +263,7 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     bool m_IsSwaggerEnabled;
     QDir m_ServeFilesDirectory;
     std::thread m_Thread;
+    QStringList m_EnabledProcessors;
 };
 
 } // End namespace qttp

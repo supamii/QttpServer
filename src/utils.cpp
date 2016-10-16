@@ -25,24 +25,7 @@ const char* QttpException::what() const _NOEXCEPT
   return m_Message.c_str();
 }
 
-const QList<HttpMethod> Utils::HTTP_METHODS =
-{
-  HttpMethod::GET,
-  HttpMethod::POST,
-  HttpMethod::PUT,
-  HttpMethod::PATCH,
-  HttpMethod::HEAD,
-  HttpMethod::DELETE,
-  HttpMethod::OPTIONS,
-  HttpMethod::TRACE,
-  HttpMethod::CONNECT
-};
-
 Utils::Utils()
-{
-}
-
-Utils::~Utils()
 {
 }
 

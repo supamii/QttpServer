@@ -200,6 +200,25 @@ template<class T> class Assert
       Q_ASSERT(ptr != nullptr);
     }
 };
+
+// Forward declaration.
+class HttpServer;
+
+class QTTPSHARED_EXPORT Global
+{
+  friend class HttpServer;
+  Global();
+
+  public:
+
+    static const QList<HttpMethod> HTTP_METHODS;
+
+    static const QList<std::pair<std::string, std::string> >& getDefaultHeaders();
+
+  private:
+    static QList<std::pair<std::string, std::string> > DEFAULT_HEADERS;
+};
+
 }
 
 #include "utils.h"

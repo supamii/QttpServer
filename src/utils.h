@@ -134,12 +134,9 @@ class QTTPSHARED_EXPORT QttpException : public std::exception
 
 class QTTPSHARED_EXPORT Utils
 {
+  Utils();
+
   public:
-
-    Utils();
-    ~Utils();
-
-    static const QList<HttpMethod> HTTP_METHODS;
 
     static const char* toString(HttpMethod method);
 
