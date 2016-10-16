@@ -127,7 +127,8 @@ class QTTPSHARED_EXPORT QttpException : public std::exception
 {
   public:
     QttpException(const std::string& message);
-    const char* what() const _NOEXCEPT;
+    const char* what() const noexcept;
+
   private:
     std::string m_Message;
 };
