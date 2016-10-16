@@ -15,15 +15,30 @@
     },
     "swagger": {
         "isEnabled": true,
-        "version": "0.1",
-        "description": "QttpServerDescription",
-        "title": "QttpServerTitle",
         "host": "127.0.0.1:8080",
-        "basePath": "/"
+        "basePath": "/",
+        "version": "0.1",
+        "title": "QttpServer",
+        "description": "Build RESTful web services using Qt, powered by Node's libuv!",
+        "company" : {
+            "name": "QttpServer",
+            "url": "http://github.com/supamii/QttpServer"
+        },
+        "contact": {
+            "email": "email@craptified.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "termsOfService": "https://opensource.org/ToS",
+        "schemes" : [ "http" ],
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ]
     },
     "httpFiles": {
         "isEnabled": true,
-        "directory": "/usr/local/qttpfiles"
+        "directory": "$QTTP_HOME"
     },
     "defaultHeaders" : {
         "Content-Type": "application/json",

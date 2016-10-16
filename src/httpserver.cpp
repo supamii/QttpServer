@@ -14,6 +14,7 @@ const char* HttpServer::ROUTES_CONFIG_FILE = "routes.json";
 const char* HttpServer::GLOBAL_CONFIG_FILE_PATH = "./config/global.json";
 const char* HttpServer::ROUTES_CONFIG_FILE_PATH = "./config/routes.json";
 const char* HttpServer::CONFIG_DIRECTORY_ENV_VAR = "QTTP_CONFIG_DIRECTORY";
+const char* HttpServer::QTTP_HOME_ENV_VAR = "QTTP_HOME";
 const char* HttpServer::SERVER_ERROR_MSG = "Unable to bind to ip/port, exiting...";
 
 HttpServer* HttpServer::getInstance()
@@ -43,14 +44,15 @@ HttpServer::HttpServer() :
   m_Stats(new Stats()),
   m_LoggingUtils(),
   m_IsInitialized(false),
+  m_IsSwaggerEnabled(false),
   m_CmdLineParser(),
   m_SendRequestMetadata(false),
   m_StrictHttpMethod(false),
   m_ShouldServeFiles(true),
-  m_IsSwaggerEnabled(false),
   m_ServeFilesDirectory(SERVE_FILES_PATH),
   m_Thread(HttpServer::start),
-  m_EnabledProcessors()
+  m_EnabledProcessors(),
+  m_ServerInfo()
 {
   this->installEventFilter(this);
 
@@ -79,10 +81,10 @@ bool HttpServer::initialize()
   }
 
   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-  if(env.contains("QTTP_HOME"))
+  if(env.contains(QTTP_HOME_ENV_VAR))
   {
-    QDir::setCurrent(env.value("QTTP_HOME"));
-    LOG_DEBUG("Working directory" << QDir::currentPath());
+    QDir::setCurrent(env.value(QTTP_HOME_ENV_VAR));
+    LOG_DEBUG("Working directory from $" << QTTP_HOME_ENV_VAR << QDir::currentPath());
   }
   else
   {
@@ -224,7 +226,32 @@ void HttpServer::initGlobal(const QString &filepath)
     m_ShouldServeFiles = httpFiles["isEnabled"].toBool(false);
     if(m_ShouldServeFiles)
     {
-      m_ServeFilesDirectory = httpFiles["directory"].toString();
+      QString directory = httpFiles["directory"].toString().trimmed();
+      if(directory == "$QTTP_HOME")
+      {
+        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+        if(env.contains(QTTP_HOME_ENV_VAR))
+        {
+          m_ServeFilesDirectory = QDir::cleanPath(env.value(QTTP_HOME_ENV_VAR));
+          m_ServeFilesDirectory = m_ServeFilesDirectory.absoluteFilePath("www");
+          LOG_DEBUG("Using $QTTP_HOME" << m_ServeFilesDirectory.absolutePath());
+        }
+        else
+        {
+          m_ServeFilesDirectory = QDir::current().absoluteFilePath("www");
+          LOG_DEBUG("QTTP_HOME not found, using current directory" << m_ServeFilesDirectory.absolutePath());
+        }
+      }
+      else if(directory.isEmpty())
+      {
+        m_ServeFilesDirectory = QDir::current().absoluteFilePath("www");
+        LOG_DEBUG("Default to using current directory" << m_ServeFilesDirectory.absolutePath());
+      }
+      else
+      {
+        m_ServeFilesDirectory = QDir::cleanPath(directory);
+        LOG_DEBUG("Using directory in config" << m_ServeFilesDirectory.absolutePath());
+      }
       if(!m_ServeFilesDirectory.exists())
       {
         LOG_ERROR("Unable to serve files from invalid directory [" << m_ServeFilesDirectory.absolutePath() << "]");
@@ -232,9 +259,6 @@ void HttpServer::initGlobal(const QString &filepath)
       }
     }
   }
-
-  QJsonObject swagger = m_GlobalConfig["swagger"].toObject();
-  m_IsSwaggerEnabled = swagger["isEnabled"].toBool(false);
 
   QJsonObject headers = m_GlobalConfig["defaultHeaders"].toObject();
   QStringList keys = headers.keys();
@@ -275,6 +299,35 @@ void HttpServer::initGlobal(const QString &filepath)
       m_EnabledProcessors.append(key);
     }
   }
+
+  QJsonObject swagger = m_GlobalConfig["swagger"].toObject();
+  m_IsSwaggerEnabled = swagger["isEnabled"].toBool(false);
+
+#ifndef ASSIGN_SWAGGER
+#  define ASSIGN_SWAGER(X) m_ServerInfo.X = swagger[#X].toString()
+#endif
+
+  ASSIGN_SWAGER(host);
+  ASSIGN_SWAGER(basePath);
+  ASSIGN_SWAGER(version);
+  ASSIGN_SWAGER(title);
+  ASSIGN_SWAGER(description);
+  ASSIGN_SWAGER(termsOfService);
+
+  QJsonObject company = swagger["company"].toObject();
+  m_ServerInfo.companyName = company["name"].toString();
+  m_ServerInfo.companyUrl = company["url"].toString();
+
+  QJsonObject contact = swagger["contact"].toObject();
+  m_ServerInfo.contactEmail = contact["email"].toString();
+
+  QJsonObject license = swagger["license"].toObject();
+  m_ServerInfo.licenseName = license["name"].toString();
+  m_ServerInfo.licenseUrl = license["url"].toString();
+
+  m_ServerInfo.schemes = swagger["schemes"].toArray();
+  m_ServerInfo.consumes = swagger["consumes"].toArray();
+  m_ServerInfo.produces = swagger["produces"].toArray();
 }
 
 void HttpServer::initRoutes(const QString &filepath)
@@ -776,20 +829,34 @@ bool HttpServer::searchAndServeFile(HttpData& data) const
 
   // TODO: WOULD BE NICE TO CACHE STRING CONSTRUCTION.
 
-  //QString urlFragment = data.getHttpRequest().getUrl().getFragment();
   QString urlPath = data.getRequest().getUrl().getPath();
-  if(urlPath.at(0) == '/')
+  if(urlPath.startsWith('/'))
   {
     urlPath = urlPath.mid(1);
   }
-  QString filepath = m_ServeFilesDirectory.absoluteFilePath(urlPath);
+  QString filepath = QDir::cleanPath(m_ServeFilesDirectory.absoluteFilePath(urlPath));
   QFile file(filepath);
 
+  if(!filepath.startsWith(m_ServeFilesDirectory.absolutePath()))
+  {
+    LOG_ERROR("Not allowed to read from path [" << filepath << "]");
+    return false;
+  }
+
+  QDir directory = filepath;
+  if(directory.exists() && QFile::exists(filepath + "/index.html"))
+  {
+    filepath += "/index.html";
+    file.setFileName(filepath);
+    LOG_DEBUG("Detected index.html [" << filepath << "]");
+  }
   if(!file.open(QIODevice::ReadOnly))
   {
     LOG_DEBUG("Unable to read file [" << filepath << "]");
     return false;
   }
+
+  LOG_DEBUG("Serving file [" << filepath << "]");
 
   string contentType = "text/html";
 
@@ -826,6 +893,22 @@ bool HttpServer::searchAndServeFile(HttpData& data) const
   else if(urlPath.endsWith(".xml", Qt::CaseInsensitive))
   {
     contentType = "application/xml";
+  }
+  else if(urlPath.endsWith(".pdf", Qt::CaseInsensitive))
+  {
+    // TODO: Support PDF, zip, tar files
+  }
+  else if(urlPath.endsWith(".zip", Qt::CaseInsensitive))
+  {
+    // TODO: Support PDF, zip, tar files
+  }
+  else if(urlPath.endsWith(".tar", Qt::CaseInsensitive))
+  {
+    // TODO: Support PDF, zip, tar files
+  }
+  else if(urlPath.endsWith(".gz", Qt::CaseInsensitive))
+  {
+    // TODO: Support PDF, zip, tar files
   }
 
   auto& response = data.getResponse();
@@ -927,9 +1010,14 @@ const QHash<QString, std::shared_ptr<const Action> >& HttpServer::getActions() c
   return m_ConstActions;
 }
 
+const HttpServer::ServerInfo& HttpServer::getServerInfo() const
+{
+  return m_ServerInfo;
+}
+
 bool HttpServer::registerRoute(const QString& method, const QString& actionName, const QString& route)
 {
-  return registerRoute(Utils::fromString(method.toUpper()), actionName, route);
+  return registerRoute(Utils::fromString(method.trimmed().toUpper()), actionName, route);
 }
 
 bool HttpServer::registerRoute(HttpMethod method, const QString& actionName, const QString& route)

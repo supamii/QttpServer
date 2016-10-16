@@ -21,6 +21,7 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     static const char* ROUTES_CONFIG_FILE;
     static const char* ROUTES_CONFIG_FILE_PATH;
     static const char* CONFIG_DIRECTORY_ENV_VAR;
+    static const char* QTTP_HOME_ENV_VAR;
 
     static HttpServer* getInstance();
     virtual ~HttpServer();
@@ -52,10 +53,11 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     /**
      * @brief A template method to register an action via the Action interface.
      */
-    template<class T> bool addAction()
+    template<class T> std::shared_ptr<Action> addAction()
     {
       std::shared_ptr<Action> action(new T());
-      return addAction(action);
+      HttpServer::addAction(action);
+      return action;
     }
 
     /**
@@ -64,28 +66,17 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
      * from the main thread to potentially reduce the need for singletons and
      * the like.
      */
-    template<class T, class P> bool addAction(P& param)
+    template<class T, class P> std::shared_ptr<Action> addAction(P& param)
     {
       std::shared_ptr<Action> action(new T(param));
-      return addAction(action);
+      HttpServer::addAction(action);
+      return action;
     }
 
     /**
      * @brief Takes ownership of the pointer passed in, do not delete!
      */
     bool addAction(std::shared_ptr<Action>& action);
-
-    template<class T> bool addActionAndRegister()
-    {
-      std::shared_ptr<Action> action(new T());
-      bool containsKey = addAction(action);
-      auto routes = action->getRoutes();
-      for(auto iter = routes.begin(); iter != routes.end(); ++iter)
-      {
-        registerRoute(iter->first, action->getName(), iter->second);
-      }
-      return containsKey;
-    }
 
     /**
      * @brief Encouraged for those who need a quick and easy way to setup an
@@ -101,13 +92,49 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     bool registerRoute(const QString& method, const QString& actionName, const QString& route);
     bool registerRoute(HttpMethod method, const QString& actionName, const QString& route);
 
+    template<class T> std::shared_ptr<Action> addActionAndRegister()
+    {
+      std::shared_ptr<Action> action(new T());
+      HttpServer::addAction(action);
+      auto routes = action->getRoutes();
+      for(auto iter = routes.begin(); iter != routes.end(); ++iter)
+      {
+        HttpServer::registerRoute(iter->first, action->getName(), iter->second);
+      }
+      return action;
+    }
+
+    template<class T> std::shared_ptr<Action> addActionAndRegister(const QString& route,
+                                                                   const std::initializer_list<HttpMethod>& methods)
+    {
+      std::shared_ptr<Action> action(new T());
+      HttpServer::addAction(action);
+      for(HttpMethod method : methods)
+      {
+        HttpServer::registerRoute(method, action->getName(), route);
+      }
+      return action;
+    }
+
+    template<class T> std::shared_ptr<Action> addActionAndRegister(const QString& route,
+                                                                   const std::initializer_list<QString>& methods)
+    {
+      std::shared_ptr<Action> action(new T());
+      HttpServer::addAction(action);
+      for(auto & method : methods)
+      {
+        HttpServer::registerRoute(method, action->getName(), route);
+      }
+      return action;
+    }
+
     /**
      * @brief A template method to register a processor via the Processor interface.
      */
     template<class T> bool addProcessor()
     {
       std::shared_ptr<Processor> processor(new T());
-      return addProcessor(processor);
+      return HttpServer::addProcessor(processor);
     }
 
     /**
@@ -143,6 +170,11 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
       return m_IsInitialized;
     }
 
+    bool isSwaggerEnabled() const
+    {
+      return m_IsSwaggerEnabled;
+    }
+
     bool initialize();
     void initGlobal(const QString& filepath);
     void initRoutes(const QString& filepath);
@@ -173,6 +205,28 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
         QStringList parts;
     };
 
+    class QTTPSHARED_EXPORT ServerInfo
+    {
+      public:
+        ServerInfo()
+        {
+        }
+        QString title;
+        QString description;
+        QString version;
+        QString termsOfService;
+        QString contactEmail;
+        QString licenseName;
+        QString licenseUrl;
+        QString companyName;
+        QString companyUrl;
+        QString host;
+        QString basePath;
+        QJsonArray schemes;
+        QJsonArray consumes;
+        QJsonArray produces;
+    };
+
     const Action* getAction(const QString& name) const;
 
     std::shared_ptr<Action> getAction(const QString& name);
@@ -187,12 +241,14 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
 
     const QHash<QString, std::shared_ptr<const Action> >& getActions() const;
 
+    const ServerInfo& getServerInfo() const;
+
   private:
 
     template<class T> bool addDefaultProcessor()
     {
       std::shared_ptr<Processor> processor(new T());
-      return addDefaultProcessor(processor);
+      return HttpServer::addDefaultProcessor(processor);
     }
 
     bool addDefaultProcessor(std::shared_ptr<Processor>& processor);
@@ -256,14 +312,15 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     Stats* m_Stats; //! To work around const captures this is a pointer.
     LoggingUtils m_LoggingUtils;
     bool m_IsInitialized;
+    bool m_IsSwaggerEnabled;
     QCommandLineParser m_CmdLineParser;
     bool m_SendRequestMetadata;
     bool m_StrictHttpMethod;
     bool m_ShouldServeFiles;
-    bool m_IsSwaggerEnabled;
     QDir m_ServeFilesDirectory;
     std::thread m_Thread;
     QStringList m_EnabledProcessors;
+    ServerInfo m_ServerInfo;
 };
 
 } // End namespace qttp

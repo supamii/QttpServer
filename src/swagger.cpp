@@ -35,33 +35,40 @@ const QList<pair<HttpMethod, QString> >& Swagger::getRoutes() const
 void Swagger::initialize()
 {
   HttpServer* svr = HttpServer::getInstance();
-  const QJsonObject& globalConfig = svr->getGlobalConfig();
-  QJsonObject config = globalConfig["swagger"].toObject();
 
-  m_IsEnabled = config["isEnabled"].toBool();
+  m_IsEnabled = svr->isSwaggerEnabled();
+  if(!m_IsEnabled)
+  {
+    return;
+  }
 
-  QString version = config["version"].toString();
+  const HttpServer::ServerInfo& info = svr->getServerInfo();
+  const QString& version = info.version;
 
   m_Response = QJsonObject {
     { "swagger", "2.0" },
     { "info", QJsonObject {
-        { "title", config["title"].toString() },
-        { "description", config["description"].toString() },
-        { "version", version },
-        { "termsOfService", "http://somwehere" },
+        { "title", info.title },
+        { "description", info.description },
+        { "version", info.version },
+        { "termsOfService", info.termsOfService },
         { "contact", QJsonObject {
-            { "email", "email@somewhere.zom" }
+            { "email", info.contactEmail }
           }},
         { "license", QJsonObject {
-            { "name", "MIT" },
-            { "url", "http://somewhere" }
+            { "name", info.licenseName },
+            { "url", info.licenseUrl }
+          }},
+        { "company", QJsonObject {
+            { "name", info.companyName },
+            { "url", info.companyUrl }
           }},
       }},
-    { "host", config["host"].toString() },
-    { "basePath", config["basePath"].toString() },
-    { "schemes", QJsonArray { "http" } },
-    { "consumes", QJsonArray { "application/json" } },
-    { "produces", QJsonArray { "application/json" } }
+    { "host", info.host },
+    { "basePath", info.basePath },
+    { "schemes", info.schemes },
+    { "consumes", info.consumes },
+    { "produces", info.produces }
   };
 
   QJsonObject definitions;

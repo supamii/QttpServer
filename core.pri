@@ -116,6 +116,67 @@ win32 {
     OBJECTS_DIR = $$PWD/build/$$QTBUILDTYPE
 }
 
+macx {
+    # Since things are buried in the app folder, we'll copy configs there.
+
+    Web.files = $$PWD/www/swagger-ui.js $$PWD/www/swagger-ui.min.js \
+        $$PWD/www/index.html $$PWD/www/o2c.html
+    Web.path = Contents/MacOS/www
+
+    Css.files = $$PWD/www/css/print.css $$PWD/www/css/reset.css \
+        $$PWD/www/css/screen.css $$PWD/www/css/style.css \
+        $$PWD/www/css/typography.css $$PWD/www/css/theme-flattop.css \
+        $$PWD/www/css/theme-feeling-blue.css $$PWD/www/css/theme-monokai.css \
+        $$PWD/www/css/theme-muted.css $$PWD/www/css/theme-newspaper.css \
+        $$PWD/www/css/theme-outline.css
+    Css.path = Contents/MacOS/www/css
+
+    Fonts.files = $$PWD/www/fonts/DroidSans-Bold.ttf \
+        $$PWD/www/fonts/DroidSans.ttf
+    Fonts.path = Contents/MacOS/www/fonts
+
+    Images.files = $$PWD/www/images/collapse.gif \
+        $$PWD/www/images/expand.gif \
+        $$PWD/www/images/explorer_icons.png \
+        $$PWD/www/images/favicon-16x16.png \
+        $$PWD/www/images/favicon-32x32.png \
+        $$PWD/www/images/favicon.ico \
+        $$PWD/www/images/logo_small.png \
+        $$PWD/www/images/pet_store_api.png \
+        $$PWD/www/images/throbber.gif \
+        $$PWD/www/images/wordnik_api.png
+    Images.path = Contents/MacOS/www/images
+
+    Lang.files = $$PWD/www/lang/ca.js $$PWD/www/lang/en.js \
+        $$PWD/www/lang/es.js $$PWD/www/lang/fr.js \
+        $$PWD/www/lang/geo.js $$PWD/www/lang/it.js \
+        $$PWD/www/lang/ja.js $$PWD/www/lang/ko-kr.js \
+        $$PWD/www/lang/pl.js $$PWD/www/lang/pt.js \
+        $$PWD/www/lang/ru.js $$PWD/www/lang/tr.js \
+        $$PWD/www/lang/translator.js $$PWD/www/lang/zh-cn.js
+    Lang.path = Contents/MacOS/www/lang
+
+    JsLib.files = $$PWD/www/lib/backbone-min.js \
+        $$PWD/www/lib/es5-shim.js \
+        $$PWD/www/lib/handlebars-4.0.5.js \
+        $$PWD/www/lib/highlight.9.1.0.pack.js \
+        $$PWD/www/lib/highlight.9.1.0.pack_extended.js \
+        $$PWD/www/lib/jquery-1.8.0.min.js \
+        $$PWD/www/lib/jquery.ba-bbq.min.js \
+        $$PWD/www/lib/jquery.slideto.min.js \
+        $$PWD/www/lib/jquery.wiggle.min.js \
+        $$PWD/www/lib/js-yaml.min.js \
+        $$PWD/www/lib/jsoneditor.min.js \
+        $$PWD/www/lib/lodash.min.js \
+        $$PWD/www/lib/marked.js \
+        $$PWD/www/lib/object-assign-pollyfill.js \
+        $$PWD/www/lib/sanitize-html.min.js \
+        $$PWD/www/lib/swagger-oauth.js
+    JsLib.path = Contents/MacOS/www/lib
+
+    QMAKE_BUNDLE_DATA += Web Css Fonts Images JsLib
+}
+
 INCLUDEPATH = $$unique(INCLUDEPATH)
 HEADERS = $$unique(HEADERS)
 SOURCES = $$unique(SOURCES)

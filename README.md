@@ -4,7 +4,7 @@ See Current Release: [QttpServer v0.1.0](https://github.com/supamii/QttpServer/t
 
 <b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/node.native).
 
-Check out the examples and samples to get started with your RESTful API server!
+Check out the [examples](examples/README.md) and samples to get started with your RESTful API server!
 
 ![QttpServer](qttp_eventloops.png)
 
@@ -17,7 +17,7 @@ Check out the examples and samples to get started with your RESTful API server!
 * Submodules ready to support [MongoDb](https://github.com/mongodb/mongo-cxx-driver), [Redis](https://github.com/uglide/qredisclient)
 * Logging support
 * Swagger-UI support
-* Very basic support for HTTP files (html, js, css, etc)
+* Very basic support for HTML files (html, js, css, txt, etc)
 
 ## Example 1: 
 Using a raw std::function based callback
@@ -60,13 +60,11 @@ int main(int argc, char** argv)
 Using the action interface
 
 ```c++
-// Adds the action interface via template method.
-httpSvr->addAction<Sample>();
+#include <httpserver.h>
 
-// Based on class definition below, we bind the the http method, action name, 
-// and the url route.
-httpSvr->registerRoute("get", "sample", "/sample");
-httpSvr->registerRoute("post", "sample", "/sampleAgain");
+using namespace std;
+using namespace qttp;
+using namespace native::http;
 
 class Sample : public Action {
   void onAction(HttpData& data) {
@@ -75,6 +73,29 @@ class Sample : public Action {
   }
   const const char* getName() const { return "sample"; }
 };
+
+int main(int argc, char** argv)
+{
+  QCoreApplication app(argc, argv);
+
+  // Always initialize in the main thread.
+  HttpServer* httpSvr = HttpServer::getInstance();
+  httpSvr->initialize();
+  
+  // Adds the action interface via template method.
+  httpSvr->addAction<Sample>();
+
+  // Based on class definition below, we bind the the http method, action name, 
+  // and the url route.
+  httpSvr->registerRoute("get", "sample", "/sample");
+  httpSvr->registerRoute("post", "sample", "/sampleAgain");
+
+  // Libuv runs in its own thread.
+  httpSvr->startServer();
+
+  // Qt takes the main thread per the usual.
+  return app.exec();
+}
 ```
 
 ## Getting started on Mac & Linux

@@ -5,6 +5,57 @@ using namespace std;
 using namespace qttp;
 using namespace native::http;
 
+class Another : public Action
+{
+  public:
+    Another() : Action()
+    {
+    }
+
+    const char* getName() const
+    {
+      return "another";
+    }
+
+    const QStringList& getTags() const
+    {
+      static const QStringList list = { "tag1", "tag2" };
+      return list;
+    }
+
+    const QList<Input>& getInputs() const
+    {
+      static const QList<Input> list =
+      {
+        Input("someinput"),
+        RequiredInput("reqinput"),
+        Input("options", { "selectone", "selectanother" })
+      };
+      return list;
+    }
+
+    const QList<std::pair<HttpMethod, QString> >& getRoutes() const
+    {
+      static const QString route = "/another";
+      static const QList<std::pair<HttpMethod, QString> > routes =
+      {
+        { HttpMethod::GET, route },
+        { HttpMethod::POST, route }
+      };
+      return routes;
+    }
+
+    void onGet(HttpData& data)
+    {
+      data.getResponse().getJson()["data"] = "GET another";
+    }
+
+    void onPost(HttpData& data)
+    {
+      data.getResponse().getJson()["data"] = "POST another";
+    }
+};
+
 class Simple : public Action
 {
   public:
@@ -43,6 +94,16 @@ class Simple : public Action
     {
       data.getResponse().getJson()["data"] = "POST ok";
     }
+
+    void onPut(HttpData& data)
+    {
+      data.getResponse().getJson()["data"] = "PUT ok";
+    }
+
+    void onPatch(HttpData& data)
+    {
+      data.getResponse().getJson()["data"] = "PATCH ok";
+    }
 };
 
 int main(int argc, char** argv)
@@ -72,9 +133,14 @@ int main(int argc, char** argv)
       json["response"] = data.getRequest().getJson();
     });
 
-    svr->addAction<Simple>();
-    svr->registerRoute(HttpMethod::GET, "simple", "/simple");
-    svr->registerRoute(HttpMethod::POST, "simple", "/simple");
+    svr->addActionAndRegister<Simple>("/simple",
+                                      { HttpMethod::GET,
+                                        HttpMethod::POST });
+
+    svr->addActionAndRegister<Simple>("/simple",
+                                      { "put", "patch" });
+
+    svr->addActionAndRegister<Another>();
 
     svr->startServer();
 

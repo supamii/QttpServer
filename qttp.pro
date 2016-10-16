@@ -7,12 +7,10 @@ contains(CONFIG, SAMPLEAPP) {
     TARGET = QttpServer
     macx {
         # Since things are buried in the app folder, we'll copy configs there.
-        MediaFiles.files = \
-            $$PWD/config/global.json \
-            $$PWD/config/routes.json
 
-        MediaFiles.path = Contents/MacOS/config
-        QMAKE_BUNDLE_DATA += MediaFiles
+        Config.files = $$PWD/config/global.json $$PWD/config/routes.json
+        Config.path = Contents/MacOS/config
+        QMAKE_BUNDLE_DATA += Config
     }
     message('Including config files')
     include($$PWD/config/config.pri)
