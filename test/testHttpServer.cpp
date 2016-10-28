@@ -75,8 +75,7 @@ void TestHttpServer::initTestCase()
   QVERIFY(result == true);
 
   // Uses the action interface.
-  result = httpSvr.addAction<SampleActionWithHttpMethods>();
-  QVERIFY(result == true);
+  QVERIFY(httpSvr.addAction<SampleActionWithHttpMethods>().get() != nullptr);
 
   result = httpSvr.registerRoute("get", "sampleWithHttpMethods", "/http");
   QVERIFY(result == true);
@@ -92,15 +91,13 @@ void TestHttpServer::initTestCase()
 
   // Uses the action interface.
   QString param = "param";
-  result = httpSvr.addAction<ActionWithParameter, QString>(param);
-  QVERIFY(result == true);
+  QVERIFY((httpSvr.addAction<ActionWithParameter, QString>(param)).get() != nullptr);
 
   result = httpSvr.registerRoute("get", "sampleWithParameter", "/sampleWithParameter");
   QVERIFY(result == true);
 
   // Uses the action interface.
-  result = httpSvr.addAction<SampleAction>();
-  QVERIFY(result == true);
+  QVERIFY((httpSvr.addAction<SampleAction>()).get() != nullptr);
 
   result = httpSvr.registerRoute("get", "sample", "/sample");
   QVERIFY(result == true);

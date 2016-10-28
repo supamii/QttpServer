@@ -625,7 +625,6 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                // intercept and process it.
                performPreprocessing(data);
 
-               bool checkThis = data.getResponse().shouldContinue();
                if(response.shouldContinue())
                {
                  // TODO: Describe this in the header file.
