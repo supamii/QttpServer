@@ -130,7 +130,7 @@ git submodule update --init
 
 Using QtCreator, open `qttpserver.pro` and enjoy!
 
-![QttpServer](img/qtcreator_project_setup_small.png =250x)
+<img src="//img/qtcreator_project_setup_small.png" alt="QttpServer" width="50%" height="50%">
 
 Using QMake:
 ```bash
