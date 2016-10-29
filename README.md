@@ -98,7 +98,13 @@ int main(int argc, char** argv)
 }
 ```
 
-## Getting started on Mac & Linux
+## SwaggerUI Integrated
+
+<img src="/img/swagger.png" alt="SwaggerUI" width="50%" height="50%">
+
+<img src="/img/swagger_operations.png" alt="QttpServer Operations" width="50%" height="50%">
+
+## **Getting started on Mac & Linux**
 
 ### **Prerequisites**
 
@@ -130,7 +136,7 @@ git submodule update --init
 
 Using QtCreator, open `qttpserver.pro` and enjoy!
 
-<img src="/img/qtcreator_project_setup_small.png" alt="QtCreator" width="50%" height="50%">
+<img src="/img/qtcreator_project_setup_small.png" alt="QttpServer project loaded in QtCreator" width="50%" height="50%">
 
 Using QMake:
 ```bash
