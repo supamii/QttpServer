@@ -406,18 +406,18 @@ void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, HttpMethod method)
 
 void HttpServer::startServer()
 {
-  HttpServer& svr = *(HttpServer::getInstance());
+  HttpServer* svr = HttpServer::getInstance();
 
-  if(svr.m_IsSwaggerEnabled)
+  if(svr->m_IsSwaggerEnabled)
   {
-    svr.addActionAndRegister<Swagger>();
+    svr->addActionAndRegister<Swagger>();
   }
 
-  svr.addDefaultProcessor<OptionsPreprocessor>();
+  svr->addDefaultProcessor<OptionsPreprocessor>();
 
-  auto quitCB = [](){
+  auto quitCB = [svr](){
                   LOG_TRACE;
-                  HttpServer::getInstance()->stop();
+                  svr->stop();
                 };
 
   QObject::connect(QCoreApplication::instance(),
@@ -430,14 +430,14 @@ void HttpServer::startServer()
 
 int HttpServer::start()
 {
-  HttpServer& svr = *(HttpServer::getInstance());
+  HttpServer* svr = HttpServer::getInstance();
 
-  QString ip = svr.m_GlobalConfig["bindIp"].toString("0.0.0.0").trimmed();
-  auto port = svr.m_GlobalConfig["bindPort"].toInt(8080);
+  QString ip = svr->m_GlobalConfig["bindIp"].toString("0.0.0.0").trimmed();
+  auto port = svr->m_GlobalConfig["bindPort"].toInt(8080);
 
-  auto serverCB = [](request& req, response& resp) {
+  auto serverCB = [svr](request& req, response& resp) {
                     HttpEvent* event = new HttpEvent(&req, &resp);
-                    QCoreApplication::postEvent(HttpServer::getInstance(), event);
+                    QCoreApplication::postEvent(svr, event);
                   };
 
   native::http::http server;
@@ -445,18 +445,16 @@ int HttpServer::start()
 
   if(!result)
   {
-    LOG_ERROR("Unable to bind to" << ip << port);
+    LOG_ERROR("Unable to bind to" << ip << ":" << port);
 
-    if(svr.m_ServerErrorCallback)
+    if(svr->m_ServerErrorCallback)
     {
-      svr.m_ServerErrorCallback();
+      svr->m_ServerErrorCallback();
     }
-    else
-    {
-      stringstream ss;
-      ss << ip.toStdString() << ":" << port << " " << SERVER_ERROR_MSG;
-      LOG_FATAL(ss.str().c_str());
-    }
+
+    stringstream ss;
+    ss << ip.toStdString() << ":" << port << " " << SERVER_ERROR_MSG;
+    LOG_FATAL(ss.str().c_str());
     return 1;
   }
 
