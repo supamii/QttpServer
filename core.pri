@@ -1,5 +1,26 @@
 QT += core network
 
+CONFIG(debug, debug|release) {
+    message('Compiling in DEBUG mode')
+    BUILDTYPE = Debug
+    QTBUILDTYPE = qtdebug
+} else {
+    message('Compiling in RELEASE mode')
+    BUILDTYPE = Release
+    QTBUILDTYPE = qtrelease
+}
+
+# For some reason Ubuntu 12 LTS doesn't jive with only the static lib!
+#
+# This isn't an issue on TravisCI with Ubuntu14 so let's make this configurable.
+
+contains(CONFIG, HTTP_PARSER_WORKAROUND) {
+  unix:!macx {
+      message('Adding http_parser.o on linux')
+      OBJECTS += $$PWD/build/out/$$BUILDTYPE/obj.target/http_parser/lib/http-parser/http_parser.o
+  }
+}
+
 message('Including qttp source files')
 include($$PWD/src/qttp.pri)
 
@@ -91,26 +112,9 @@ contains(TEMPLATE, lib) {
     }
 }
 
-
-CONFIG(debug, debug|release) {
-    message('Compiling in DEBUG mode')
-    BUILDTYPE = Debug
-    QTBUILDTYPE = qtdebug
-} else {
-    message('Compiling in RELEASE mode')
-    BUILDTYPE = Release
-    QTBUILDTYPE = qtrelease
-}
-
 MOC_DIR = $$PWD/build/$$QTBUILDTYPE
 RCC_DIR = $$PWD/build/$$QTBUILDTYPE
 UI_DIR = $$PWD/build/$$QTBUILDTYPE
-
-unix:!macx {
-    message('Adding http_parser.o on linux')
-    # For some reason Ubuntu 12 LTS doesn't jive with only the static lib
-    OBJECTS += $$PWD/build/out/$$BUILDTYPE/obj.target/http_parser/lib/http-parser/http_parser.o
-}
 
 isEmpty(DESTDIR) {
     DESTDIR = $$PWD/build/$$QTBUILDTYPE
