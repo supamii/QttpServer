@@ -46,8 +46,6 @@ unix {
         $$PWD/../libuv/src/unix/poll.c \
         $$PWD/../libuv/src/unix/process.c \
         $$PWD/../libuv/src/unix/proctitle.c \
-        $$PWD/../libuv/src/unix/pthread-barrier.c \
-        $$PWD/../libuv/src/unix/pthread-fixes.c \
         $$PWD/../libuv/src/unix/signal.c \
         $$PWD/../libuv/src/unix/stream.c \
         $$PWD/../libuv/src/unix/tcp.c \
@@ -67,5 +65,7 @@ macx {
     SOURCES += $$PWD/../libuv/src/unix/darwin.c \
         $$PWD/../libuv/src/unix/darwin-proctitle.c \
         $$PWD/../libuv/src/unix/fsevents.c \
-        $$PWD/../libuv/src/unix/kqueue.c
+        $$PWD/../libuv/src/unix/kqueue.c \
+        $$PWD/../libuv/src/unix/pthread-barrier.c \
+        $$PWD/../libuv/src/unix/pthread-fixes.c \
 }
