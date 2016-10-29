@@ -100,7 +100,7 @@ http::response::~response()
 {
 }
 
-void http::response::write(unsigned int length, const char* body)
+void http::response::write(size_t length, const char* body)
 {
   if(!is_response_written_)
   {

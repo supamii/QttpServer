@@ -120,7 +120,7 @@ int main(int argc, char** argv)
 
     // Always initialize in the main thread.
     if(!svr->initialize()) {
-        std::cerr << "Failed to initialize!" << std::endl;
+      std::cerr << "Failed to initialize!" << std::endl;
     }
 
     svr->registerRoute("get", "helloworld", "/helloworld");

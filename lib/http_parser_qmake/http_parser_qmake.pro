@@ -3,10 +3,10 @@ QT -= gui core network
 TEMPLATE = lib
 CONFIG += staticlib
 
-VERSION = 0.0.1
-TARGET = node_native
+VERSION = 2.7.1
+TARGET = http_parser
 
-include($$PWD/http.pri)
+include($$PWD/http_parser_qmake.pri)
 
 CONFIG(debug, debug|release) {
     win32 {
@@ -19,27 +19,27 @@ CONFIG(debug, debug|release) {
 } else {
     win32 {
         DESTDIR = $$PWD/../../build/Release/lib
-        # OTHER_FILES += $$PWD/../../build/lib/*
+        # OTHER_FILES += $$PWD/../../build/Release/lib
     } else {
         DESTDIR = $$PWD/../../build/out/Release
-        # OTHER_FILES += $$PWD/../../build/out/Release/*
+        # OTHER_FILES += $$PWD/../../build/out/Release
     }
 }
 
 macx: {
     LIBS += -framework CoreFoundation # -framework CoreServices
-    CONFIG += c++14
+    #CONFIG += c++14
     QMAKE_CXXFLAGS += -g -O0 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -std=gnu++0x -stdlib=libc++
 }
 
 unix:!macx {
-    CONFIG += c++0x
+    #CONFIG += c++0x
     # This supports GCC 4.7
     QMAKE_CXXFLAGS += -g -O0 -lm -lpthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -std=c++0x
 }
 
 win32 {
-    CONFIG += c++14
+    #CONFIG += c++14
     QMAKE_CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
     LIBS += \
         -llibuv \
@@ -52,11 +52,6 @@ win32 {
         -luserenv \
         -luser32
 }
-
-# For ease and quick reference in QtCreator
-# OTHER_FILES += \
-#     $$PWD/../libuv/include/*.h \
-#     $$PWD/../http-parser/*.h
 
 INCLUDEPATH = $$unique(INCLUDEPATH)
 HEADERS = $$unique(HEADERS)

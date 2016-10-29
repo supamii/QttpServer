@@ -65,9 +65,6 @@ win32 {
     CONFIG += c++14
     QMAKE_CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
     LIBS += \
-        -llibuv \
-        -lhttp_parser \
-        -lnode_native \
         -ladvapi32 \
         -liphlpapi \
         -lpsapi \
@@ -75,9 +72,9 @@ win32 {
         -lws2_32 \
         -luserenv \
         -luser32
-} else {
-    LIBS += -luv -lhttp_parser -lnode_native
 }
+
+LIBS += -luv -lhttp_parser -lnode_native
 
 contains(TEMPLATE, lib) {
     message('Building QTTP library')
