@@ -1,0 +1,39 @@
+# a good example is: https://github.com/boostorg/hana/blob/master/.travis.yml
+language: c++
+compiler:
+    - gcc
+matrix:
+  exclude:
+    - os: linux
+  include:
+    - os: linux
+      sudo: required
+      dist: trusty
+      compiler: gcc
+before_install:
+    - echo $TRAVIS_OS_NAME
+    - echo $LANG
+    - echo $LC_ALL
+    - echo $CXX
+    - which $CXX
+    - which $CC
+    - $CXX --version
+    - python --version
+    - git submodule update --init
+    - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
+    - sudo apt-get update -qq
+    - sudo apt-get install qtbase5-dev
+    - sudo apt-get install qt5-default
+    - $CXX --version
+    - which $CXX
+    - which $CC
+before_script: ls
+script:
+    - qmake CONFIG+=debug CONFIG+=SAMPLEAPP qttpserver.pro
+    - make
+branches:
+  only:
+    - master
+os:
+  - linux
+  
