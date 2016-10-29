@@ -20,7 +20,7 @@ QttpException::QttpException(const std::string& message) :
 {
 }
 
-const char* QttpException::what() const noexcept
+const char* QttpException::what() const QTTP_NOEXCEPT
 {
   return m_Message.c_str();
 }
@@ -48,7 +48,7 @@ const char* Utils::toString(HttpMethod method)
     case HttpMethod::HEAD:
       return "HEAD";
 
-    case HttpMethod::DELETE:
+    case HttpMethod::DEL:
       return "DELETE";
 
     case HttpMethod::OPTIONS:
@@ -85,7 +85,7 @@ const char* Utils::toStringLower(HttpMethod method)
     case HttpMethod::HEAD:
       return "head";
 
-    case HttpMethod::DELETE:
+    case HttpMethod::DEL:
       return "delete";
 
     case HttpMethod::OPTIONS:

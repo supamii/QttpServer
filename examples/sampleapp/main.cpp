@@ -119,7 +119,9 @@ int main(int argc, char** argv)
     HttpServer* svr = HttpServer::getInstance();
 
     // Always initialize in the main thread.
-    svr->initialize();
+    if(!svr->initialize()) {
+        std::cerr << "Failed to initialize!" << std::endl;
+    }
 
     svr->registerRoute("get", "helloworld", "/helloworld");
     svr->addAction("helloworld", [](HttpData& data) {

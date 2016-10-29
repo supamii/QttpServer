@@ -14,7 +14,7 @@ const QList<HttpMethod> Global::HTTP_METHODS =
   HttpMethod::PUT,
   HttpMethod::PATCH,
   HttpMethod::HEAD,
-  HttpMethod::DELETE,
+  HttpMethod::DEL,
   HttpMethod::OPTIONS,
   HttpMethod::TRACE,
   HttpMethod::CONNECT

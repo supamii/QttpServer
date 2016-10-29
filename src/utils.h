@@ -123,11 +123,17 @@ class QTTPSHARED_EXPORT LogTrace
     quint32 line;
 };
 
+#ifdef _MSC_VER
+#define QTTP_NOEXCEPT _NOEXCEPT
+#else
+#define QTTP_NOEXCEPT noexcept
+#endif
+
 class QTTPSHARED_EXPORT QttpException : public std::exception
 {
   public:
     QttpException(const std::string& message);
-    const char* what() const noexcept;
+    const char* what() const QTTP_NOEXCEPT;
 
   private:
     std::string m_Message;
@@ -171,7 +177,7 @@ class QTTPSHARED_EXPORT Utils
       }
       if(method == "DELETE")
       {
-        return HttpMethod::DELETE;
+        return HttpMethod::DEL;
       }
       if(method == "TRACE")
       {
@@ -229,7 +235,7 @@ class QTTPSHARED_EXPORT Utils
 
       if(firstChar == 'D'|| firstChar == 'd')
       {
-        return HttpMethod::DELETE;
+        return HttpMethod::DEL;
       }
 
       if(firstChar == 'T' || firstChar == 't')

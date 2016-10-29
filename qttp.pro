@@ -20,11 +20,10 @@ contains(CONFIG, SAMPLEAPP) {
     TEMPLATE = lib
     VERSION = 0.0.1
     TARGET = qttpserver
+    DEFINES += QTTP_LIBRARY
 
     contains(CONFIG, QTTP_LIBRARY) {
         message(********* Building shared library qttpserver *********)
-
-        DEFINES += QTTP_LIBRARY
         unix {
             #target.path = /usr/lib
             #INSTALLS += target

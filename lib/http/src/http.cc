@@ -100,7 +100,7 @@ http::response::~response()
 {
 }
 
-void http::response::write(int length, const char* body)
+void http::response::write(unsigned int length, const char* body)
 {
   if(!is_response_written_)
   {
@@ -412,6 +412,7 @@ http::http::~http()
 bool http::http::listen(const std::string& ip, int port, std::function<void(request&, response&)> callback)
 {
   if(!socket_->bind(ip, port)) {
+    std::cerr << "Failed to bind to ip/port " << ip << ":" << port << std::endl;
     return false;
   }
 

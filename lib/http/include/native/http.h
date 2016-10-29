@@ -1,6 +1,8 @@
 #ifndef __NATIVE_HTTP_H__
 #define __NATIVE_HTTP_H__
 
+#include <stdio.h>
+#include <sys/types.h>
 #include <sstream>
 #include <iostream>
 #include <http_parser.h>
@@ -50,22 +52,22 @@ class url_obj
     void from_buf(const char* buf, std::size_t len, bool is_connect = false);
 
     bool has_schema() const {
-      return handle_.field_set & (1 << UF_SCHEMA);
+      return (handle_.field_set & (1 << UF_SCHEMA)) != 0;
     }
     bool has_host() const {
-      return handle_.field_set & (1 << UF_HOST);
+      return (handle_.field_set & (1 << UF_HOST)) != 0;
     }
     bool has_port() const {
-      return handle_.field_set & (1 << UF_PORT);
+      return (handle_.field_set & (1 << UF_PORT)) != 0;
     }
     bool has_path() const {
-      return handle_.field_set & (1 << UF_PATH);
+      return (handle_.field_set & (1 << UF_PATH)) != 0;
     }
     bool has_query() const {
-      return handle_.field_set & (1 << UF_QUERY);
+      return (handle_.field_set & (1 << UF_QUERY)) != 0;
     }
     bool has_fragment() const {
-      return handle_.field_set & (1 << UF_FRAGMENT);
+      return (handle_.field_set & (1 << UF_FRAGMENT)) != 0;
     }
 
   private:
@@ -90,7 +92,7 @@ class response
       return end(body.length(), body.c_str());
     }
 
-    bool end(int length, const char* body)
+    bool end(size_t length, const char* body)
     {
       write(length, body);
       return close();
@@ -101,7 +103,7 @@ class response
       return write(body.length(), body.c_str());
     }
 
-    void write(int length, const char* body);
+    void write(size_t length, const char* body);
 
     bool close();
 

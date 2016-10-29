@@ -318,7 +318,6 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     bool m_StrictHttpMethod;
     bool m_ShouldServeFiles;
     QDir m_ServeFilesDirectory;
-    std::thread m_Thread;
     QStringList m_EnabledProcessors;
     ServerInfo m_ServerInfo;
 };

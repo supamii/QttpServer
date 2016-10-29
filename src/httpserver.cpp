@@ -28,9 +28,7 @@ HttpServer* HttpServer::getInstance()
 
 HttpServer::HttpServer() :
   QObject(),
-  m_ServerErrorCallback([](){
-  LOG_FATAL(SERVER_ERROR_MSG);
-}),
+  m_ServerErrorCallback(),
   m_EventCallback(this->defaultEventCallback()),
   m_Actions(),
   m_ConstActions(),
@@ -50,7 +48,6 @@ HttpServer::HttpServer() :
   m_StrictHttpMethod(false),
   m_ShouldServeFiles(true),
   m_ServeFilesDirectory(SERVE_FILES_PATH),
-  m_Thread(HttpServer::start),
   m_EnabledProcessors(),
   m_ServerInfo()
 {
@@ -196,6 +193,9 @@ void HttpServer::initGlobal(const QString &filepath)
   LOG_INFO("Processing filepath [" << filepath << "]");
 
   m_GlobalConfig = Utils::readJson(QDir(filepath).absolutePath());
+
+  LOG_INFO(m_GlobalConfig["bindIp"]);
+  LOG_INFO(m_GlobalConfig["bindPort"]);
 
   QJsonValueRef loggingValue = m_GlobalConfig["logfile"];
   if(loggingValue.isObject())
@@ -424,8 +424,8 @@ void HttpServer::startServer()
                    &QCoreApplication::aboutToQuit,
                    quitCB);
 
-  // thread.detach() invokes HttpServer::start()
-  svr.m_Thread.detach();
+  std::thread newThread(HttpServer::start);
+  newThread.detach();
 }
 
 int HttpServer::start()
@@ -451,7 +451,12 @@ int HttpServer::start()
     {
       svr.m_ServerErrorCallback();
     }
-
+    else
+    {
+      stringstream ss;
+      ss << ip.toStdString() << ":" << port << " " << SERVER_ERROR_MSG;
+      LOG_FATAL(ss.str().c_str());
+    }
     return 1;
   }
 
@@ -516,7 +521,7 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                STATS_INC("http:method:head");
                break;
 
-             case HttpMethod::DELETE:
+             case HttpMethod::DEL:
                STATS_INC("http:method:delete");
                break;
 

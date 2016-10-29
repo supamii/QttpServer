@@ -150,6 +150,16 @@ make
 ./qttpserver
 ```
 
+If you want to compile a static library:
+```bash
+qmake CONFIG+=debug CONFIG+=QTTP_LIBRARY qttp.pro
+```
+
+If you want to compile a shared library:
+```bash
+qmake CONFIG+=debug CONFIG+=QTTP_LIBRARY CONFIG+=QTTP_EXPORT qttp.pro
+```
+
 ## Optional components
 
 ##### Build Redis client
@@ -253,6 +263,8 @@ msbuild.exe all.sln /p:Configuration=Debug
 Launch `qttp.pro` in QtCreator and build.
 
 As a side note, if you want to run a quick sample application you can add `CONFIG+=SAMPLEAPP` to the additional arguments section located in QtCreator under `Projects > Build & Run > Build Steps > qmake > Additional arguments`
+
+Building DLLs will require additional parameters into qmake: `CONFIG+=QTTP_LIBRARY CONFIG+=QTTP_EXPORT`
 
 # TODOs
 

@@ -32,7 +32,7 @@ void Action::onAction(HttpData &data)
       this->onPut(data);
       break;
 
-    case HttpMethod::DELETE:
+    case HttpMethod::DEL:
       this->onDelete(data);
       break;
 

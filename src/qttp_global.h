@@ -1,10 +1,14 @@
 #ifndef QTTP_GLOBAL_H
 #define QTTP_GLOBAL_H
 
-#if defined(QTTP_LIBRARY)
-#  define QTTPSHARED_EXPORT Q_DECL_EXPORT
+#ifdef QTTP_LIBRARY
+#  if defined(QTTP_EXPORT)
+#    define QTTPSHARED_EXPORT Q_DECL_EXPORT
+#  else
+#    define QTTPSHARED_EXPORT Q_DECL_IMPORT
+#  endif
 #else
-#  define QTTPSHARED_EXPORT Q_DECL_IMPORT
+#  define QTTPSHARED_EXPORT
 #endif
 
 #ifndef QTTP_SERVER_VERSION
@@ -59,7 +63,7 @@ enum class HttpMethod : char
   GET = 0,
   POST = 1,
   PUT = 2,
-  DELETE = 3,
+  DEL = 3,
   PATCH = 4,
   HEAD = 5,
   OPTIONS = 6,

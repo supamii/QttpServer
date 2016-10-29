@@ -73,14 +73,27 @@ win32 {
         -lpsapi \
         -lshell32 \
         -lws2_32 \
-        -luserenv
+        -luserenv \
+        -luser32
 } else {
     LIBS += -luv -lhttp_parser -lnode_native
 }
 
-contains(CONFIG, QTTP_LIBRARY) {
-    LIBS += -lqttpserver
+contains(TEMPLATE, lib) {
+    message('Building QTTP library')
+    contains(CONFIG, staticlib) {
+        message('Building staticlib')
+    } else {
+        message('Building shared library')
+        DEFINES += QTTP_EXPORT
+    }
+} else {
+    contains(CONFIG, QTTP_LIBRARY) {
+        message('Including QTTP library')
+        LIBS += -lqttpserver
+    }
 }
+
 
 CONFIG(debug, debug|release) {
     message('Compiling in DEBUG mode')
