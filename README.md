@@ -6,7 +6,7 @@ See Current Release: [QttpServer v0.1.0](https://github.com/supamii/QttpServer/t
 
 Check out the [examples](examples/README.md) and samples to get started with your RESTful API server!
 
-![QttpServer](qttp_eventloops.png)
+![QttpServer](img/qttp_eventloops.png =250x)
 
 ## Features
 
@@ -129,6 +129,8 @@ git submodule update --init
 ```
 
 Using QtCreator, open `qttpserver.pro` and enjoy!
+
+![QttpServer](img/qtcreator_project_setup_small.png =250x)
 
 Using QMake:
 ```bash
