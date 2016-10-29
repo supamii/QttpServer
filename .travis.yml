@@ -27,6 +27,8 @@ before_install:
     - $CXX --version
     - which $CXX
     - which $CC
+    - which qmake
+    - qmake --version
 before_script: ls
 script:
     - qmake CONFIG+=debug CONFIG+=SAMPLEAPP qttpserver.pro

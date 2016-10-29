@@ -28,18 +28,15 @@ CONFIG(debug, debug|release) {
 
 macx: {
     LIBS += -framework CoreFoundation # -framework CoreServices
-    #CONFIG += c++14
     QMAKE_CXXFLAGS += -g -O0 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -std=gnu++0x -stdlib=libc++
 }
 
 unix:!macx {
-    #CONFIG += c++0x
     # This supports GCC 4.7
     QMAKE_CXXFLAGS += -g -O0 -lm -lpthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -std=c++0x
 }
 
 win32 {
-    #CONFIG += c++14
     QMAKE_CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
     LIBS += \
         -llibuv \

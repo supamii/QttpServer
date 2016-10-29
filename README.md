@@ -1,5 +1,15 @@
 # QttpServer 1.0.0 beta
 
+<table>
+  <tbody>
+    <tr>
+      <td align="center">
+        <a href="https://travis-ci.org/supamii/QttpServer"><img src="https://travis-ci.org/supamii/QttpServer.svg?branch=master"></a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 See Current Release: [QttpServer v0.1.0](https://github.com/supamii/QttpServer/tree/QTTPv0.1.0)
 
 <b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/nodenative).

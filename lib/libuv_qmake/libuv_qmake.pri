@@ -39,7 +39,6 @@ unix {
         $$PWD/../libuv/src/unix/core.c \
         $$PWD/../libuv/src/unix/dl.c \
         $$PWD/../libuv/src/unix/fs.c \
-        $$PWD/../libuv/src/unix/fsevents.c \
         $$PWD/../libuv/src/unix/getaddrinfo.c \
         $$PWD/../libuv/src/unix/getnameinfo.c \
         $$PWD/../libuv/src/unix/kqueue.c \
@@ -67,5 +66,6 @@ unix:!macx {
 
 macx {
     SOURCES += $$PWD/../libuv/src/unix/darwin.c \
-        $$PWD/../libuv/src/unix/darwin-proctitle.c
+        $$PWD/../libuv/src/unix/darwin-proctitle.c \
+        $$PWD/../libuv/src/unix/fsevents.c
 }
