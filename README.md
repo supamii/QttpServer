@@ -100,16 +100,14 @@ int main(int argc, char** argv)
 
 ## SwaggerUI Integrated
 
-<img src="/img/swagger.png" alt="SwaggerUI" width="50%" height="50%">
-
-<img src="/img/swagger_operations.png" alt="QttpServer Operations" width="50%" height="50%">
+<img src="/img/swagger.png" alt="SwaggerUI" width="50%" height="50%"><img src="/img/swagger_operations.png" alt="QttpServer Operations" width="50%" height="50%">
 
 ## **Getting started on Mac & Linux**
 
 ### **Prerequisites**
 
 1. [git](http://git-scm.com/)
-2. [qt installer](http://www.qt.io/download/) or [build](http://doc.qt.io/qt-5/linux-building.html) from [source](http://download.qt.io/official_releases/qt/5.5/5.5.1/single/)
+2. [qt installer](http://www.qt.io/download/) or [build](http://doc.qt.io/qt-5/linux-building.html) from [source](http://download.qt.io/official_releases/qt/5.7/5.7.0/single/).  Below I've successfully used this [tarball][(http://download.qt.io/official_releases/qt/5.5/5.5.1/single/).
 
    ```bash
    # Building from source is a breeze for Ubuntu SERVER 12 & 14 LTS
