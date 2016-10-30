@@ -6,6 +6,8 @@ CONFIG += staticlib
 VERSION = 2.7.1
 TARGET = http_parser
 
+QMAKE_LFLAGS += -static
+
 include($$PWD/http_parser_qmake.pri)
 
 CONFIG(debug, debug|release) {

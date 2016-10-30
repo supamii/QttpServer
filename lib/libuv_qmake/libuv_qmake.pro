@@ -6,6 +6,8 @@ CONFIG += staticlib
 VERSION = 1.10.0
 TARGET = uv
 
+QMAKE_LFLAGS += -static
+
 include($$PWD/libuv_qmake.pri)
 
 CONFIG(debug, debug|release) {
