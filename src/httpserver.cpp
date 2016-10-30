@@ -48,6 +48,7 @@ HttpServer::HttpServer() :
   m_StrictHttpMethod(false),
   m_ShouldServeFiles(true),
   m_ServeFilesDirectory(SERVE_FILES_PATH),
+  m_FileLookup(),
   m_EnabledProcessors(),
   m_ServerInfo()
 {
@@ -258,6 +259,11 @@ void HttpServer::initGlobal(const QString &filepath)
         m_ShouldServeFiles = false;
       }
     }
+  }
+
+  if(m_ShouldServeFiles)
+  {
+    m_FileLookup.populateFiles(m_ServeFilesDirectory);
   }
 
   QJsonObject headers = m_GlobalConfig["defaultHeaders"].toObject();
@@ -773,7 +779,7 @@ bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QU
     }
   }
 
-  LOG_DEBUG("Found route" << path);
+  LOG_DEBUG("Found path" << path);
   return true;
 }
 
@@ -836,9 +842,12 @@ bool HttpServer::searchAndServeFile(HttpData& data) const
   {
     urlPath = urlPath.mid(1);
   }
+
   QString filepath = QDir::cleanPath(m_ServeFilesDirectory.absoluteFilePath(urlPath));
   QFile file(filepath);
 
+  // NOTE:
+  // Won't need this check when/if we support multiple directories.
   if(!filepath.startsWith(m_ServeFilesDirectory.absolutePath()))
   {
     LOG_ERROR("Not allowed to read from path [" << filepath << "]");
@@ -846,12 +855,22 @@ bool HttpServer::searchAndServeFile(HttpData& data) const
   }
 
   QDir directory = filepath;
-  if(directory.exists() && QFile::exists(filepath + "/index.html"))
+
+  if(m_FileLookup.hasDir(filepath) &&
+     directory.exists() &&
+     QFile::exists(filepath + "/index.html"))
   {
     filepath += "/index.html";
     file.setFileName(filepath);
     LOG_DEBUG("Detected index.html [" << filepath << "]");
   }
+
+  if(!m_FileLookup.hasFile(filepath))
+  {
+    LOG_ERROR("File not in lookup list [" << filepath << "]");
+    return false;
+  }
+
   if(!file.open(QIODevice::ReadOnly))
   {
     LOG_DEBUG("Unable to read file [" << filepath << "]");
@@ -860,62 +879,16 @@ bool HttpServer::searchAndServeFile(HttpData& data) const
 
   LOG_DEBUG("Serving file [" << filepath << "]");
 
-  string contentType = "text/html";
+  string contentType = FileUtils::determineContentType(urlPath);
 
-  if(urlPath.endsWith(".js", Qt::CaseInsensitive))
-  {
-    contentType = "text/javascript";
-  }
-  else if(urlPath.endsWith(".html", Qt::CaseInsensitive) ||
-          urlPath.endsWith(".htm", Qt::CaseInsensitive))
-  {
-    // No-op. Meant to help reduce constantly checking for other types.
-  }
-  else if(urlPath.endsWith(".json", Qt::CaseInsensitive))
-  {
-    contentType = "application/javascript";
-  }
-  else if(urlPath.endsWith(".css", Qt::CaseInsensitive) ||
-          urlPath.endsWith(".less", Qt::CaseInsensitive))
-  {
-    contentType = "text/css";
-  }
-  else if(urlPath.endsWith(".png", Qt::CaseInsensitive) ||
-          urlPath.endsWith(".gif", Qt::CaseInsensitive) ||
-          urlPath.endsWith(".jpg", Qt::CaseInsensitive) ||
-          urlPath.endsWith(".jpeg", Qt::CaseInsensitive) ||
-          urlPath.endsWith(".ico", Qt::CaseInsensitive))
-  {
-    contentType = "image";
-  }
-  else if(urlPath.endsWith(".svg", Qt::CaseInsensitive))
-  {
-    contentType = "image/svg+xml";
-  }
-  else if(urlPath.endsWith(".xml", Qt::CaseInsensitive))
-  {
-    contentType = "application/xml";
-  }
-  else if(urlPath.endsWith(".pdf", Qt::CaseInsensitive))
-  {
-    // TODO: Support PDF, zip, tar files
-  }
-  else if(urlPath.endsWith(".zip", Qt::CaseInsensitive))
-  {
-    // TODO: Support PDF, zip, tar files
-  }
-  else if(urlPath.endsWith(".tar", Qt::CaseInsensitive))
-  {
-    // TODO: Support PDF, zip, tar files
-  }
-  else if(urlPath.endsWith(".gz", Qt::CaseInsensitive))
-  {
-    // TODO: Support PDF, zip, tar files
-  }
+  // TODO: -- Move this into FileUtils::LoadFile
+  // where we can manage opening and closing.
 
   auto& response = data.getResponse();
   response.setHeader("Content-Type", contentType);
-  return response.finish(file.readAll());
+  auto result = response.finish(file.readAll());
+  file.close();
+  return result;
 }
 
 bool HttpServer::eventFilter(QObject* /* object */, QEvent* event)
@@ -1017,30 +990,30 @@ const HttpServer::ServerInfo& HttpServer::getServerInfo() const
   return m_ServerInfo;
 }
 
-bool HttpServer::registerRoute(const QString& method, const QString& actionName, const QString& route)
+bool HttpServer::registerRoute(const QString& method, const QString& actionName, const QString& path)
 {
-  return registerRoute(Utils::fromString(method.trimmed().toUpper()), actionName, route);
+  return registerRoute(Utils::fromString(method.trimmed().toUpper()), actionName, path);
 }
 
-bool HttpServer::registerRoute(HttpMethod method, const QString& actionName, const QString& route)
+bool HttpServer::registerRoute(HttpMethod method, const QString& actionName, const QString& path)
 {
   auto routes = m_Routes.find(method);
   if(routes == m_Routes.end())
   {
     LOG_ERROR("Invalid http "
               "action [" << actionName << "] "
-              "route [" << route << "]");
+              "path [" << path << "]");
     return false;
   }
 
   LOG_DEBUG("method [" << Utils::toString(method) << "] "
             "action [" << actionName << "] "
-            "route [" << route << "]");
+            "path [" << path << "]");
 
-  bool containsKey = (routes->find(route) != routes->end());
+  bool containsKey = (routes->find(path) != routes->end());
 
   // Initialize and assign the Route struct.
-  routes->insert(route, Route(route, actionName));
+  routes->insert(path, Route(path, actionName));
 
   return !containsKey;
 }

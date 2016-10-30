@@ -5,6 +5,7 @@
 #include "action.h"
 #include "httpdata.h"
 #include "httpevent.h"
+#include "fileutils.h"
 
 namespace qttp
 {
@@ -89,8 +90,8 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
      * @brief More of an association than a registration - binds an action name
      * to a route url.
      */
-    bool registerRoute(const QString& method, const QString& actionName, const QString& route);
-    bool registerRoute(HttpMethod method, const QString& actionName, const QString& route);
+    bool registerRoute(const QString& method, const QString& actionName, const QString& path);
+    bool registerRoute(HttpMethod method, const QString& actionName, const QString& path);
 
     template<class T> std::shared_ptr<Action> addActionAndRegister()
     {
@@ -189,18 +190,18 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     class QTTPSHARED_EXPORT Route
     {
       public:
-        Route() : route(), action(), parts()
+        Route() : path(), action(), parts()
         {
         }
 
         Route(const QString& r, const QString& a) :
-          route(r),
+          path(r),
           action(a),
-          parts(route.split('/', QString::SkipEmptyParts))
+          parts(path.split('/', QString::SkipEmptyParts))
         {
         }
 
-        QString route;
+        QString path;
         QString action;
         QStringList parts;
     };
@@ -318,6 +319,7 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     bool m_StrictHttpMethod;
     bool m_ShouldServeFiles;
     QDir m_ServeFilesDirectory;
+    FileUtils m_FileLookup;
     QStringList m_EnabledProcessors;
     ServerInfo m_ServerInfo;
 };

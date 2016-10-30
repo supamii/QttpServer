@@ -149,19 +149,19 @@ void Swagger::initialize()
         {
           continue;
         }
-        if(!paths.contains(route.route))
+        if(!paths.contains(route.path))
         {
-          paths.insert(route.route, QJsonObject());
+          paths.insert(route.path, QJsonObject());
         }
-        QJsonObject pathRoute = paths[route.route].toObject();
+        QJsonObject pathRoute = paths[route.path].toObject();
         pathRoute.insert(Utils::toStringLower(httpMethod), QJsonObject {
           { "summary", action->getSummary() },
           { "description", action->getDescription() },
-          { "operationId", route.route },
+          { "operationId", route.path },
           { "parameters", routeParameters },
           { "tags", tags }
         });
-        paths[route.route] = pathRoute;
+        paths[route.path] = pathRoute;
       }
     }
 

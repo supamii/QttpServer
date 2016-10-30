@@ -34,15 +34,9 @@ class QTTPSHARED_EXPORT HttpData
 
   public:
 
-    /**
-     * @brief
-     */
     const HttpRequest& getRequest() const;
     HttpRequest& getRequest();
 
-    /**
-     * @brief
-     */
     const HttpResponse& getResponse() const;
     HttpResponse& getResponse();
 
@@ -52,6 +46,12 @@ class QTTPSHARED_EXPORT HttpData
      * This is the same as getResponse().setJson();
      */
     void setResponse(const QJsonObject& json);
+
+    //! Quick and easy way to set error messages.
+    void setErrorResponse(const QString& msg);
+    void setErrorResponse(const QString& msg, HttpError code);
+    void setErrorResponse(const QJsonObject& json);
+    void setErrorResponse(const QJsonObject& json, HttpError code);
 
     const QUuid& getUid() const;
     void setTimestamp(const QDateTime& timestamp);
