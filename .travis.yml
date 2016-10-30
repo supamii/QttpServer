@@ -27,14 +27,13 @@ before_install:
   #- sudo apt-get update -qq
   #- sudo apt-get install qtbase5-dev
   #- sudo apt-get install qt5-default
-
-before_script: ls
-  - source /opt/qt55/bin/qt55-env.sh
-  - /opt/qt55/bin/qmake
   - which qmake
   - qmake --version
+  - /opt/qt55/bin/qmake --version
+before_script: ls
 script:
-  - qmake CONFIG+=debug CONFIG+=SAMPLEAPP DEFINES+=QDEBUG_NOQUOTE_NOT_AVAILABLE qttpserver.pro
+  - source /opt/qt55/bin/qt55-env.sh
+  - /opt/qt55/bin/qmake CONFIG+=debug CONFIG+=SAMPLEAPP DEFINES+=QDEBUG_NOQUOTE_NOT_AVAILABLE qttpserver.pro
   - make
 branches:
   only:
