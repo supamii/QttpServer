@@ -6,8 +6,6 @@ CONFIG += staticlib
 VERSION = 0.0.1
 TARGET = node_native
 
-QMAKE_LFLAGS += -static
-
 include($$PWD/http.pri)
 
 CONFIG(debug, debug|release) {

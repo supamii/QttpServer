@@ -95,7 +95,8 @@ win32 {
         -luser32
 }
 
-LIBS += -luv -lhttp_parser -lnode_native
+# ARG order matters here, always make sure node_native goes first!
+LIBS += -lnode_native -luv -lhttp_parser
 
 contains(TEMPLATE, lib) {
     message('Building QTTP library')
