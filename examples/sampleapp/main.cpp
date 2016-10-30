@@ -47,12 +47,12 @@ class Another : public Action
 
     void onGet(HttpData& data)
     {
-      data.getResponse().getJson()["data"] = "GET another";
+      data.getResponse().getJson()["data"] = QSTR("GET another");
     }
 
     void onPost(HttpData& data)
     {
-      data.getResponse().getJson()["data"] = "POST another";
+      data.getResponse().getJson()["data"] = QSTR("POST another");
     }
 };
 
@@ -87,22 +87,22 @@ class Simple : public Action
 
     void onGet(HttpData& data)
     {
-      data.getResponse().getJson()["data"] = "GET ok";
+      data.getResponse().getJson()["data"] = QSTR("GET ok");
     }
 
     void onPost(HttpData& data)
     {
-      data.getResponse().getJson()["data"] = "POST ok";
+      data.getResponse().getJson()["data"] = QSTR("POST ok");
     }
 
     void onPut(HttpData& data)
     {
-      data.getResponse().getJson()["data"] = "PUT ok";
+      data.getResponse().getJson()["data"] = QSTR("PUT ok");
     }
 
     void onPatch(HttpData& data)
     {
-      data.getResponse().getJson()["data"] = "PATCH ok";
+      data.getResponse().getJson()["data"] = QSTR("PATCH ok");
     }
 };
 
@@ -126,7 +126,7 @@ int main(int argc, char** argv)
     svr->registerRoute("get", "helloworld", "/helloworld");
     svr->addAction("helloworld", [](HttpData& data) {
       QJsonObject& json = data.getResponse().getJson();
-      json["response"] = "Hello World!";
+      json["response"] = QSTR("Hello World!");
     });
 
     svr->registerRoute("post", "echobody", "/echobody");

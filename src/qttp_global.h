@@ -37,6 +37,17 @@
 #include <thread>
 #include <initializer_list>
 
+// Unfortunately, some compilers will default to bool/int before it assumes
+// QString.  For these cases we'll resort to this ugly MACRO.
+
+#ifndef QSTR
+#  ifdef OMIT_QSTRING_LITERAL
+#    define QSTR(X) X
+#  else
+#    define QSTR(X) QStringLiteral(X)
+#  endif
+#endif
+
 namespace qttp
 {
 

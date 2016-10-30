@@ -1,14 +1,6 @@
 # QttpServer 1.0.0 beta
 
-<table>
-  <tbody>
-    <tr>
-      <td align="center">
-        <a href="https://travis-ci.org/supamii/QttpServer"><img src="https://travis-ci.org/supamii/QttpServer.svg?branch=master"></a>
-      </td>
-    </tr>
-  </tbody>
-</table>
+[![Build Status](https://travis-ci.org/supamii/QttpServer.svg?branch=master)](https://travis-ci.org/supamii/QttpServer)
 
 See Current Release: [QttpServer v0.1.0](https://github.com/supamii/QttpServer/tree/QTTPv0.1.0)
 
