@@ -31,7 +31,7 @@ before_install:
     - qmake --version
 before_script: ls
 script:
-    - qmake CONFIG+=debug CONFIG+=SAMPLEAPP qttpserver.pro
+    - qmake CONFIG+=debug CONFIG+=SAMPLEAPP DEFINES+=QDEBUG_NOQUOTE_NOT_AVAILABLE qttpserver.pro
     - make
 branches:
   only:
