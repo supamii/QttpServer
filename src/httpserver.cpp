@@ -539,7 +539,7 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                STATS_INC("http:method:unknown");
                response.setStatus(HttpStatus::BAD_REQUEST);
                QJsonObject& json = data.getResponse().getJson();
-               json["error"] = "Invalid HTTP method";
+               json["error"] = QSTR("Invalid HTTP method");
                return;
            }
 
@@ -551,7 +551,7 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
              LOG_ERROR("Invalid route");
              response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
              QJsonObject& json = data.getResponse().getJson();
-             json["error"] = "Internal error";
+             json["error"] = QSTR("Internal error");
              return;
            }
 
@@ -661,7 +661,7 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                      {
                        response.setStatus(HttpStatus::BAD_REQUEST);
                        QJsonObject& json = data.getResponse().getJson();
-                       json["error"] = "Invalid request";
+                       json["error"] = QSTR("Invalid request");
                        performPostprocessing(data);
                      }
                    }
@@ -686,7 +686,7 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
            {
              response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
              QJsonObject& json = data.getResponse().getJson();
-             json["error"] = "Internal server error";
+             json["error"] = QSTR("Internal server error");
            }
 
            if(!response.isFinished())

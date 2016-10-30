@@ -41,10 +41,10 @@
 // QString.  For these cases we'll resort to this ugly MACRO.
 
 #ifndef QSTR
-#  ifdef OMIT_QSTRING_LITERAL
-#    define QSTR(X) X
-#  else
+#  ifdef USE_QSTRING_LITERAL
 #    define QSTR(X) QStringLiteral(X)
+#  else
+#    define QSTR(X) X
 #  endif
 #endif
 

@@ -11,28 +11,31 @@ matrix:
       dist: trusty
       compiler: gcc
 before_install:
-    - echo $TRAVIS_OS_NAME
-    - echo $LANG
-    - echo $LC_ALL
-    - echo $CXX
-    - which $CXX
-    - which $CC
-    - $CXX --version
-    - python --version
-    - git submodule update --init
-    - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
-    - sudo apt-get update -qq
-    - sudo apt-get install qtbase5-dev
-    - sudo apt-get install qt5-default
-    - $CXX --version
-    - which $CXX
-    - which $CC
-    - which qmake
-    - qmake --version
+  - echo $TRAVIS_OS_NAME
+  - echo $LANG
+  - echo $LC_ALL
+  - echo $CXX
+  - which $CXX
+  - which $CC
+  - $CXX --version
+  - python --version
+  - git submodule update --init
+  - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
+  - sudo apt-get update -qq
+  - sudo apt-get -y install qt55[QTPACKAGE]
+  #- sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
+  #- sudo apt-get update -qq
+  #- sudo apt-get install qtbase5-dev
+  #- sudo apt-get install qt5-default
+
 before_script: ls
+  - source /opt/qt55/bin/qt55-env.sh
+  - /opt/qt55/bin/qmake
+  - which qmake
+  - qmake --version
 script:
-    - qmake CONFIG+=debug CONFIG+=SAMPLEAPP DEFINES+=QDEBUG_NOQUOTE_NOT_AVAILABLE qttpserver.pro
-    - make
+  - qmake CONFIG+=debug CONFIG+=SAMPLEAPP DEFINES+=QDEBUG_NOQUOTE_NOT_AVAILABLE qttpserver.pro
+  - make
 branches:
   only:
     - master
