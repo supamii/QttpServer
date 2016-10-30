@@ -6,19 +6,20 @@ See Current Release: [QttpServer v0.1.0](https://github.com/supamii/QttpServer/t
 
 <b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/nodenative).
 
-Check out the [examples](examples/README.md) and samples to get started with your RESTful API server!
+Check out the [examples](./examples/) and samples to get started with your RESTful API server!
 
 <img src="/img/qttp_eventloops.png" alt="QttpServer" width="50%" height="50%">
 
 ## Features
 
-* NodeJS's [libuv](https://github.com/libuv/libuv) integrated with Qt
-* NodeJS's [http-parser](https://github.com/nodejs/http-parser)
+* Compatible with [Qt](http://www.qt.io/download/) 5.5, 5.6, [5.7](http://download.qt.io/official_releases/qt/5.7/5.7.0/single/)
+* NodeJS's blazing fast [libuv](https://github.com/libuv/libuv)
+* NodeJS's lightning quick [http-parser](https://github.com/nodejs/http-parser)
 * URL routing e.g. /v1/your/api/path
-* Pre & Post processing hooks and chaining
-* Submodules ready to support [MongoDb](https://github.com/mongodb/mongo-cxx-driver), [Redis](https://github.com/uglide/qredisclient)
+* Pre & Post processing hooks with chaining
+* Submodules ready to support [MongoDb](https://github.com/mongodb/mongo-cxx-driver), [Redis](https://github.com/uglide/qredisclient) ([Build guide](./BUILD_OTHERS.md))
 * Logging support
-* Swagger-UI support
+* [Swagger-UI](img/swagger.png) support
 * Very basic support for HTML files (html, js, css, txt, etc)
 
 ## Example 1: 
@@ -144,69 +145,15 @@ qmake CONFIG+=debug qttpserver.pro
 make
 ```
 
-## Optional components
-
-##### Build Redis client
-
-Pretty straight forward stuff here - just be mindful of the extra environment variable set to DESTDIR:
-
-```bash
-cd lib/qredisclient
-git submodule update --init
-qmake CONFIG+=debug DESTDIR=. qredisclient.pro
-make
-```
-
-##### Build MongoDb driver
-
-1. Install [scons](http://www.scons.org/) - e.g. `brew install scons` or `sudo apt-get install scons`
-2. Install [boost](https://github.com/mongodb/mongo-cxx-driver/wiki/Download-and-Compile-the-Legacy-Driver)
-
-   Many agree that building Boost can be challenging so it's recommend to use something like brew, apt-get, or the pre-built [binary installer for windows](http://sourceforge.net/projects/boost/files/boost-binaries/)
-
-    ```bash
-    # Install what you can with Ubuntu
-    sudo apt-get install mongodb-dev
-    sudo apt-get install libboost1.54-all-dev
-    ```
-
-    ```bash
-    # Brew on macx
-    brew search boost
-    brew info boost
-    brew install boost --c++11
-    ```
-
-   *NOTE:* If you're installing mongo locally, make sure you link to the same set of BOOST libraries
-
-    ```bash
-    brew install mongodb --with-boost --with-openssl
-    ```
-4. Build the driver!
-
-   Ubuntu
-
-    ```bash
-    cd QttpServer/lib/mongo-cxx-driver
-    sudo scons --libpath=/usr/lib/x86_64-linux-gnu --cpppath=/usr/include --dbg=on --opt=on --64 install
-    ```
-
-   Windows
-
-    ```batch
-    set PATH=C:\Python27;C:Pyathon27\Scripts;%PATH%
-    scons --32 --dbg=on --opt=off --sharedclient --dynamic-windows --prefix="C:\local\mongo-client" --cpppath="C:\local\boost_1_59_0" --libpath="C:\local\boost_1_59_0\lib32-msvc-14.0" install
-    ```
-
-   Mac
-
-    ```bash
-    scons --libpath=/usr/local/lib --cpppath=/usr/local/include --dbg=on --opt=on --64 install
-    ```
-
-For more information visit [mongodb.org](https://docs.mongodb.org/getting-started/cpp/client/)
+By default, qttpserver will compile as a static library for ease of use.  Check out the [examples here](./examples/) for a quick-start.  If you run into any blockers, feel free to open bug(s) and ask questions!
 
 # Older Resources
+
+## Building Redis and MongoDB
+
+Checkout the guide [here](./BUILD_OTHERS.md).
+
+## Alternate Build Scripts
 
 node.native was previously built using **gyp** - you can checkout more about that [here](./BUILD.md)
 
@@ -244,4 +191,6 @@ node.native was previously built using **gyp** - you can checkout more about tha
 30. Include periodic TASKS to execute in between libuv call-backs!
 31. ~~Swagger suppport~~
 32. ~~Serve basic http files~~
+33. More swagger support and thorough examples on how to create interface based actions
+34. Rename some "routes" to the more appropriate "path"
 
