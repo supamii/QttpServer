@@ -75,8 +75,23 @@
     #define LOG_TRACE qttp::LogTrace logTraceObject(LOG_FILE.append(__FUNCTION__), __LINE__)
   #endif
 
+// The no-quote feature may not be available on all version of Qt so this
+// definition should help stub it out.
+
+  #ifdef QDEBUG_NOQUOTE_NOT_AVAILABLE
+  #  define QDEBUG_NOQUOTE qDebug()
+  #  define QINFO_NOQUOTE qInfo()
+  #  define QWARNING_NOQUOTE qWarning()
+  #  define QCRITICAL_NOQUOTE qCritical()
+  #else
+  #  define QDEBUG_NOQUOTE qDebug().noquote()
+  #  define QINFO_NOQUOTE qInfo().noquote()
+  #  define QWARNING_NOQUOTE qWarning().noquote()
+  #  define QCRITICAL_NOQUOTE qCritical().noquote()
+  #endif
+
   #ifndef LOG_DBG
-    #define LOG_DBG(X) qDebug().noquote() << LOG_FUNCTION("DEBUG") << X
+    #define LOG_DBG(X) QDEBUG_NOQUOTE << LOG_FUNCTION("DEBUG") << X
   #endif
 
   #ifndef LOG_DEBUG
@@ -84,19 +99,19 @@
   #endif
 
   #ifndef LOG_INFO
-    #define LOG_INFO(X) qInfo().noquote() << LOG_FUNCTION("INFO ") << X
+    #define LOG_INFO(X) QINFO_NOQUOTE << LOG_FUNCTION("INFO ") << X
   #endif
 
   #ifndef LOG_WARN
-    #define LOG_WARN(X) qWarning().noquote() << LOG_FUNCTION("WARN ") << X
+    #define LOG_WARN(X) QWARNING_NOQUOTE << LOG_FUNCTION("WARN ") << X
   #endif
 
   #ifndef LOG_ALERT
-    #define LOG_ALERT(X) qCritical().noquote() << LOG_FUNCTION("ALERT") << X
+    #define LOG_ALERT(X) QCRITICAL_NOQUOTE << LOG_FUNCTION("ALERT") << X
   #endif
 
   #ifndef LOG_ERROR
-    #define LOG_ERROR(X) qCritical().noquote() << LOG_FUNCTION("ERROR") << X
+    #define LOG_ERROR(X) QCRITICAL_NOQUOTE << LOG_FUNCTION("ERROR") << X
   #endif
 
   #ifndef LOG_FATAL
