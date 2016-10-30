@@ -21,7 +21,7 @@ void OptionsPreprocessor::preprocess(HttpData& data)
     // For now we won't use Global::getDefaultHeaders() until we can figure
     // out how to ensure the OPTIONS method will always work as expected.
 
-    static const QList<pair<string, string> > defaultHeaders =
+    static const QList<pair<QString, QString> > defaultHeaders =
     {
       { "Content-Type", "application/json" },
       { "Access-Control-Allow-Headers", "Content-Type, Authorization" },

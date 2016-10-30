@@ -12,7 +12,7 @@ SOURCES += \
 DESTDIR = $$PWD
 
 # Skip timestamps since it adds clutter to unit test logs.
-DEFINES += NO_LOG_DATETIME
+DEFINES += QTTP_OMIT_LOG_DATETIME QTTP_FORMAT_JSON_RESPONSE
 
 macx {
     # Since things are buried in the app folder, we'll copy configs there.

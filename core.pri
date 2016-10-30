@@ -1,5 +1,8 @@
 QT += core network
 
+# Good for dev/test but in prod let's skip this all together.
+DEFINES += QTTP_OMIT_ASSERTIONS
+
 CONFIG(debug, debug|release) {
     message('Compiling in DEBUG mode')
     BUILDTYPE = Debug
@@ -48,7 +51,8 @@ INCLUDEPATH += \
     $$PWD/lib/libuv/ \
     $$PWD/lib/libuv/include \
     $$PWD/lib/http/include \
-    $$PWD/lib/http/include/native
+    $$PWD/lib/http/include/native \
+    $$PWD/lib/http/qttp
 
 contains(CONFIG, SSL_TLS) {
 

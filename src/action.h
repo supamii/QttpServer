@@ -84,7 +84,7 @@ class QTTPSHARED_EXPORT Action
     virtual const char* getSummary() const;
     virtual const char* getDescription() const;
     virtual const QStringList& getTags() const;
-    virtual const QList<Input>& getInputs() const;
+    virtual const std::vector<Input>& getInputs() const;
 
   protected:
 
@@ -92,7 +92,7 @@ class QTTPSHARED_EXPORT Action
      * @brief Override in order to return a list of headers to automatically
      * append to each response.
      */
-    virtual const QList<std::pair<std::string, std::string> >& getHeaders() const;
+    virtual const std::vector<std::pair<QString, QString> >& getHeaders() const;
 
     /**
      * @brief Helps apply, modify, or prune headers in each response.
@@ -100,9 +100,9 @@ class QTTPSHARED_EXPORT Action
     virtual void applyHeaders(HttpData& data) const;
 
   private:
-    static const QList<Input> m_EmptyInputList;
+    static const std::vector<Input> m_EmptyInputList;
     static const QStringList m_EmptyStringList;
-    static const QList<std::pair<std::string, std::string> > m_EmptyStringPairList;
+    static const std::vector<std::pair<QString, QString> > m_EmptyStringPairList;
 };
 
 /**

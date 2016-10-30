@@ -275,12 +275,12 @@ void HttpServer::initGlobal(const QString &filepath)
     for(QString key : keys)
     {
       QString value = headers.value(key).toString();
-      Global::DEFAULT_HEADERS.append({ key.toStdString(), value.toStdString() });
+      Global::DEFAULT_HEADERS.push_back({ key, value });
       LOG_DEBUG("Adding default-header [" << key << ", " << value << "]");
     }
 
     // We'll always force the QttpServer version in here.
-    Global::DEFAULT_HEADERS.append({ "Server", QTTP_SERVER_VERSION });
+    Global::DEFAULT_HEADERS.push_back({ "Server", QTTP_SERVER_VERSION });
   }
   else
   {
@@ -441,13 +441,13 @@ int HttpServer::start()
   QString ip = svr->m_GlobalConfig["bindIp"].toString("0.0.0.0").trimmed();
   auto port = svr->m_GlobalConfig["bindPort"].toInt(8080);
 
-  auto serverCB = [svr](request& req, response& resp) {
+  auto callback = [svr](QttpRequest& req, QttpResponse& resp) {
                     HttpEvent* event = new HttpEvent(&req, &resp);
                     QCoreApplication::postEvent(svr, event);
                   };
 
-  native::http::http server;
-  auto result = server.listen(ip.toStdString(), port, serverCB);
+  native::http::Qttp server;
+  auto result = server.listen(ip.toStdString(), port, callback);
 
   if(!result)
   {
@@ -879,7 +879,7 @@ bool HttpServer::searchAndServeFile(HttpData& data) const
 
   LOG_DEBUG("Serving file [" << filepath << "]");
 
-  string contentType = FileUtils::determineContentType(urlPath);
+  QString contentType = FileUtils::determineContentType(urlPath);
 
   // TODO: -- Move this into FileUtils::LoadFile
   // where we can manage opening and closing.

@@ -3,14 +3,14 @@
 using namespace std;
 using namespace qttp;
 
-HttpUrl::HttpUrl(native::http::request* request) :
-    m_Assertion(request),
-    m_Request(request),
-    m_Schema(),
-    m_Host(),
-    m_Path(),
-    m_Query(),
-    m_Fragment()
+HttpUrl::HttpUrl(native::http::QttpRequest* request) :
+  QTTP_INIT_ASSERT_MEMBER(request)
+  m_Request(request),
+  m_Schema(),
+  m_Host(),
+  m_Path(),
+  m_Query(),
+  m_Fragment()
 {
 }
 
@@ -27,22 +27,22 @@ void HttpUrl::initialize()
   getFragment();
 }
 
-const QString& HttpUrl::getSchema() const
+const QByteArray& HttpUrl::getSchema() const
 {
   if(m_Schema.isNull())
   {
-    m_Schema = QSharedPointer<QString>(new QString(m_Request->url().schema().c_str()));
+    m_Schema = std::move(m_Request->url().schema());
   }
-  return *(m_Schema.data());
+  return m_Schema;
 }
 
-const QString& HttpUrl::getHost() const
+const QByteArray& HttpUrl::getHost() const
 {
   if(m_Host.isNull())
   {
-    m_Host = QSharedPointer<QString>(new QString(m_Request->url().host().c_str()));
+    m_Host = std::move(m_Request->url().host());
   }
-  return *(m_Host.data());
+  return m_Host;
 }
 
 qint32 HttpUrl::getPort() const
@@ -50,29 +50,29 @@ qint32 HttpUrl::getPort() const
   return m_Request->url().port();
 }
 
-const QString& HttpUrl::getPath() const
+const QByteArray& HttpUrl::getPath() const
 {
   if(m_Path.isNull())
   {
-    m_Path = QSharedPointer<QString>(new QString(m_Request->url().path().c_str()));
+    m_Path = std::move(m_Request->url().path().constData());
   }
-  return *(m_Path.data());
+  return m_Path;
 }
 
-const QString& HttpUrl::getQuery() const
+const QByteArray& HttpUrl::getQuery() const
 {
   if(m_Query.isNull())
   {
-    m_Query = QSharedPointer<QString>(new QString(m_Request->url().query().c_str()));
+    m_Query = std::move(m_Request->url().query().constData());
   }
-  return *(m_Query.data());
+  return m_Query;
 }
 
-const QString& HttpUrl::getFragment() const
+const QByteArray& HttpUrl::getFragment() const
 {
   if(m_Fragment.isNull())
   {
-    m_Fragment = QSharedPointer<QString>(new QString(m_Request->url().fragment().c_str()));
+    m_Fragment = std::move(m_Request->url().fragment().constData());
   }
-  return *(m_Fragment.data());
+  return m_Fragment;
 }

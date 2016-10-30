@@ -30,7 +30,7 @@ class QTTPSHARED_EXPORT FileUtils
      */
     bool loadFile(const QString& file, QByteArray& data) const;
 
-    static std::string determineContentType(const QString& urlPath);
+    static QString determineContentType(const QString& urlPath);
 
   private:
 

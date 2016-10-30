@@ -7,6 +7,14 @@
 #include "httpevent.h"
 #include "fileutils.h"
 
+#ifdef QTTP_COLLECT_STATS
+  #define STATS_INC(X) m_Stats->increment( X )
+  #define STATS_SET(X, Y) m_Stats->setValue( X, Y )
+#else
+  #define STATS_INC(X)
+  #define STATS_SET(X, Y)
+#endif
+
 namespace qttp
 {
 

@@ -3,9 +3,9 @@
 using namespace std;
 using namespace qttp;
 
-const QList<Input> Action::m_EmptyInputList;
+const std::vector<Input> Action::m_EmptyInputList;
 const QStringList Action::m_EmptyStringList;
-const QList<std::pair<string, string> > Action::m_EmptyStringPairList;
+const std::vector<std::pair<QString, QString> > Action::m_EmptyStringPairList;
 
 Action::Action()
 {
@@ -133,12 +133,12 @@ const QStringList& Action::getTags() const
   return m_EmptyStringList;
 }
 
-const QList<Input>& Action::getInputs() const
+const std::vector<Input>& Action::getInputs() const
 {
   return m_EmptyInputList;
 }
 
-const QList<pair<string, string> >& Action::getHeaders() const
+const std::vector<pair<QString, QString> >& Action::getHeaders() const
 {
   return Global::getDefaultHeaders();
 }

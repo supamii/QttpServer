@@ -11,18 +11,14 @@ include($$PWD/http_parser_qmake.pri)
 CONFIG(debug, debug|release) {
     win32 {
         DESTDIR = $$PWD/../../build/Debug/lib
-        # OTHER_FILES += $$PWD/../../build/Debug/lib/*
     } else {
         DESTDIR = $$PWD/../../build/out/Debug
-        # OTHER_FILES += $$PWD/../../build/out/Debug/*
     }
 } else {
     win32 {
         DESTDIR = $$PWD/../../build/Release/lib
-        # OTHER_FILES += $$PWD/../../build/Release/lib
     } else {
         DESTDIR = $$PWD/../../build/out/Release
-        # OTHER_FILES += $$PWD/../../build/out/Release
     }
 }
 

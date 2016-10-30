@@ -4,8 +4,8 @@ using namespace std;
 using namespace qttp;
 using namespace native::http;
 
-HttpResponse::HttpResponse(response* resp) :
-  m_Assertion(resp),
+HttpResponse::HttpResponse(QttpResponse* resp) :
+  QTTP_INIT_ASSERT_MEMBER(resp)
   m_Response(resp),
   m_Status(HttpStatus::OK),
   m_Json(),
@@ -17,17 +17,17 @@ HttpResponse::~HttpResponse()
 {
 }
 
-const native::http::response* HttpResponse::getResponse()
+const native::http::QttpResponse* HttpResponse::getResponse()
 {
   return m_Response;
 }
 
-void HttpResponse::setHeader(const string& key, const string& value)
+void HttpResponse::setHeader(const QString& key, const QString& value)
 {
   m_Response->set_header(key, value);
 }
 
-void HttpResponse::setHeader(const QList<std::pair<std::string, std::string> >& headers)
+void HttpResponse::setHeader(const QList<std::pair<QString, QString> >& headers)
 {
   for(auto & header : headers)
   {
@@ -85,13 +85,18 @@ bool HttpResponse::finish(const QJsonObject& json)
   LOG_TRACE;
   setHeader("Content-Type", "application/json");
   QJsonDocument doc(json);
-  return finish(doc.toJson());
+
+#ifdef QTTP_FORMAT_JSON_RESPONSE
+  return finish(doc.toJson(QJsonDocument::Indented));
+#else
+  return finish(doc.toJson(QJsonDocument::Compact));
+#endif
 }
 
 bool HttpResponse::finish(const QByteArray& bytes)
 {
   setFlag(DataControl::Finished);
-  m_Response->write(bytes.length(), bytes.data());
+  m_Response->write(bytes.length(), bytes.constData());
   return m_Response->close();
 }
 

@@ -5,7 +5,7 @@ using namespace std;
 using namespace native::http;
 using namespace qttp;
 
-HttpData::HttpData(request* req, response* resp) :
+HttpData::HttpData(QttpRequest* req, QttpResponse* resp) :
   m_HttpRequest(req),
   m_HttpResponse(resp),
   m_Uid(QUuid::createUuid()),

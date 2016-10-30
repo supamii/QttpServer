@@ -7,7 +7,7 @@ Global::Global()
 {
 }
 
-const QList<HttpMethod> Global::HTTP_METHODS =
+const std::vector<HttpMethod> Global::HTTP_METHODS =
 {
   HttpMethod::GET,
   HttpMethod::POST,
@@ -20,7 +20,7 @@ const QList<HttpMethod> Global::HTTP_METHODS =
   HttpMethod::CONNECT
 };
 
-QList<std::pair<std::string, std::string> > Global::DEFAULT_HEADERS =
+std::vector<std::pair<QString, QString> > Global::DEFAULT_HEADERS =
 {
   { "Content-Type", "application/json" },
   { "Access-Control-Allow-Headers", "Content-Type, Authorization" },
@@ -29,7 +29,7 @@ QList<std::pair<std::string, std::string> > Global::DEFAULT_HEADERS =
   { "Server", QTTP_SERVER_VERSION }
 };
 
-const QList<std::pair<std::string, std::string> >& Global::getDefaultHeaders()
+const std::vector<std::pair<QString, QString> >& Global::getDefaultHeaders()
 {
   return DEFAULT_HEADERS;
 }

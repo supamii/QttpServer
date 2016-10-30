@@ -26,7 +26,7 @@
 #include <QJsonObject>
 #include <QList>
 
-#include <http.h>
+#include <qttp.h>
 #include <functional>
 
 #include <iostream>
@@ -254,6 +254,14 @@ enum class HttpError : int
   ASSIGN_HTTP_STATUS(NETWORK_AUTHENTICATION_REQUIRED),
 };
 
+#ifdef QTTP_OMIT_ASSERTIONS
+#  define QTTP_DECLARE_ASSERT_MEMBER(X)
+#  define QTTP_INIT_ASSERT_MEMBER(X)
+#else
+#  define QTTP_DECLARE_ASSERT_MEMBER(X) Assert< X > m_Assertion;
+#  define QTTP_INIT_ASSERT_MEMBER(X) m_Assertion( X ),
+#endif
+
 /// Quick a dirty mechanism to assert ptrs within the initializer list!
 template<class T> class Assert
 {
@@ -274,12 +282,12 @@ class QTTPSHARED_EXPORT Global
 
   public:
 
-    static const QList<HttpMethod> HTTP_METHODS;
+    static const std::vector<HttpMethod> HTTP_METHODS;
 
-    static const QList<std::pair<std::string, std::string> >& getDefaultHeaders();
+    static const std::vector<std::pair<QString, QString> >& getDefaultHeaders();
 
   private:
-    static QList<std::pair<std::string, std::string> > DEFAULT_HEADERS;
+    static std::vector<std::pair<QString, QString> > DEFAULT_HEADERS;
 };
 
 }

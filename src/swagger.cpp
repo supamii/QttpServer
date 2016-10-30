@@ -86,7 +86,7 @@ void Swagger::initialize()
     QJsonArray tags;
 
     QString actionName = action->getName();
-    const QList<Input> inputs = action->getInputs();
+    const std::vector<Input> & inputs = action->getInputs();
 
     for(const auto & input : inputs)
     {

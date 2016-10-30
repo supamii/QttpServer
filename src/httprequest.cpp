@@ -3,11 +3,10 @@
 using namespace std;
 using namespace qttp;
 
-HttpRequest::HttpRequest(native::http::request* req) :
-  m_Assertion(req),
+HttpRequest::HttpRequest(native::http::QttpRequest* req) :
+  QTTP_INIT_ASSERT_MEMBER(req)
   m_Request(req),
   m_HttpUrl(),
-  m_MethodStr(),
   m_MethodEnum(HttpMethod::UNKNOWN),
   m_Json(),
   m_Query()
@@ -18,18 +17,18 @@ HttpRequest::~HttpRequest()
 {
 }
 
-bool HttpRequest::containsHeader(const std::string& key) const
+bool HttpRequest::containsHeader(const QString& key) const
 {
   auto & headers = m_Request->get_headers();
   return headers.find(key) != headers.end();
 }
 
-const std::string& HttpRequest::getHeader(const std::string& key) const
+const QString& HttpRequest::getHeader(const QString& key) const
 {
   return m_Request->get_header(key);
 }
 
-bool HttpRequest::getHeader(const std::string& key, std::string& value) const
+bool HttpRequest::getHeader(const QString& key, QString& value) const
 {
   return m_Request->get_header(key, value);
 }
@@ -50,11 +49,7 @@ const HttpUrl& HttpRequest::getUrl() const
 
 const QString& HttpRequest::getMethodStr() const
 {
-  if(m_MethodStr.isNull())
-  {
-    m_MethodStr = QSharedPointer<QString>(new QString(m_Request->get_method().c_str()));
-  }
-  return *(m_MethodStr.data());
+  return m_Request->get_method();
 }
 
 HttpMethod HttpRequest::getMethod(bool strictComparison) const
@@ -68,12 +63,7 @@ HttpMethod HttpRequest::getMethod(bool strictComparison) const
   return m_MethodEnum;
 }
 
-const std::stringstream& HttpRequest::getRawBody() const
-{
-  return m_Request->get_raw_body();
-}
-
-native::http::request* HttpRequest::getRequest()
+native::http::QttpRequest* HttpRequest::getRequest()
 {
   return m_Request;
 }
@@ -88,20 +78,20 @@ const QJsonObject& HttpRequest::getJson() const
   // TODO: MUTEX!
   // FIXME: MUTEX!
 
-  string body = m_Request->get_body();
-  auto openBrace = body.find("{");
-  auto closeBrace = body.find("}");
+  const QByteArray& body = m_Request->get_body();
+  auto openBrace = body.indexOf("{");
+  auto closeBrace = body.lastIndexOf("}");
 
-  if(openBrace != string::npos && openBrace == 0 &&
-     closeBrace != string::npos && closeBrace == (body.length() - 1))
+  if(openBrace >= 0 && closeBrace >= 0)
   {
     QJsonParseError error;
     m_Json = Utils::toJson(body, &error);
 
     if(error.error != QJsonParseError::NoError)
     {
-      LOG_ERROR(error.errorString());
-      m_Json = Utils::toJson(string("{}"));
+      // This should probably be muted later.
+      LOG_WARN(error.errorString());
+      m_Json = Utils::toJson(QByteArray("{}"));
     }
   }
 

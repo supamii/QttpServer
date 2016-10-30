@@ -1,4 +1,8 @@
-QT -= gui core network
+QT -= gui network
+
+# If the core lib is loaded, then we'll automatically compile the Qt-version of
+# the HttpServer.
+QT += core
 
 TEMPLATE = lib
 CONFIG += staticlib
@@ -6,24 +10,30 @@ CONFIG += staticlib
 VERSION = 0.0.1
 TARGET = node_native
 
+DEFINES += NNATIVE_ERROR_LOGGING
+
 include($$PWD/http.pri)
 
 CONFIG(debug, debug|release) {
     win32 {
         DESTDIR = $$PWD/../../build/Debug/lib
-        # OTHER_FILES += $$PWD/../../build/Debug/lib/*
     } else {
         DESTDIR = $$PWD/../../build/out/Debug
-        # OTHER_FILES += $$PWD/../../build/out/Debug/*
     }
 } else {
     win32 {
         DESTDIR = $$PWD/../../build/Release/lib
-        # OTHER_FILES += $$PWD/../../build/lib/*
     } else {
         DESTDIR = $$PWD/../../build/out/Release
-        # OTHER_FILES += $$PWD/../../build/out/Release/*
     }
+}
+
+CONFIG(debug, debug|release) {
+    OTHER_FILES += $$PWD/../../build/Debug/lib/*
+    OTHER_FILES += $$PWD/../../build/out/Debug/*
+} else {
+    OTHER_FILES += $$PWD/../../build/Release/lib/*
+    OTHER_FILES += $$PWD/../../build/out/Release/*
 }
 
 macx: {

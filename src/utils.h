@@ -33,7 +33,7 @@
     #endif
   #endif
 
-#ifdef NO_LOG_DATETIME
+#ifdef QTTP_OMIT_LOG_DATETIME
   #define LOG_DATETIME QString()
 #else
 // TODO If we're running as a unit test - ignore time stamps!?
@@ -320,19 +320,6 @@ class QTTPSHARED_EXPORT Utils
       return QJsonDocument::fromJson(bytes, error).array();
     }
 };
-
-#ifndef STATS_INC
-  #define STATS_INC(X) m_Stats->increment( X )
-#endif
-
-#ifndef STATS_SET
-  #define STATS_SET(X, Y) m_Stats->setValue( X, Y )
-#endif
-
-#ifdef NO_QTTP_STATS
-  #define STATS_INC(X)
-  #define STATS_SET(X, Y)
-#endif
 
 class QTTPSHARED_EXPORT Stats
 {

@@ -23,9 +23,9 @@ class Another : public Action
       return list;
     }
 
-    const QList<Input>& getInputs() const
+    const std::vector<Input>& getInputs() const
     {
-      static const QList<Input> list =
+      static const std::vector<Input> list =
       {
         Input("someinput"),
         RequiredInput("reqinput"),
@@ -74,9 +74,9 @@ class Simple : public Action
       return list;
     }
 
-    const QList<Input>& getInputs() const
+    const std::vector<Input>& getInputs() const
     {
-      static const QList<Input> list =
+      static const std::vector<Input> list =
       {
         Input("someinput"),
         RequiredInput("reqinput"),

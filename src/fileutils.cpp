@@ -99,9 +99,9 @@ bool FileUtils::loadFile(const QString& file, QByteArray& data) const
   return false;
 }
 
-std::string FileUtils::determineContentType(const QString &urlPath)
+QString FileUtils::determineContentType(const QString &urlPath)
 {
-  string contentType = "text/html";
+  QString contentType = "text/html";
 
   if(urlPath.endsWith(".js", Qt::CaseInsensitive))
   {

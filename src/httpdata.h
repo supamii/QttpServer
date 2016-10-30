@@ -29,7 +29,7 @@ class QTTPSHARED_EXPORT HttpData
      *
      * Throws an exception if arguments are NULL.
      */
-    HttpData(native::http::request*, native::http::response*);
+    HttpData(native::http::QttpRequest*, native::http::QttpResponse*);
     ~HttpData();
 
   public:

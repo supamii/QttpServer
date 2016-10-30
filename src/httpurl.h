@@ -17,12 +17,12 @@ class HttpResponse;
  */
 class QTTPSHARED_EXPORT HttpUrl
 {
-    friend class HttpData;
-    friend class HttpRequest;
-    friend class HttpResponse;
+  friend class HttpData;
+  friend class HttpRequest;
+  friend class HttpResponse;
 
   private:
-    HttpUrl(native::http::request* req);
+    HttpUrl(native::http::QttpRequest* req);
 
   public:
     ~HttpUrl();
@@ -32,31 +32,32 @@ class QTTPSHARED_EXPORT HttpUrl
      */
     void initialize();
 
-    const QString& getSchema() const;
-    const QString& getHost() const;
+    const QByteArray& getSchema() const;
+    const QByteArray& getHost() const;
     qint32 getPort() const;
-    const QString& getPath() const;
-    const QString& getQuery() const;
-    const QString& getFragment() const;
+    const QByteArray& getPath() const;
+    const QByteArray& getQuery() const;
+    const QByteArray& getFragment() const;
 
   private:
-    Assert<native::http::request> m_Assertion;
-    const native::http::request* m_Request;
+    QTTP_DECLARE_ASSERT_MEMBER(native::http::QttpRequest)
+
+    const native::http::QttpRequest * m_Request;
 
     /// Mutable because this is inteded to help cache and reduce QString conversions.
-    mutable QSharedPointer<QString> m_Schema;
+    mutable QByteArray m_Schema;
 
     /// Mutable because this is inteded to help cache and reduce QString conversions.
-    mutable QSharedPointer<QString> m_Host;
+    mutable QByteArray m_Host;
 
     /// Mutable because this is inteded to help cache and reduce QString conversions.
-    mutable QSharedPointer<QString> m_Path;
+    mutable QByteArray m_Path;
 
     /// Mutable because this is inteded to help cache and reduce QString conversions.
-    mutable QSharedPointer<QString> m_Query;
+    mutable QByteArray m_Query;
 
     /// Mutable because this is inteded to help cache and reduce QString conversions.
-    mutable QSharedPointer<QString> m_Fragment;
+    mutable QByteArray m_Fragment;
 };
 
 }

@@ -6,6 +6,7 @@ SOURCES += $$PWD/src/*.cc
 
 INCLUDEPATH += \
     $$PWD/include \
+    $$PWD/include/native \
     $$PWD/../libuv/include \
     $$PWD/../http-parser \
     $$PWD/../evt_tls
@@ -17,6 +18,12 @@ CONFIG(debug, debug|release) {
 }
 
 LIBS += -luv -lhttp_parser
+
+contains(QT, core) {
+  HEADERS += $$PWD/qttp/*.h
+  SOURCES += $$PWD/qttp/*.cc
+  INCLUDEPATH += $$PWD/qttp
+}
 
 contains(CONFIG, SSL_TLS) {
 

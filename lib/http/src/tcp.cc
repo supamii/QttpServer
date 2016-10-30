@@ -58,7 +58,12 @@ bool tcp::bind(const sockaddr* iAddr, error& oError)
 
   // TODO: add flags
   oError = uv_tcp_bind(listener, iAddr, 0);
-  return !oError;
+  if(oError)
+  {
+    PRINT_NN_ERROR(oError);
+    return false;
+  }
+  return true;
 }
 
 bool tcp::bind(const std::string& ip, int port, error& oError)
@@ -66,6 +71,7 @@ bool tcp::bind(const std::string& ip, int port, error& oError)
   ip4_addr addr;
   to_ip4_addr(ip.c_str(), port, addr, oError);
   if(oError) {
+    PRINT_NN_ERROR(oError);
     return false;
   }
   return bind(reinterpret_cast<const sockaddr*>(&addr), oError);
@@ -82,6 +88,7 @@ bool tcp::bind6(const std::string& ip, int port, error& oError)
   ip6_addr addr;
   to_ip6_addr(ip.c_str(), port, addr, oError);
   if(oError) {
+    PRINT_NN_ERROR(oError);
     return false;
   }
   return bind(reinterpret_cast<const sockaddr*>(&addr), oError);
@@ -96,12 +103,15 @@ bool tcp::bind6(const std::string& ip, int port)
 bool tcp::connect(const std::string& ip, int port, std::function<void(error)> callback, error& oError)
 {
   callbacks::store(get()->data, native::internal::uv_cid_connect, callback);
+
   ip4_addr addr;
   to_ip4_addr(ip, port, addr, oError);
   if (oError)
   {
+    PRINT_NN_ERROR(oError);
     return false;
   }
+
   uv_connect_t* connection_p = new uv_connect_t;
   oError = uv_tcp_connect(connection_p, get<uv_tcp_t>(), reinterpret_cast<const sockaddr*>(&addr), [](uv_connect_t* req, int status) {
     callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_connect, error(status));
@@ -109,6 +119,7 @@ bool tcp::connect(const std::string& ip, int port, std::function<void(error)> ca
   });
   if(oError)
   {
+    PRINT_NN_ERROR(oError);
     delete connection_p;
   }
   return !oError;
@@ -123,12 +134,15 @@ bool tcp::connect(const std::string& ip, int port, std::function<void(error)> ca
 bool tcp::connect6(const std::string& ip, int port, std::function<void(error)> callback, error& oError)
 {
   callbacks::store(get()->data, native::internal::uv_cid_connect6, callback);
+
   ip6_addr addr;
   to_ip6_addr(ip, port, addr, oError);
   if (oError)
   {
+    PRINT_NN_ERROR(oError);
     return false;
   }
+
   uv_connect_t* connection_p = new uv_connect_t;
   oError = uv_tcp_connect(connection_p, get<uv_tcp_t>(), reinterpret_cast<const sockaddr*>(&addr), [](uv_connect_t* req, int status) {
     callbacks::invoke<decltype(callback)>(req->handle->data, native::internal::uv_cid_connect6, error(status));
@@ -136,6 +150,7 @@ bool tcp::connect6(const std::string& ip, int port, std::function<void(error)> c
   });
   if(oError)
   {
+    PRINT_NN_ERROR(oError);
     delete connection_p;
   }
   return !oError;
@@ -154,8 +169,9 @@ bool tcp::getsockname(bool& ip4, std::string& ip, int& port) const
   if(uv_tcp_getsockname(get<uv_tcp_t>(), reinterpret_cast<struct sockaddr*>(&addr), &len) == 0)
   {
     ip4 = (addr.ss_family == AF_INET);
-    if(ip4) return from_ip4_addr(reinterpret_cast<ip4_addr*>(&addr), ip, port);
-    else return from_ip6_addr(reinterpret_cast<ip6_addr*>(&addr), ip, port);
+    return (ip4) ?
+           from_ip4_addr(reinterpret_cast<ip4_addr*>(&addr), ip, port) :
+           from_ip6_addr(reinterpret_cast<ip6_addr*>(&addr), ip, port);
   }
   return false;
 }
@@ -167,8 +183,9 @@ bool tcp::getpeername(bool& ip4, std::string& ip, int& port) const
   if(uv_tcp_getpeername(get<uv_tcp_t>(), reinterpret_cast<struct sockaddr*>(&addr), &len) == 0)
   {
     ip4 = (addr.ss_family == AF_INET);
-    if(ip4) return from_ip4_addr(reinterpret_cast<ip4_addr*>(&addr), ip, port);
-    else return from_ip6_addr(reinterpret_cast<ip6_addr*>(&addr), ip, port);
+    return (ip4) ?
+           from_ip4_addr(reinterpret_cast<ip4_addr*>(&addr), ip, port) :
+           from_ip6_addr(reinterpret_cast<ip6_addr*>(&addr), ip, port);
   }
   return false;
 }

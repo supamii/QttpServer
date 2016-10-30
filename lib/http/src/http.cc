@@ -140,7 +140,8 @@ bool http::response::close()
   return socket_->write(str.c_str(), static_cast<int>(str.length()), [ = ](native::error e) {
     if(e)
     {
-      // TODO: handle error
+      PRINT_STDERR("ERROR while trying to close response");
+      PRINT_NN_ERROR(e);
     }
     // clean up
     client_.reset();
@@ -297,6 +298,7 @@ http::client_context::~client_context()
   if(socket_.use_count())
   {
     socket_->close([ = ](){
+      PRINT_DBG("Socket closed");
     });
   }
 }
@@ -314,15 +316,22 @@ bool http::client_context::parse(std::function<void(request&, response&)> callba
 
   parser_settings_.on_url = [](http_parser* parser, const char *at, size_t len) {
                               auto client = reinterpret_cast<client_context*>(parser->data);
+                              try
+                              {
+                                client->request_->url_.from_buf(at, len);
+                              }
+                              catch(const url_parse_exception& ex)
+                              {
+                                // from_buf() can throw an exception.
+                                PRINT_STDERR(ex.message());
 
-                              // TODO: from_buf() can throw an exception: check
-                              client->request_->url_.from_buf(at, len);
-
+                                // TODO: HOW DO WE HANDLE THIS?
+                              }
                               return 0;
                             };
+
   parser_settings_.on_header_field = [](http_parser* parser, const char* at, size_t len) {
                                        auto client = reinterpret_cast<client_context*>(parser->data);
-
                                        if(client->was_header_value_)
                                        {
                                          // new field started
@@ -343,6 +352,7 @@ bool http::client_context::parse(std::function<void(request&, response&)> callba
                                        }
                                        return 0;
                                      };
+
   parser_settings_.on_header_value = [](http_parser* parser, const char* at, size_t len) {
                                        auto client = reinterpret_cast<client_context*>(parser->data);
 
@@ -358,35 +368,35 @@ bool http::client_context::parse(std::function<void(request&, response&)> callba
                                        }
                                        return 0;
                                      };
+
   parser_settings_.on_headers_complete = [](http_parser* parser) {
                                            auto client = reinterpret_cast<client_context*>(parser->data);
-
                                            // add last entry if any
                                            if(!client->last_header_field_.empty()) {
                                              // add new entry
                                              client->request_->headers_[client->last_header_field_] = client->last_header_value_;
                                            }
-
                                            return 0; // 1 to prevent reading of message body.
                                          };
+
   parser_settings_.on_body = [](http_parser* parser, const char* at, size_t len) {
-                               //printf("on_body, len of 'char* at' is %d\n", len);
+                               PRINT_DBG("on_body: len of 'char* at' is " << len);
                                auto client = reinterpret_cast<client_context*>(parser->data);
                                client->request_->body_.write(at, len);
                                return 0;
                              };
+
   parser_settings_.on_message_complete = [](http_parser* parser) {
-                                           //printf("on_message_complete, so invoke the callback.\n");
+                                           PRINT_DBG("on_message_complete, so invoke the callback");
                                            auto client = reinterpret_cast<client_context*>(parser->data);
-                                           std::string method = http_method_str((http_method)parser->method);
-                                           client->request_->method_.swap(method);
+                                           client->request_->method_ = http_method_str((http_method)parser->method);
                                            // invoke stored callback object
                                            callbacks::invoke<decltype(callback)>(client->callback_lut_, 0, *client->request_, *client->response_);
                                            return 1; // 0 or 1?
                                          };
 
-  socket_->read_start([ = ](const char* buf, int len){
-    if ((buf == nullptr) || (len == -1)) {
+  socket_->read_start([ = ](const char* buf, int len) {
+    if ((buf == nullptr) || (len < 0)) {
       response_->set_status(500);
     } else {
       http_parser_execute(&parser_, &parser_settings_, buf, len);
@@ -405,6 +415,7 @@ http::http::~http()
   if(socket_)
   {
     socket_->close([](){
+      PRINT_DBG("Closing socket");
     });
   }
 }
@@ -412,24 +423,28 @@ http::http::~http()
 bool http::http::listen(const std::string& ip, int port, std::function<void(request&, response&)> callback)
 {
   if(!socket_->bind(ip, port)) {
-    std::cerr << "Failed to bind to ip/port " << ip << ":" << port << std::endl;
+    PRINT_STDERR("Failed to bind to ip/port " << ip << ":" << port);
     return false;
   }
+  auto closed = [](){
+                  PRINT_STDERR("Closing socket due to an error");
+                };
 
-  if(!socket_->listen([ = ](native::error e) {
-    if(e)
-    {
-      std::cerr << e.str();
-      // TODO: handle client connection error
-    }
-    else
-    {
-      auto client = new client_context(socket_.get());
-      client->parse(callback);
-    }
-  })) return false;
+  auto connected = [ = ](native::error err) {
+                     if(err)
+                     {
+                       // TODO: handle client connection error
+                       PRINT_NN_ERROR(err);
+                       socket_.get()->close(closed);
+                     }
+                     else
+                     {
+                       auto client = new client_context(socket_.get());
+                       client->parse(callback);
+                     }
+                   };
 
-  return true;
+  return socket_->listen(connected);
 }
 
 const char* http::get_error_name(error err)

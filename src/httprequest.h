@@ -20,25 +20,29 @@ class QTTPSHARED_EXPORT HttpRequest
   friend class HttpData;
 
   private:
-    HttpRequest(native::http::request* req);
+    HttpRequest(native::http::QttpRequest* req);
 
   public:
 
     ~HttpRequest();
 
-    bool containsHeader(const std::string& key) const;
-    const std::string& getHeader(const std::string& key) const;
-    bool getHeader(const std::string& key, std::string& value) const;
+    bool containsHeader(const QString& key) const;
+    const QString& getHeader(const QString& key) const;
+    bool getHeader(const QString& key, QString& value) const;
     uint64_t getTimestamp() const;
     const HttpUrl& getUrl() const;
     const QString &getMethodStr() const;
+
     /**
      * This will return the HTTP method based on char-checking instead of a
      * full string-comparison.
      */
     HttpMethod getMethod(bool strictComparison = false) const;
 
-    const std::stringstream& getRawBody() const;
+    const QByteArray& getRawBody() const
+    {
+      return m_Request->get_body();
+    }
 
     /**
      * @brief Highly recommended!  This builds and returns a QJsonObject that
@@ -65,14 +69,14 @@ class QTTPSHARED_EXPORT HttpRequest
      * result in an exception since alloated memory will be NULL.  Also be sure
      * NOT to save/use this reference outside of the lifetime of HttpData.
      */
-    native::http::request* getRequest();
+    native::http::QttpRequest* getRequest();
 
   private:
 
-    Assert<native::http::request> m_Assertion;
-    native::http::request* m_Request;
+    QTTP_DECLARE_ASSERT_MEMBER(native::http::QttpRequest)
+
+    native::http::QttpRequest * m_Request;
     mutable QSharedPointer<HttpUrl> m_HttpUrl;
-    mutable QSharedPointer<QString> m_MethodStr;
     mutable HttpMethod m_MethodEnum;
     mutable QJsonObject m_Json;
     QUrlQuery m_Query;

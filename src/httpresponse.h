@@ -19,15 +19,16 @@ class QTTPSHARED_EXPORT HttpResponse
   friend class HttpData;
 
   private:
-    HttpResponse(native::http::response* resp);
+    HttpResponse(native::http::QttpResponse* resp);
 
   public:
 
     ~HttpResponse();
 
+    // TODO: PASS A ENUM TO TO HELP REDUCE CASE SENSITIVE ISSUES!
     // TODO: Should go ahead and accept a whole container as well.
-    void setHeader(const std::string& key, const std::string& value);
-    void setHeader(const QList<std::pair<std::string, std::string> >& headers);
+    void setHeader(const QString& key, const QString& value);
+    void setHeader(const QList<std::pair<QString, QString> >& headers);
 
     void setStatus(HttpStatus status);
     HttpStatus getStatus() const;
@@ -103,12 +104,13 @@ class QTTPSHARED_EXPORT HttpResponse
      *
      * DO NOT to save/use this reference outside of the lifetime of HttpData.
      */
-    const native::http::response* getResponse();
+    const native::http::QttpResponse* getResponse();
 
   private:
 
-    Assert<native::http::response> m_Assertion;
-    native::http::response* m_Response;
+    QTTP_DECLARE_ASSERT_MEMBER(native::http::QttpResponse)
+
+    native::http::QttpResponse * m_Response;
     HttpStatus m_Status;
     QJsonObject m_Json;
     quint32 m_ControlFlag;
