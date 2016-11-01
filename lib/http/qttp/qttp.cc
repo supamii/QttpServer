@@ -67,8 +67,8 @@ void QttpUrl::from_buf(const char* buf, std::size_t len, bool is_connect)
 {
   // TODO: validate input parameters
 
+  buf_.clear();
   buf_.append(buf, len);
-  //buf_ = std::string(buf, len);
 
   if(http_parser_parse_url(buf, len, is_connect, &handle_) != 0)
   {

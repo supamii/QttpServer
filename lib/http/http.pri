@@ -1,8 +1,27 @@
 message($$PWD)
 
-HEADERS += $$PWD/include/native/*.h
+HEADERS += \
+    $$PWD/include/native/base.h \
+    $$PWD/include/native/callback.h \
+    $$PWD/include/native/error.h \
+    $$PWD/include/native/fs.h \
+    $$PWD/include/native/handle.h \
+    $$PWD/include/native/http.h \
+    $$PWD/include/native/loop.h \
+    $$PWD/include/native/native.h \
+    $$PWD/include/native/net.h \
+    $$PWD/include/native/stream.h \
+    $$PWD/include/native/tcp.h \
+    $$PWD/include/native/text.h
 
-SOURCES += $$PWD/src/*.cc
+SOURCES += \
+    $$PWD/src/fs.cc \
+    $$PWD/src/handle.cc \
+    $$PWD/src/http.cc \
+    $$PWD/src/loop.cc \
+    $$PWD/src/net.cc \
+    $$PWD/src/stream.cc \
+    $$PWD/src/tcp.cc
 
 INCLUDEPATH += \
     $$PWD/include \

@@ -34,6 +34,10 @@ class QTTPSHARED_EXPORT HttpRequest
     const QString &getMethodStr() const;
 
     /**
+     * NOT THREAD SAFE - this value is lazily initialized so user beware.  This
+     * should be called before dispatching to multiple threads (if there's some
+     * reason for multiple threads).
+     *
      * This will return the HTTP method based on char-checking instead of a
      * full string-comparison.
      */
@@ -49,6 +53,10 @@ class QTTPSHARED_EXPORT HttpRequest
      * consolidates query-string parameters and the reqeust body (JSON only).
      * This avoids having to grab from the query string and parsing through the
      * request body separately.
+     *
+     * NOT THREAD SAFE - this value is lazily initialized so user beware.  This
+     * should be called before dispatching to multiple threads (if there's some
+     * reason for multiple threads).
      */
     const QJsonObject& getJson() const;
 
@@ -76,7 +84,7 @@ class QTTPSHARED_EXPORT HttpRequest
     QTTP_DECLARE_ASSERT_MEMBER(native::http::QttpRequest)
 
     native::http::QttpRequest * m_Request;
-    mutable QSharedPointer<HttpUrl> m_HttpUrl;
+    HttpUrl m_HttpUrl;
     mutable HttpMethod m_MethodEnum;
     mutable QJsonObject m_Json;
     QUrlQuery m_Query;

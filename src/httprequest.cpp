@@ -6,7 +6,7 @@ using namespace qttp;
 HttpRequest::HttpRequest(native::http::QttpRequest* req) :
   QTTP_INIT_ASSERT_MEMBER(req)
   m_Request(req),
-  m_HttpUrl(),
+  m_HttpUrl(req),
   m_MethodEnum(HttpMethod::UNKNOWN),
   m_Json(),
   m_Query()
@@ -40,11 +40,7 @@ uint64_t HttpRequest::getTimestamp() const
 
 const HttpUrl& HttpRequest::getUrl() const
 {
-  if(m_HttpUrl.isNull())
-  {
-    m_HttpUrl = QSharedPointer<HttpUrl>(new HttpUrl(m_Request));
-  }
-  return *(m_HttpUrl.data());
+  return m_HttpUrl;
 }
 
 const QString& HttpRequest::getMethodStr() const
@@ -74,9 +70,6 @@ const QJsonObject& HttpRequest::getJson() const
   {
     return m_Json;
   }
-
-  // TODO: MUTEX!
-  // FIXME: MUTEX!
 
   const QByteArray& body = m_Request->get_body();
   auto openBrace = body.indexOf("{");
