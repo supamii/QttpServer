@@ -27,7 +27,7 @@ void HttpResponse::setHeader(const QString& key, const QString& value)
   m_Response->set_header(key, value);
 }
 
-void HttpResponse::setHeader(const QList<std::pair<QString, QString> >& headers)
+void HttpResponse::setHeader(const QList<QStringPair>& headers)
 {
   for(auto & header : headers)
   {

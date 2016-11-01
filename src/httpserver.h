@@ -2,6 +2,7 @@
 #define QTTPHTTPSERVER_H
 
 #include "qttp_global.h"
+#include "httproute.h"
 #include "action.h"
 #include "httpdata.h"
 #include "httpevent.h"
@@ -65,7 +66,10 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     template<class T> std::shared_ptr<Action> addAction()
     {
       std::shared_ptr<Action> action(new T());
-      HttpServer::addAction(action);
+      if(!HttpServer::addAction(action))
+      {
+        LOG_DEBUG("A previously installed action has been replaced");
+      }
       return action;
     }
 
@@ -78,7 +82,10 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     template<class T, class P> std::shared_ptr<Action> addAction(P& param)
     {
       std::shared_ptr<Action> action(new T(param));
-      HttpServer::addAction(action);
+      if(!HttpServer::addAction(action))
+      {
+        LOG_DEBUG("A previously installed action has been replaced");
+      }
       return action;
     }
 
@@ -90,49 +97,57 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     /**
      * @brief Encouraged for those who need a quick and easy way to setup an
      * action.
-     * @return boolean false if a previous route was replaced, false otherwise
+     * @return boolean true if a previous route was replaced, false otherwise
      */
-    bool addAction(const QString&, std::function<void(HttpData& data)>);
+    std::shared_ptr<Action> createAction(const QString&, std::function<void(HttpData& data)>);
+
+    //! You are highly encouraged to use the register route options below!
+    bool registerRoute(const QString& method, const QString& actionName, const QString& path, Visibility visibilty = Visibility::Show);
+    bool registerRoute(HttpMethod method, const QString& actionName, const QString& path, Visibility visibilty = Visibility::Show);
 
     /**
      * @brief More of an association than a registration - binds an action name
      * to a route url.
      */
-    bool registerRoute(const QString& method, const QString& actionName, const QString& path);
-    bool registerRoute(HttpMethod method, const QString& actionName, const QString& path);
+    bool registerRoute(std::shared_ptr<Action> action, HttpMethod method, const QString& path, Visibility visibility = Visibility::Show);
+    bool registerRoute(std::shared_ptr<Action> action, const qttp::HttpPath& path, Visibility visibility = Visibility::Show);
+    bool registerRoute(HttpMethod method, const Route& route);
 
-    template<class T> std::shared_ptr<Action> addActionAndRegister()
+
+    template<class T> std::shared_ptr<Action> addActionAndRegister(Visibility visibilty = Visibility::Show)
     {
       std::shared_ptr<Action> action(new T());
       HttpServer::addAction(action);
       auto routes = action->getRoutes();
-      for(auto iter = routes.begin(); iter != routes.end(); ++iter)
+      for(const auto & path : routes)
       {
-        HttpServer::registerRoute(iter->first, action->getName(), iter->second);
+        HttpServer::registerRoute(action, path, visibilty);
       }
       return action;
     }
 
-    template<class T> std::shared_ptr<Action> addActionAndRegister(const QString& route,
-                                                                   const std::initializer_list<HttpMethod>& methods)
+    template<class T> std::shared_ptr<Action> addActionAndRegister(const QString& path,
+                                                                   const std::initializer_list<HttpMethod>& methods,
+                                                                   Visibility visibilty = Visibility::Show)
     {
       std::shared_ptr<Action> action(new T());
       HttpServer::addAction(action);
       for(HttpMethod method : methods)
       {
-        HttpServer::registerRoute(method, action->getName(), route);
+        HttpServer::registerRoute(action, method, path, visibilty);
       }
       return action;
     }
 
-    template<class T> std::shared_ptr<Action> addActionAndRegister(const QString& route,
-                                                                   const std::initializer_list<QString>& methods)
+    template<class T> std::shared_ptr<Action> addActionAndRegister(const QString& path,
+                                                                   const std::initializer_list<QString>& methods,
+                                                                   Visibility visibilty = Visibility::Show)
     {
       std::shared_ptr<Action> action(new T());
       HttpServer::addAction(action);
       for(auto & method : methods)
       {
-        HttpServer::registerRoute(method, action->getName(), route);
+        HttpServer::registerRoute(action, Utils::fromString(method), path, visibilty);
       }
       return action;
     }
@@ -191,30 +206,7 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
 
     QCommandLineParser& getCommandLineParser();
 
-    /**
-     * @todo The move constructor!
-     * @brief The Route class
-     */
-    class QTTPSHARED_EXPORT Route
-    {
-      public:
-        Route() : path(), action(), parts()
-        {
-        }
-
-        Route(const QString& r, const QString& a) :
-          path(r),
-          action(a),
-          parts(path.split('/', QString::SkipEmptyParts))
-        {
-        }
-
-        QString path;
-        QString action;
-        QStringList parts;
-    };
-
-    class QTTPSHARED_EXPORT ServerInfo
+    struct QTTPSHARED_EXPORT ServerInfo
     {
       public:
         ServerInfo()
@@ -263,6 +255,7 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     bool addDefaultProcessor(std::shared_ptr<Processor>& processor);
 
     void registerRouteFromJSON(QJsonValueRef& obj, const QString& method);
+
     void registerRouteFromJSON(QJsonValueRef& obj, HttpMethod method);
 
     /**
@@ -295,9 +288,6 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
      */
     static bool matchUrl(const QStringList& pathParts, const QString& path, QUrlQuery& responseParams);
 
-    static HttpServer* m_Instance;
-    static const char* SERVER_ERROR_MSG;
-
     /// @brief Private constructor per singleton design.
     HttpServer();
 
@@ -306,12 +296,14 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     void operator =(const HttpServer&) {
     }
 
+    static HttpServer* m_Instance;
+    static const char* SERVER_ERROR_MSG;
+
     std::function<void()> m_ServerErrorCallback;
     /// @brief This callback allows the caller to intercept all responses.
     std::function<void(HttpEvent*)> m_EventCallback;
     QHash<QString, std::shared_ptr<Action> > m_Actions;
     QHash<QString, std::shared_ptr<const Action> > m_ConstActions;
-    QHash<QString, std::function<void(HttpData& data)> > m_ActionCallbacks;
     QMap<HttpMethod, QHash<QString, Route> > m_Routes;
     std::vector<std::shared_ptr<Processor> > m_Processors;
     std::vector<std::function<void(HttpData& data)> > m_Preprocessors;

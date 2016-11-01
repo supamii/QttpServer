@@ -20,7 +20,7 @@ const std::vector<HttpMethod> Global::HTTP_METHODS =
   HttpMethod::CONNECT
 };
 
-std::vector<std::pair<QString, QString> > Global::DEFAULT_HEADERS =
+std::vector<QStringPair> Global::DEFAULT_HEADERS =
 {
   { "Content-Type", "application/json" },
   { "Access-Control-Allow-Headers", "Content-Type, Authorization" },
@@ -29,7 +29,7 @@ std::vector<std::pair<QString, QString> > Global::DEFAULT_HEADERS =
   { "Server", QTTP_SERVER_VERSION }
 };
 
-const std::vector<std::pair<QString, QString> >& Global::getDefaultHeaders()
+const std::vector<QStringPair>& Global::getDefaultHeaders()
 {
   return DEFAULT_HEADERS;
 }

@@ -2,8 +2,17 @@ TEMPLATE = app
 
 QT -= gui
 DESTDIR = $$PWD
-SOURCES += $$PWD/main.cpp
-TARGET = SayHello
+
+TARGET = Computers
+
+SOURCES += \
+    main.cpp
+
+HEADERS += \
+    phones.h \
+    desktops.h \
+    tablets.h \
+    laptops.h
 
 macx {
     # Since things are buried in the app folder, we'll copy configs there.
@@ -20,3 +29,5 @@ include($$PWD/config/config.pri)
 
 message('Including core files')
 include($$PWD/../../core.pri)
+
+

@@ -36,9 +36,7 @@ macx {
     INCLUDEPATH += \
         $$PWD/../../lib/mongo-cxx-driver/build/install/include \
         /usr/local/include
-}
 
-macx {
     # Since things are buried in the app folder, we'll copy configs there.
     MediaFiles.files = \
         $$PWD/config/global.json \

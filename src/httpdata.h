@@ -23,6 +23,7 @@ class QTTPSHARED_EXPORT HttpData
   friend class HttpServer;
 
   private:
+
     /**
      * @brief Private constructor because the underlying native::http::request
      * and native::http::response objects are privately managed as well.

@@ -20,6 +20,7 @@ class QTTPSHARED_EXPORT HttpRequest
   friend class HttpData;
 
   private:
+
     HttpRequest(native::http::QttpRequest* req);
 
   public:

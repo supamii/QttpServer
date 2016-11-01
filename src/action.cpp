@@ -3,9 +3,10 @@
 using namespace std;
 using namespace qttp;
 
+const QList<qttp::HttpPath> Action::m_EmptyRoutes;
 const std::vector<Input> Action::m_EmptyInputList;
 const QStringList Action::m_EmptyStringList;
-const std::vector<std::pair<QString, QString> > Action::m_EmptyStringPairList;
+const std::vector<QStringPair> Action::m_EmptyStringPairList;
 
 Action::Action()
 {
@@ -112,10 +113,9 @@ void Action::onUnknown(HttpData& data)
   Q_UNUSED(data);
 }
 
-const QList<pair<HttpMethod, QString> >& Action::getRoutes() const
+QList<qttp::HttpPath> Action::getRoutes() const
 {
-  const static QList<pair<HttpMethod, QString> > list;
-  return list;
+  return m_EmptyRoutes;
 }
 
 const char* Action::getSummary() const
@@ -128,17 +128,17 @@ const char* Action::getDescription() const
   return "";
 }
 
-const QStringList& Action::getTags() const
+QStringList Action::getTags() const
 {
   return m_EmptyStringList;
 }
 
-const std::vector<Input>& Action::getInputs() const
+std::vector<Input> Action::getInputs() const
 {
   return m_EmptyInputList;
 }
 
-const std::vector<pair<QString, QString> >& Action::getHeaders() const
+std::vector<QStringPair> Action::getHeaders() const
 {
   return Global::getDefaultHeaders();
 }
@@ -152,83 +152,86 @@ void Action::applyHeaders(HttpData& data) const
   }
 }
 
-Input::Input() :
-  name(),
-  description(),
-  required(false),
-  paramType("query"),
-  dataType("string"),
-  enums()
+SimpleAction::SimpleAction(std::function<void(qttp::HttpData&)> callback) :
+  Action(),
+  m_Callback(callback),
+  m_Name(),
+  m_Routes(),
+  m_Summary(),
+  m_Description(),
+  m_Tags(),
+  m_Inputs(),
+  m_Headers()
 {
 }
 
-Input::Input(const QString& n) :
-  name(n),
-  description(),
-  required(false),
-  paramType("query"),
-  dataType("string"),
-  enums()
+SimpleAction::~SimpleAction()
 {
 }
 
-Input::Input(const QString& n, const QString& desc) :
-  name(n),
-  description(desc),
-  required(false),
-  paramType("query"),
-  dataType("string"),
-  enums()
+void SimpleAction::onAction(HttpData &data)
 {
+  m_Callback(data);
 }
 
-Input::Input(const QString& n, const QStringList& e) :
-  name(n),
-  description(),
-  required(false),
-  paramType("query"),
-  dataType("string"),
-  enums(e)
+void SimpleAction::setRoutes(const QList<qttp::HttpPath>& routes)
 {
+  m_Routes = routes;
 }
 
-Input::Input(const QString& n, const QStringList& e, const QString& desc) :
-  name(n),
-  description(desc),
-  required(false),
-  paramType("query"),
-  dataType("string"),
-  enums(e)
+QList<qttp::HttpPath> SimpleAction::getRoutes() const
 {
+  return m_Routes;
 }
 
-RequiredInput::RequiredInput() :
-  Input()
+const char* SimpleAction::getName() const
 {
+  return m_Name.constData();
 }
 
-RequiredInput::RequiredInput(const QString& n) :
-  Input(n)
+void SimpleAction::setSummary(const char* summary)
 {
-  required = true;
+  m_Summary = summary;
 }
 
-RequiredInput::RequiredInput(const QString& n, const QString& desc) :
-  Input(n, desc)
+const char* SimpleAction::getSummary() const
 {
-  required = true;
+  return m_Summary.constData();
 }
 
-RequiredInput::RequiredInput(const QString& n, const QStringList& e) :
-  Input(n, e)
+void SimpleAction::setDescription(const char* description)
 {
-  required = true;
+  m_Description = description;
 }
 
-RequiredInput::RequiredInput(const QString& n, const QStringList& e, const QString& desc) :
-  Input(n, e, desc)
+const char* SimpleAction::getDescription() const
 {
-  required = true;
+  return m_Description.constData();
+}
+
+void SimpleAction::setTags(const QStringList& tags)
+{
+  m_Tags = tags;
+}
+
+QStringList SimpleAction::getTags() const
+{
+  return m_Tags;
+}
+
+void SimpleAction::setInputs(const std::vector<Input>& inputs)
+{
+  m_Inputs.insert(m_Inputs.end(), inputs.begin(), inputs.end());
+}
+
+std::vector<Input> SimpleAction::getInputs() const
+{
+  return m_Inputs;
+}
+
+std::vector<QStringPair> SimpleAction::getHeaders() const
+{
+  return m_Headers;
 }
 
 Processor::Processor()

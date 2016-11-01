@@ -32,7 +32,6 @@ HttpServer::HttpServer() :
   m_EventCallback(this->defaultEventCallback()),
   m_Actions(),
   m_ConstActions(),
-  m_ActionCallbacks(),
   m_Routes(),
   m_Processors(),
   m_Preprocessors(),
@@ -590,37 +589,20 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
 
            try
            {
-             // Previously we had hard-routes that weren't dynamic.
-             // auto route = routes->find(urlPath);
-
              if(route != routes->end())
              {
-               auto callback = m_ActionCallbacks.find(route.value().action);
-               if(callback != m_ActionCallbacks.end())
+               auto action = m_Actions.find(route.value().action);
+               if(action != m_Actions.end() && action.value().get() != nullptr)
                {
                  performPreprocessing(data);
                  if(response.shouldContinue())
                  {
                    response.setFlag(DataControl::ActionProcessed);
-                   (callback.value())(data);
+                   auto& a = action.value();
+                   a->applyHeaders(data);
+                   a->onAction(data);
                  }
                  if(response.shouldContinue()) performPostprocessing(data);
-               }
-               else
-               {
-                 auto action = m_Actions.find(route.value().action);
-                 if(action != m_Actions.end() && action.value().get() != nullptr)
-                 {
-                   performPreprocessing(data);
-                   if(response.shouldContinue())
-                   {
-                     response.setFlag(DataControl::ActionProcessed);
-                     auto& a = action.value();
-                     a->applyHeaders(data);
-                     a->onAction(data);
-                   }
-                   if(response.shouldContinue()) performPostprocessing(data);
-                 }
                }
              }
 
@@ -641,35 +623,24 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                  // TODO: Can also perform this check once in a while instead to reduce
                  // performance lookup costs.
 
-                 // Actions registered under "" is the default handler.
-                 auto callback = m_ActionCallbacks.find("");
-                 if(callback != m_ActionCallbacks.end())
+                 auto action = m_Actions.find("");
+                 if(action != m_Actions.end())
                  {
                    response.setFlag(DataControl::ActionProcessed);
-                   callback.value()(data);
+                   auto& a = action.value();
+                   a->applyHeaders(data);
+                   a->onAction(data);
                    if(response.shouldContinue()) performPostprocessing(data);
                  }
                  else
                  {
-                   auto action = m_Actions.find("");
-                   if(action != m_Actions.end())
+                   // Check out files as a last resort.
+                   if(!searchAndServeFile(data))
                    {
-                     response.setFlag(DataControl::ActionProcessed);
-                     auto& a = action.value();
-                     a->applyHeaders(data);
-                     a->onAction(data);
-                     if(response.shouldContinue()) performPostprocessing(data);
-                   }
-                   else
-                   {
-                     // Check out files as a last resort.
-                     if(!searchAndServeFile(data))
-                     {
-                       response.setStatus(HttpStatus::BAD_REQUEST);
-                       QJsonObject& json = data.getResponse().getJson();
-                       json["error"] = QSTR("Invalid request");
-                       performPostprocessing(data);
-                     }
+                     response.setStatus(HttpStatus::BAD_REQUEST);
+                     QJsonObject& json = data.getResponse().getJson();
+                     json["error"] = QSTR("Invalid request");
+                     performPostprocessing(data);
                    }
                  }
                } // End if(data.shouldContinue())
@@ -891,8 +862,10 @@ bool HttpServer::searchAndServeFile(HttpData& data) const
   return result;
 }
 
-bool HttpServer::eventFilter(QObject* /* object */, QEvent* event)
+bool HttpServer::eventFilter(QObject* object, QEvent* event)
 {
+  Q_UNUSED(object);
+
   if(!event || event->type() != QEvent::None)
   {
     return false;
@@ -924,11 +897,16 @@ bool HttpServer::addAction(std::shared_ptr<Action>& action)
   return !containsKey;
 }
 
-bool HttpServer::addAction(const QString& actionName, function<void(HttpData& data)> callback)
+std::shared_ptr<Action> HttpServer::createAction(const QString& actionName, function<void(HttpData&)> callback)
 {
-  bool containsKey = (m_ActionCallbacks.find(actionName) != m_ActionCallbacks.end());
-  m_ActionCallbacks[actionName] = callback;
-  return !containsKey;
+  std::shared_ptr<Action> action(new SimpleAction(callback));
+  SimpleAction* simpleAction = reinterpret_cast<SimpleAction*>(action.get());
+  simpleAction->m_Name = std::move(actionName.toUtf8());
+  if(!HttpServer::addAction(action))
+  {
+    LOG_DEBUG("A previously installed action has been replaced");
+  }
+  return action;
 }
 
 const Action* HttpServer::getAction(const QString& name) const
@@ -951,7 +929,7 @@ std::shared_ptr<Action> HttpServer::getAction(const QString& name)
   return nullptr;
 }
 
-const QHash<QString, HttpServer::Route>& HttpServer::getRoutes(HttpMethod method) const
+const QHash<QString, Route>& HttpServer::getRoutes(HttpMethod method) const
 {
   auto route = m_Routes.find(method);
   if(route == m_Routes.end())
@@ -961,7 +939,7 @@ const QHash<QString, HttpServer::Route>& HttpServer::getRoutes(HttpMethod method
   return route.value();
 }
 
-const QHash<QString, HttpServer::Route>& HttpServer::getRoutes(const QString& method) const
+const QHash<QString, Route>& HttpServer::getRoutes(const QString& method) const
 {
   if(m_StrictHttpMethod)
   {
@@ -990,33 +968,49 @@ const HttpServer::ServerInfo& HttpServer::getServerInfo() const
   return m_ServerInfo;
 }
 
-bool HttpServer::registerRoute(const QString& method, const QString& actionName, const QString& path)
+bool HttpServer::registerRoute(const QString& method, const QString& actionName, const QString& path, Visibility visibility)
 {
-  return registerRoute(Utils::fromString(method.trimmed().toUpper()), actionName, path);
+  return registerRoute(Utils::fromString(method.trimmed().toUpper()), actionName, path, visibility);
 }
 
-bool HttpServer::registerRoute(HttpMethod method, const QString& actionName, const QString& path)
+bool HttpServer::registerRoute(HttpMethod method, const QString& action, const QString& path, Visibility visibility)
+{
+  return registerRoute(method, Route(action, path, visibility));
+}
+
+bool HttpServer::registerRoute(std::shared_ptr<Action> action, HttpMethod method, const QString& path, Visibility visibility)
+{
+  return registerRoute(action, { method, path }, visibility);
+}
+
+bool HttpServer::registerRoute(std::shared_ptr<Action> action, const qttp::HttpPath& path, Visibility visibility)
+{
+  return registerRoute(path.first, Route(action->getName(), path.second, visibility));
+}
+
+bool HttpServer::registerRoute(HttpMethod method, const Route& route)
 {
   auto routes = m_Routes.find(method);
   if(routes == m_Routes.end())
   {
     LOG_ERROR("Invalid http "
-              "action [" << actionName << "] "
-              "path [" << path << "]");
+              "action [" << route.action << "] "
+              "path [" << route.path << "]");
     return false;
   }
 
   LOG_DEBUG("method [" << Utils::toString(method) << "] "
-            "action [" << actionName << "] "
-            "path [" << path << "]");
+            "action [" << route.action << "] "
+            "path [" << route.path << "]");
 
-  bool containsKey = (routes->find(path) != routes->end());
+  bool containsKey = (routes->find(route.path) != routes->end());
 
   // Initialize and assign the Route struct.
-  routes->insert(path, Route(path, actionName));
+  routes->insert(route.path, route);
 
   return !containsKey;
 }
+
 
 bool HttpServer::addProcessor(std::shared_ptr<Processor>& processor)
 {

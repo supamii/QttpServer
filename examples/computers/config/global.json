@@ -1,0 +1,13 @@
+{
+    "bindIp": "0.0.0.0",
+    "bindPort": 8080,
+    "swagger": {
+            "isEnabled": true,
+            "host": "127.0.0.1:8080",
+            "basePath": "/"
+    },
+    "httpFiles": {
+        "isEnabled": true,
+        "directory": "$QTTP_HOME"
+    }
+}

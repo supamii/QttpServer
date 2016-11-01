@@ -14,13 +14,14 @@ namespace qttp
 class QTTPSHARED_EXPORT Swagger : public Action
 {
   public:
+
     Swagger();
     ~Swagger();
 
     void initialize();
 
     const char* getName() const;
-    const QList<std::pair<HttpMethod, QString> >& getRoutes() const;
+    QList<HttpPath> getRoutes() const;
 
     static const char* ACTION_NAME;
 

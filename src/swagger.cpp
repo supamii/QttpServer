@@ -23,13 +23,11 @@ const char* Swagger::getName() const
   return ACTION_NAME;
 }
 
-const QList<pair<HttpMethod, QString> >& Swagger::getRoutes() const
+QList<HttpPath> Swagger::getRoutes() const
 {
-  const static QList<pair<HttpMethod, QString> > list =
-  {
-    { HttpMethod::GET, "/swagger" }
+  return {
+           { HttpMethod::GET, "/swagger" }
   };
-  return list;
 }
 
 void Swagger::initialize()
@@ -83,17 +81,23 @@ void Swagger::initialize()
 
     QJsonArray refParams;
     QJsonArray required;
-    QJsonArray tags;
+    QJsonArray tags = QJsonArray::fromStringList(action->getTags());
 
     QString actionName = action->getName();
     const std::vector<Input> & inputs = action->getInputs();
 
-    for(const auto & input : inputs)
+    for(const Input & input : inputs)
     {
-      QJsonArray enums;
-      for(int i = 0; i < input.enums.size(); ++i)
+      if(input.visibility == Visibility::Hide)
       {
-        enums.append(input.enums.at(i));
+        // Obviously let's skip this if this is not meant to be publicly listed.
+        continue;
+      }
+
+      QJsonArray enums;
+      for(int i = 0; i < input.values.size(); ++i)
+      {
+        enums.append(input.values.at(i));
       }
 
       QString paramKey = "action_" + actionName + version + "_" + input.name;
@@ -103,11 +107,11 @@ void Swagger::initialize()
         { "in", input.paramType },
         { "type", input.dataType },
         { "description", input.description },
-        { "required", input.required },
+        { "required", input.isRequired },
         { "enum", enums.size() == 0 ? QJsonValue() : enums }
       };
 
-      if(input.required)
+      if(input.isRequired)
       {
         required.append(input.name);
       }
@@ -125,7 +129,7 @@ void Swagger::initialize()
 
     for(auto httpMethod : Global::HTTP_METHODS)
     {
-      const QHash<QString, HttpServer::Route>& routes = svr->getRoutes(httpMethod);
+      const QHash<QString, Route>& routes = svr->getRoutes(httpMethod);
 
       QJsonArray routeParameters(refParams);
 
@@ -145,23 +149,45 @@ void Swagger::initialize()
 
       for(const auto & route : routes)
       {
-        if(route.action != actionName)
+        if(route.visibility == Visibility::Hide)
         {
+          // If this is meant to be private then let's not list on SwaggerUI.
           continue;
         }
-        if(!paths.contains(route.path))
+        if(route.action != actionName)
         {
-          paths.insert(route.path, QJsonObject());
+          // A route with a blank action is usually the default base-route.
+          continue;
         }
-        QJsonObject pathRoute = paths[route.path].toObject();
+        QString routePath;
+        for(QString part : route.parts)
+        {
+          // If the parts of the route contains an input variable
+          // (starts with ":"), then go ahead and replace to make it "{param}"
+          // so that swagger can digest.
+
+          if(part.startsWith(':'))
+          {
+            routePath.append("/{" + part.mid(1) + "}");
+          }
+          else if(!part.isEmpty())
+          {
+            routePath.append("/" + part);
+          }
+        }
+        if(!paths.contains(routePath))
+        {
+          paths.insert(routePath, QJsonObject());
+        }
+        QJsonObject pathRoute = paths[routePath].toObject();
         pathRoute.insert(Utils::toStringLower(httpMethod), QJsonObject {
           { "summary", action->getSummary() },
           { "description", action->getDescription() },
-          { "operationId", route.path },
+          { "operationId", routePath },
           { "parameters", routeParameters },
           { "tags", tags }
         });
-        paths[route.path] = pathRoute;
+        paths[routePath] = pathRoute;
       }
     }
 
@@ -172,7 +198,6 @@ void Swagger::initialize()
   m_Response["definitions"] = definitions;
   m_Response["paths"] = paths;
   m_Response["parameters"] = parameters;
-
 }
 
 void Swagger::onGet(HttpData& data)

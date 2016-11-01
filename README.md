@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     json["hello"] = "world";
   });
 
-  // Bind the http method, action name, and the url route together.
+  // Bind the http method, action name, and the url path together.
   httpSvr->registerRoute(qttp::HttpMethod::GET, "sayHello", "/");
   httpSvr->registerRoute(qttp::HttpMethod::GET, "sayHello", "/hello");
 
@@ -85,7 +85,7 @@ int main(int argc, char** argv)
   httpSvr->addAction<SayGoodbye>();
 
   // Based on class definition below, we bind the the http method, action name, 
-  // and the url route.
+  // and the url path.
   httpSvr->registerRoute("get", "sayGoodbye", "/bye");
   httpSvr->registerRoute("post", "sayGoodbye", "/aloha");
 

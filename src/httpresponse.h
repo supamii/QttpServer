@@ -19,6 +19,7 @@ class QTTPSHARED_EXPORT HttpResponse
   friend class HttpData;
 
   private:
+
     HttpResponse(native::http::QttpResponse* resp);
 
   public:
@@ -28,7 +29,7 @@ class QTTPSHARED_EXPORT HttpResponse
     // TODO: PASS A ENUM TO TO HELP REDUCE CASE SENSITIVE ISSUES!
     // TODO: Should go ahead and accept a whole container as well.
     void setHeader(const QString& key, const QString& value);
-    void setHeader(const QList<std::pair<QString, QString> >& headers);
+    void setHeader(const QList<QStringPair>& headers);
 
     void setStatus(HttpStatus status);
     HttpStatus getStatus() const;

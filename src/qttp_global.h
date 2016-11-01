@@ -51,6 +51,8 @@
 namespace qttp
 {
 
+typedef std::pair<QString, QString> QStringPair;
+
 typedef enum DataControl
 {
   // Provided for Processors to abort/terminate processing.
@@ -68,8 +70,19 @@ typedef enum DataControl
 
 } DataControl;
 
+enum class Visibility : char
+{
+  Show = 0,
+  Hide = 1
+};
+
 enum class HttpMethod : char
 {
+  // TODO: Circle back and make sure this can be used or rejected for other
+  // scenarios.
+  // A special use case for paths in particular - this might not be honored for
+  // most other methods.
+  ALL = -2,
   UNKNOWN = -1,
   GET = 0,
   POST = 1,
@@ -266,6 +279,7 @@ enum class HttpError : int
 template<class T> class Assert
 {
   public:
+
     Assert(T* ptr)
     {
       Q_ASSERT(ptr != nullptr);
@@ -284,10 +298,11 @@ class QTTPSHARED_EXPORT Global
 
     static const std::vector<HttpMethod> HTTP_METHODS;
 
-    static const std::vector<std::pair<QString, QString> >& getDefaultHeaders();
+    static const std::vector<QStringPair>& getDefaultHeaders();
 
   private:
-    static std::vector<std::pair<QString, QString> > DEFAULT_HEADERS;
+
+    static std::vector<QStringPair> DEFAULT_HEADERS;
 };
 
 }

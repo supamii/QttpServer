@@ -38,7 +38,8 @@
     },
     "httpFiles": {
         "isEnabled": true,
-        "directory": "$QTTP_HOME"
+        "path": "/",
+        "directory": "/Users/sonhuy.pham/dev/personal/QttpServer/www"
     },
     "defaultHeaders" : {
         "Content-Type": "application/json",

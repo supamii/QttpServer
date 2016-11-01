@@ -2,47 +2,11 @@
 #define QTTPACTION_H
 
 #include "qttp_global.h"
+#include "httproute.h"
 #include "httpdata.h"
 
 namespace qttp
 {
-
-class Action;
-
-class QTTPSHARED_EXPORT Input
-{
-  public:
-    Input();
-    Input(const QString& name);
-    Input(const QString& name, const QString& desc);
-    Input(const QString& name, const QStringList& enums);
-    Input(const QString& name, const QStringList& enums, const QString& desc);
-
-    QString name;
-    QString description;
-    bool required;
-
-    //! Should match "in"
-    QString paramType;
-
-    //! Should match "type"
-    QString dataType;
-
-    //! Should match "enum"
-    QStringList enums;
-};
-
-class QTTPSHARED_EXPORT RequiredInput : public Input
-{
-  public:
-    RequiredInput();
-    RequiredInput(const QString& name);
-    RequiredInput(const QString& name, const QString& desc);
-    RequiredInput(const QString& name, const QStringList& enums);
-    RequiredInput(const QString& name, const QStringList& enums, const QString& desc);
-};
-
-class HttpServer;
 
 /**
  * @brief Borrowing ideas from Node.js frameworks like Actionhero.js, an action
@@ -53,6 +17,7 @@ class QTTPSHARED_EXPORT Action
   friend class HttpServer;
 
   public:
+
     Action();
     virtual ~Action();
 
@@ -76,23 +41,24 @@ class QTTPSHARED_EXPORT Action
 
     /**
      * @brief Override  in order to associate this action to a specific
-     * HttpMethod and route (e.g. "/myroute/").
+     * HttpMethod and path (e.g. "/myroute/").
      */
-    virtual const QList<std::pair<HttpMethod, QString> >& getRoutes() const;
+    virtual QList<qttp::HttpPath> getRoutes() const;
 
     virtual const char* getName() const = 0;
     virtual const char* getSummary() const;
     virtual const char* getDescription() const;
-    virtual const QStringList& getTags() const;
-    virtual const std::vector<Input>& getInputs() const;
+    virtual QStringList getTags() const;
+    virtual std::vector<Input> getInputs() const;
 
   protected:
 
     /**
      * @brief Override in order to return a list of headers to automatically
-     * append to each response.
+     * append to each response.  This returns a reference to a vector because
+     * this can be called frequently when assembling the outbound response.
      */
-    virtual const std::vector<std::pair<QString, QString> >& getHeaders() const;
+    virtual std::vector<QStringPair> getHeaders() const;
 
     /**
      * @brief Helps apply, modify, or prune headers in each response.
@@ -100,9 +66,57 @@ class QTTPSHARED_EXPORT Action
     virtual void applyHeaders(HttpData& data) const;
 
   private:
+
+    static const QList<qttp::HttpPath> m_EmptyRoutes;
     static const std::vector<Input> m_EmptyInputList;
     static const QStringList m_EmptyStringList;
-    static const std::vector<std::pair<QString, QString> > m_EmptyStringPairList;
+    static const std::vector<QStringPair> m_EmptyStringPairList;
+};
+
+/**
+ * @brief A Simple action that stores a basic call-back.  This will allow
+ * us to supplement with additional information.
+ */
+class QTTPSHARED_EXPORT SimpleAction : public Action
+{
+  friend class HttpServer;
+
+  public:
+
+    SimpleAction(std::function<void(qttp::HttpData&)> callback);
+    virtual ~SimpleAction();
+
+    void onAction(HttpData& data);
+
+    const char* getName() const;
+
+    void setRoutes(const QList<qttp::HttpPath>& routes);
+    QList<qttp::HttpPath> getRoutes() const;
+
+    void setSummary(const char* summary);
+    const char* getSummary() const;
+
+    void setDescription(const char* description);
+    const char* getDescription() const;
+
+    void setTags(const QStringList& tags);
+    QStringList getTags() const;
+
+    void setInputs(const std::vector<Input>& inputs);
+    std::vector<Input> getInputs() const;
+
+  protected:
+    std::vector<QStringPair> getHeaders() const;
+
+  private:
+    std::function<void(qttp::HttpData&)> m_Callback;
+    QByteArray m_Name;
+    QList<qttp::HttpPath> m_Routes;
+    QByteArray m_Summary;
+    QByteArray m_Description;
+    QStringList m_Tags;
+    std::vector<Input> m_Inputs;
+    std::vector<QStringPair> m_Headers;
 };
 
 /**
@@ -113,6 +127,7 @@ class QTTPSHARED_EXPORT Action
 class QTTPSHARED_EXPORT Processor
 {
   public:
+
     Processor();
     virtual ~Processor();
 
@@ -125,6 +140,6 @@ class QTTPSHARED_EXPORT Processor
     virtual void postprocess(HttpData& data);
 };
 
-}
+} // End namespace qttp
 
 #endif // QTTPACTION_H

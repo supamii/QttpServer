@@ -17,32 +17,27 @@ class Another : public Action
       return "another";
     }
 
-    const QStringList& getTags() const
+    QStringList getTags() const
     {
-      static const QStringList list = { "tag1", "tag2" };
-      return list;
+      return { "tag1", "tag2" };
     }
 
-    const std::vector<Input>& getInputs() const
+    std::vector<Input> getInputs() const
     {
-      static const std::vector<Input> list =
-      {
-        Input("someinput"),
-        RequiredInput("reqinput"),
-        Input("options", { "selectone", "selectanother" })
+      return {
+               Input("someinput"),
+               RequiredInput("reqinput"),
+               Input("options", "someoptions", { "selectone", "selectanother" })
       };
-      return list;
     }
 
-    const QList<std::pair<HttpMethod, QString> >& getRoutes() const
+    QList<qttp::HttpPath> getRoutes() const
     {
       static const QString route = "/another";
-      static const QList<std::pair<HttpMethod, QString> > routes =
-      {
-        { HttpMethod::GET, route },
-        { HttpMethod::POST, route }
+      return {
+               { HttpMethod::GET, route },
+               { HttpMethod::POST, route }
       };
-      return routes;
     }
 
     void onGet(HttpData& data)
@@ -68,19 +63,19 @@ class Simple : public Action
       return "simple";
     }
 
-    const QStringList& getTags() const
+    QStringList getTags() const
     {
       static const QStringList list = { "tag1", "tag2" };
       return list;
     }
 
-    const std::vector<Input>& getInputs() const
+    std::vector<Input> getInputs() const
     {
       static const std::vector<Input> list =
       {
         Input("someinput"),
         RequiredInput("reqinput"),
-        Input("options", { "selectone", "selectanother" })
+        Input("options", "some options", { "selectone", "selectanother" })
       };
       return list;
     }
@@ -124,13 +119,13 @@ int main(int argc, char** argv)
     }
 
     svr->registerRoute("get", "helloworld", "/helloworld");
-    svr->addAction("helloworld", [](HttpData& data) {
+    svr->createAction("helloworld", [](HttpData& data) {
       QJsonObject& json = data.getResponse().getJson();
       json["response"] = QSTR("Hello World!");
     });
 
     svr->registerRoute("post", "echobody", "/echobody");
-    svr->addAction("echobody", [](HttpData& data) {
+    svr->createAction("echobody", [](HttpData& data) {
       QJsonObject& json = data.getResponse().getJson();
       json["response"] = data.getRequest().getJson();
     });
