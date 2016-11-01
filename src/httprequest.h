@@ -43,11 +43,6 @@ class QTTPSHARED_EXPORT HttpRequest
      */
     HttpMethod getMethod(bool strictComparison = false) const;
 
-    const QByteArray& getRawBody() const
-    {
-      return m_Request->get_body();
-    }
-
     /**
      * @brief Highly recommended!  This builds and returns a QJsonObject that
      * consolidates query-string parameters and the reqeust body (JSON only).
@@ -59,6 +54,8 @@ class QTTPSHARED_EXPORT HttpRequest
      * reason for multiple threads).
      */
     const QJsonObject& getJson() const;
+
+    const QByteArray& getBody() const;
 
     QUrlQuery& getQuery();
     const QUrlQuery& getQuery() const;

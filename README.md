@@ -192,7 +192,8 @@ node.native was previously built using **gyp** - you can checkout more about tha
 31. ~~Swagger suppport~~
 32. ~~Serve basic http files~~
 33. More swagger support and thorough examples on how to create interface based actions
-34. Rename some "routes" to the more appropriate "path"
+34. ~~Rename some "routes" to the more appropriate "path"~~
 35. Simplify API unit tests with more macros
 36. Refactor to use more PRIVATE implementations (PIMPL) to help readability
-37. Optimize Qt Http parsing by translating directly into QString instead of std::string
+37. ~~Optimize Qt Http parsing by translating directly into QString instead of std::string~~
+38. Investigate using a faster JSON parser/framework

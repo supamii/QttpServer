@@ -59,11 +59,6 @@ HttpMethod HttpRequest::getMethod(bool strictComparison) const
   return m_MethodEnum;
 }
 
-native::http::QttpRequest* HttpRequest::getRequest()
-{
-  return m_Request;
-}
-
 const QJsonObject& HttpRequest::getJson() const
 {
   if(!m_Json.isEmpty())
@@ -97,6 +92,11 @@ const QJsonObject& HttpRequest::getJson() const
   return m_Json;
 }
 
+const QByteArray& HttpRequest::getBody() const
+{
+  return m_Request->get_body();
+}
+
 QUrlQuery& HttpRequest::getQuery()
 {
   return m_Query;
@@ -111,3 +111,9 @@ void HttpRequest::setQuery(QUrlQuery& params)
 {
   m_Query.swap(params);
 }
+
+native::http::QttpRequest* HttpRequest::getRequest()
+{
+  return m_Request;
+}
+

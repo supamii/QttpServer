@@ -7,7 +7,7 @@
 namespace qttp
 {
 
-class OptionsPreprocessor : public Processor
+class QTTPSHARED_EXPORT OptionsPreprocessor : public Processor
 {
   public:
     OptionsPreprocessor();
