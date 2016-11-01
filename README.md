@@ -28,28 +28,24 @@ Using a raw std::function based callback
 ```c++
 #include <httpserver.h>
 
-using namespace std;
-using namespace qttp;
-using namespace native::http;
-
 int main(int argc, char** argv)
 {
   QCoreApplication app(argc, argv);
 
   // Always initialize in the main thread.
-  HttpServer* httpSvr = HttpServer::getInstance();
+  qttp::HttpServer* httpSvr = qttp::HttpServer::getInstance();
   httpSvr->initialize();
 
-  // Associate this call-back with the action named, "test"
-  httpSvr->addAction("test", [](HttpData& data) {
+  // Associate this call-back with the action named, "sayHello"
+  httpSvr->addAction("sayHello", [](qttp::HttpData& data) {
     // Form the JSON content and let the framework handle the rest.
     QJsonObject& json = data.getResponse().getJson();
-    json["response"] = "Test C++ FTW";
+    json["hello"] = "world";
   });
 
   // Bind the http method, action name, and the url route together.
-  httpSvr->registerRoute("get", "test", "/test");
-  httpSvr->registerRoute("get", "test", "/test2");
+  httpSvr->registerRoute(qttp::HttpMethod::GET, "sayHello", "/");
+  httpSvr->registerRoute(qttp::HttpMethod::GET, "sayHello", "/hello");
 
   // Libuv runs in its own thread.
   httpSvr->startServer();
@@ -69,12 +65,12 @@ using namespace std;
 using namespace qttp;
 using namespace native::http;
 
-class Sample : public Action {
+class SayGoodbye : public Action {
   void onAction(HttpData& data) {
     QJsonObject& json = data.getResponse().getJson();
-    json["response"] = "Sample C++ FTW";
+    json["response"] = "adios";
   }
-  const const char* getName() const { return "sample"; }
+  const const char* getName() const { return "sayGoodbye"; }
 };
 
 int main(int argc, char** argv)
@@ -86,12 +82,12 @@ int main(int argc, char** argv)
   httpSvr->initialize();
   
   // Adds the action interface via template method.
-  httpSvr->addAction<Sample>();
+  httpSvr->addAction<SayGoodbye>();
 
   // Based on class definition below, we bind the the http method, action name, 
   // and the url route.
-  httpSvr->registerRoute("get", "sample", "/sample");
-  httpSvr->registerRoute("post", "sample", "/sampleAgain");
+  httpSvr->registerRoute("get", "sayGoodbye", "/bye");
+  httpSvr->registerRoute("post", "sayGoodbye", "/aloha");
 
   // Libuv runs in its own thread.
   httpSvr->startServer();
