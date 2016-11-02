@@ -51,6 +51,10 @@ class QTTPSHARED_EXPORT Action
     virtual QStringList getTags() const;
     virtual std::vector<Input> getInputs() const;
 
+    bool registerRoute(HttpMethod method, const QString& path, Visibility visibility = Visibility::Show);
+    bool registerRoute(const qttp::HttpPath& path, Visibility visibility = Visibility::Show);
+    void registerRoutes(const std::vector<qttp::HttpPath>& routes, Visibility visibility = Visibility::Show);
+
   protected:
 
     /**

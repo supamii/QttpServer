@@ -14,9 +14,9 @@ int main(int argc, char** argv)
   httpSvr->initialize();
 
   auto action = httpSvr->addAction<Desktops>();
-  httpSvr->registerRoute(action, qttp::HttpMethod::GET, "desktops");
-  httpSvr->registerRoute(action, qttp::HttpMethod::GET, "desktops/:model");
-  httpSvr->registerRoute(action, qttp::HttpMethod::PUT, "desktops");
+  action->registerRoute(qttp::HttpMethod::GET, "desktops");
+  action->registerRoute(qttp::HttpMethod::GET, "desktops/:model");
+  action->registerRoute(qttp::HttpMethod::PUT, "desktops");
 
   httpSvr->addActionAndRegister<Phones>("phones",
                                         { qttp::HttpMethod::GET,

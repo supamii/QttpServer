@@ -124,10 +124,15 @@ int main(int argc, char** argv)
       json["response"] = QSTR("Hello World!");
     });
 
-    svr->registerRoute("post", "echobody", "/echobody");
-    svr->createAction("echobody", [](HttpData& data) {
+    auto action = svr->createAction("echobody", [](HttpData& data) {
       QJsonObject& json = data.getResponse().getJson();
       json["response"] = data.getRequest().getJson();
+    });
+
+    action->registerRoutes({
+      { HttpMethod::GET, "echobody" },
+      { HttpMethod::GET, "echobody2" },
+      { HttpMethod::POST, "echobody3" }
     });
 
     svr->addActionAndRegister<Simple>("/simple",

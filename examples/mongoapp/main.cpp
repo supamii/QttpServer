@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 
     httpSvr.registerRoute("post", "addPerson", "/person");
 
-    httpSvr.addAction("addPerson", [&](HttpData& data)
+    httpSvr.createAction("addPerson", [&](HttpData& data)
     {
       // Took some of this from the tutorials online.
       BSONObj p = BSON( "name" << "Joe" << "age" << 33 );
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
     // Get a person by name e.g. http://localhost:8080/p/Joe
     httpSvr.registerRoute("get", "getPerson", "/p/:name");
 
-    httpSvr.addAction("getPerson", [&](HttpData& data)
+    httpSvr.createAction("getPerson", [&](HttpData& data)
     {
       QJsonObject& json = data.getResponse().getJson();
 

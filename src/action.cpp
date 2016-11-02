@@ -1,4 +1,5 @@
 #include "action.h"
+#include "httpserver.h"
 
 using namespace std;
 using namespace qttp;
@@ -149,6 +150,27 @@ void Action::applyHeaders(HttpData& data) const
   for(auto & header : getHeaders())
   {
     resp.setHeader(header.first, header.second);
+  }
+}
+
+bool Action::registerRoute(HttpMethod method, const QString& path, Visibility visibility)
+{
+  HttpServer* svr = HttpServer::getInstance();
+  return svr->registerRoute(method, Route(this->getName(), path, visibility));
+}
+
+bool Action::registerRoute(const qttp::HttpPath& path, Visibility visibility)
+{
+  HttpServer* svr = HttpServer::getInstance();
+  return svr->registerRoute(path.first, Route(this->getName(), path.second, visibility));
+}
+
+void Action::registerRoutes(const std::vector<qttp::HttpPath>& routes, Visibility visibility)
+{
+  HttpServer* svr = HttpServer::getInstance();
+  for(const auto & path : routes)
+  {
+    svr->registerRoute(path.first, Route(this->getName(), path.second, visibility));
   }
 }
 

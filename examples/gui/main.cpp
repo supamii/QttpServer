@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
   HttpServer* svr = HttpServer::getInstance();
   svr->initialize();
   svr->registerRoute("get", "helloworld", "/helloworld");
-  svr->addAction("helloworld", [&](HttpData& data) {
+  svr->createAction("helloworld", [&](HttpData& data) {
     QJsonObject& json = data.getResponse().getJson();
     json["response"] = "Hello World!";
 

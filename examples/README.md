@@ -13,16 +13,18 @@ int main(int argc, char** argv)
   qttp::HttpServer* httpSvr = qttp::HttpServer::getInstance();
   httpSvr->initialize();
 
-  // Associate this call-back with the action named, "sayHello"
-  httpSvr->addAction("sayHello", [](qttp::HttpData& data) {
+  // Create an action, named "sayHello", that will handle all requests
+  auto action = httpSvr->createAction("sayHello", [](qttp::HttpData& data) {
     // Form the JSON content and let the framework handle the rest.
     QJsonObject& json = data.getResponse().getJson();
     json["hello"] = "world";
   });
 
-  // Bind the http method, action name, and the url path together.
-  httpSvr->registerRoute(qttp::HttpMethod::GET, "sayHello", "/");
-  httpSvr->registerRoute(qttp::HttpMethod::GET, "sayHello", "/hello");
+  // Register the action to handle http GET for the path "/".
+  action->registerRoute(qttp::HttpMethod::GET, "/");
+
+  // Register the action to handle http GET for the path "/hello".
+  action->registerRoute(qttp::HttpMethod::GET, "/hello");
 
   // Libuv runs in its own thread.
   httpSvr->startServer();
@@ -33,3 +35,8 @@ int main(int argc, char** argv)
 ```
 
 # Advanced
+
+## Introduction
+
+
+
