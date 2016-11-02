@@ -3,7 +3,7 @@ contains(CONFIG, SAMPLEAPP) {
     # This default configuration is for example purposes.
     TEMPLATE = app
     DESTDIR = $$PWD
-    SOURCES += $$PWD/examples/sampleapp/main.cpp
+    SOURCES += $$PWD/examples/sample/main.cpp
     TARGET = QttpServer
     macx {
         # Since things are buried in the app folder, we'll copy configs there.
@@ -22,7 +22,7 @@ contains(CONFIG, SAMPLEAPP) {
     TARGET = qttpserver
     DEFINES += QTTP_LIBRARY
 
-    contains(CONFIG, QTTP_LIBRARY) {
+    contains(CONFIG, QTTP_SHARED_LIBRARY) {
         message(********* Building shared library qttpserver *********)
         unix {
             #target.path = /usr/lib

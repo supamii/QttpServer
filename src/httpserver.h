@@ -60,6 +60,9 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
      */
     void setEventCallback(std::function<void(HttpEvent*)> eventCallback);
 
+    //! Publicly available in case people are too lazy to generate their own.
+    QString generateActionName() const;
+
     /**
      * @brief A template method to register an action via the Action interface.
      */
@@ -91,14 +94,15 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
 
     /**
      * @brief Takes ownership of the pointer passed in, do not delete!
+     * @return boolean true if a previous route was replaced, false otherwise
      */
     bool addAction(std::shared_ptr<Action>& action);
 
     /**
      * @brief Encouraged for those who need a quick and easy way to setup an
      * action.
-     * @return boolean true if a previous route was replaced, false otherwise
      */
+    std::shared_ptr<Action> createAction(std::function<void(HttpData& data)>);
     std::shared_ptr<Action> createAction(const QString&, std::function<void(HttpData& data)>);
 
     //! You are highly encouraged to use the register route options below!
@@ -206,7 +210,7 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
 
     QCommandLineParser& getCommandLineParser();
 
-    struct QTTPSHARED_EXPORT ServerInfo
+    class QTTPSHARED_EXPORT ServerInfo
     {
       public:
         ServerInfo()
@@ -243,6 +247,8 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     const QHash<QString, std::shared_ptr<const Action> >& getActions() const;
 
     const ServerInfo& getServerInfo() const;
+
+    void setServerInfo(const HttpServer::ServerInfo& serverInfo);
 
   private:
 

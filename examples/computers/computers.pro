@@ -3,7 +3,7 @@ TEMPLATE = app
 QT -= gui
 DESTDIR = $$PWD
 
-TARGET = Computers
+TARGET = computers
 
 SOURCES += \
     main.cpp

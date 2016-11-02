@@ -8,8 +8,8 @@ int main(int argc, char** argv)
   qttp::HttpServer* httpSvr = qttp::HttpServer::getInstance();
   httpSvr->initialize();
 
-  // Create an action, named "sayHello", that will handle all requests
-  auto action = httpSvr->createAction("sayHello", [](qttp::HttpData& data) {
+  // Create an action that will handle all requests
+  auto action = httpSvr->createAction([](qttp::HttpData& data) {
     // Form the JSON content and let the framework handle the rest.
     QJsonObject& json = data.getResponse().getJson();
     json["hello"] = "world";

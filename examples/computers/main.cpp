@@ -1,5 +1,4 @@
-#include <httpserver.h>
-
+#include <qttpserver>
 #include <desktops.h>
 #include <phones.h>
 #include <tablets.h>
@@ -27,6 +26,12 @@ int main(int argc, char** argv)
   httpSvr->addActionAndRegister<Tablets>();
 
   httpSvr->addActionAndRegister<Laptops>();
+
+  qttp::HttpServer::ServerInfo info = httpSvr->getServerInfo();
+  info.title = "Computers API";
+  info.description = "An API that lists different types of computers.";
+  info.companyName = "Computers";
+  httpSvr->setServerInfo(info);
 
   // Libuv runs in its own thread.
   httpSvr->startServer();

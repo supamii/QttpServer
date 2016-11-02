@@ -17,7 +17,7 @@ Check out the [examples](./examples/) and samples to get started with your RESTf
 * NodeJS's lightning quick [http-parser](https://github.com/nodejs/http-parser)
 * URL routing e.g. /v1/your/api/path
 * Pre & Post processing hooks with chaining
-* Submodules ready to support [MongoDb](https://github.com/mongodb/mongo-cxx-driver), [Redis](https://github.com/uglide/qredisclient) ([Build guide](./BUILD_OTHERS.md))
+* Submodules ready to support [MongoDb](https://github.com/mongodb/mongo-cxx-driver), [Redis](https://github.com/uglide/qredisclient) (see [build guide](./BUILD_OTHERS.md))
 * Logging support
 * [Swagger-UI](img/swagger.png) support
 * Very basic support for HTML files (html, js, css, txt, etc)
@@ -66,11 +66,12 @@ Using the action interface
 using namespace qttp;
 
 class SayGoodbye : public Action {
-  void onAction(HttpData& data) {
-    QJsonObject& json = data.getResponse().getJson();
-    json["response"] = "adios";
-  }
-  const const char* getName() const { return "sayGoodbye"; }
+  public:
+    void onAction(HttpData& data) {
+      QJsonObject& json = data.getResponse().getJson();
+      json["response"] = "adios";
+    }
+    const const char* getName() const { return "sayGoodbye"; }
 };
 
 int main(int argc, char** argv)
@@ -81,8 +82,11 @@ int main(int argc, char** argv)
   
   // Adds the action interface via template method.
   auto action = httpSvr->createAction<SayGoodbye>();
-  httpSvr->registerRoute(action, "get", "/bye");
-  httpSvr->registerRoute(action, "post", "/aloha");
+  
+  action->registerRoute({
+    {qttp::HttpMethod::GET, "/bye"},
+    {qttp::HttpMethod::POST, "/aloha"}
+  });
 
   httpSvr->startServer();
   return app.exec();

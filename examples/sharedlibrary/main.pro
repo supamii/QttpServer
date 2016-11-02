@@ -1,18 +1,19 @@
 QT += core
 QT -= gui
 
-CONFIG += c++11
+TARGET = main
+TEMPLATE = app
 
-TARGET = SharedLibrary
 CONFIG += console QTTP_LIBRARY
 CONFIG -= app_bundle
-
-TEMPLATE = app
 
 SOURCES += main.cpp
 
 message('Including core files')
 include($$PWD/../../core.pri)
 
+LIBS += -L$$PWD
 message('LIBS: ' + $$LIBS);
 
+# We'll just throw everything into the project folder
+DESTDIR = $$PWD

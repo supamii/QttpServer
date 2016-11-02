@@ -897,7 +897,34 @@ bool HttpServer::addAction(std::shared_ptr<Action>& action)
   return !containsKey;
 }
 
-std::shared_ptr<Action> HttpServer::createAction(const QString& actionName, function<void(HttpData&)> callback)
+QString HttpServer::generateActionName() const
+{
+  int sanityLimit = 10;
+  QString uuid;
+
+  do
+  {
+    uuid = QUuid::createUuid().toString();
+    if((--sanityLimit) < 1)
+    {
+      LOG_FATAL("UNABLE TO CREATE A UNIQUE ID WHILE ADDING AN ACTION");
+    }
+
+    // A bit extreme but just in case... let's regenerate UUIDs if there is
+    // already one!?
+
+  } while(m_Actions.contains(uuid));
+
+  return uuid;
+}
+
+std::shared_ptr<Action> HttpServer::createAction(std::function<void(HttpData&)> callback)
+{
+  QString uuid = generateActionName();
+  return createAction(uuid, callback);
+}
+
+std::shared_ptr<Action> HttpServer::createAction(const QString& actionName, std::function<void(HttpData&)> callback)
 {
   std::shared_ptr<Action> action(new SimpleAction(callback));
   SimpleAction* simpleAction = reinterpret_cast<SimpleAction*>(action.get());
@@ -961,6 +988,11 @@ const QJsonObject& HttpServer::getRoutesConfig() const
 const QHash<QString, std::shared_ptr<const Action> >& HttpServer::getActions() const
 {
   return m_ConstActions;
+}
+
+void HttpServer::setServerInfo(const HttpServer::ServerInfo& serverInfo)
+{
+  m_ServerInfo = serverInfo;
 }
 
 const HttpServer::ServerInfo& HttpServer::getServerInfo() const

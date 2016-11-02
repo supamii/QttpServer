@@ -3,7 +3,7 @@ TEMPLATE = app
 QT -= gui
 DESTDIR = $$PWD
 SOURCES += $$PWD/main.cpp
-TARGET = MongoApp
+TARGET = mongo
 
 win32 {
     LIBS += \

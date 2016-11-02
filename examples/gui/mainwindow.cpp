@@ -57,7 +57,7 @@ int HttpDataModel::columnCount(const QModelIndex& parent) const
 void HttpDataModel::addData(qttp::HttpData& data)
 {
   LOG_TRACE;
-  m_Data.push_back(data.getRequest().getUrl().getPath());
+  m_Data.push_back(QDateTime::currentDateTime().toString() + " - " + data.getRequest().getUrl().getPath());
   emit layoutChanged();
 }
 

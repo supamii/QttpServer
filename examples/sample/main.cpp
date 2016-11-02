@@ -1,4 +1,4 @@
-#include <httpserver.h>
+#include <qttpserver>
 #include <swagger.h>
 
 using namespace std;
@@ -112,24 +112,23 @@ int main(int argc, char** argv)
     QCoreApplication app(argc, argv);
 
     HttpServer* svr = HttpServer::getInstance();
-
-    // Always initialize in the main thread.
     if(!svr->initialize()) {
       std::cerr << "Failed to initialize!" << std::endl;
     }
 
-    svr->registerRoute("get", "helloworld", "/helloworld");
-    svr->createAction("helloworld", [](HttpData& data) {
+    auto helloworld = svr->createAction([](HttpData& data) {
       QJsonObject& json = data.getResponse().getJson();
       json["response"] = QSTR("Hello World!");
     });
 
-    auto action = svr->createAction("echobody", [](HttpData& data) {
+    helloworld->registerRoute(HttpMethod::GET, "/helloworld");
+
+    auto echobody = svr->createAction([](HttpData& data) {
       QJsonObject& json = data.getResponse().getJson();
       json["response"] = data.getRequest().getJson();
     });
 
-    action->registerRoutes({
+    echobody->registerRoute({
       { HttpMethod::GET, "echobody" },
       { HttpMethod::GET, "echobody2" },
       { HttpMethod::POST, "echobody3" }

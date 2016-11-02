@@ -1,10 +1,8 @@
+#include <QApplication>
 #include <httpserver.h>
 #include "mainwindow.h"
-#include <QApplication>
 
-using namespace std;
 using namespace qttp;
-using namespace native::http;
 
 int main(int argc, char *argv[])
 {
@@ -15,14 +13,15 @@ int main(int argc, char *argv[])
 
   HttpServer* svr = HttpServer::getInstance();
   svr->initialize();
-  svr->registerRoute("get", "helloworld", "/helloworld");
-  svr->createAction("helloworld", [&](HttpData& data) {
+
+  auto action = svr->createAction([&](HttpData& data) {
     QJsonObject& json = data.getResponse().getJson();
     json["response"] = "Hello World!";
-
+    // Record the results and display on the GUI!
     w.getModel().addData(data);
   });
-  svr->startServer();
+  action->registerRoute(HttpMethod::GET, "/helloworld");
 
+  svr->startServer();
   return a.exec();
 }

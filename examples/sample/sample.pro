@@ -3,7 +3,7 @@ TEMPLATE = app
 QT -= gui
 DESTDIR = $$PWD
 SOURCES += $$PWD/main.cpp
-TARGET = SampleApp
+TARGET = sample
 
 macx {
     # Since things are buried in the app folder, we'll copy configs there.

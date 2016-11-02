@@ -165,7 +165,7 @@ bool Action::registerRoute(const qttp::HttpPath& path, Visibility visibility)
   return svr->registerRoute(path.first, Route(this->getName(), path.second, visibility));
 }
 
-void Action::registerRoutes(const std::vector<qttp::HttpPath>& routes, Visibility visibility)
+void Action::registerRoute(const std::vector<qttp::HttpPath>& routes, Visibility visibility)
 {
   HttpServer* svr = HttpServer::getInstance();
   for(const auto & path : routes)

@@ -1,5 +1,8 @@
 HEADERS += $$PWD/*.h
-SOURCES += $$PWD/*.cpp
+
+!contains(CONFIG, QTTP_LIBRARY) {
+  SOURCES += $$PWD/*.cpp
+}
 
 INCLUDEPATH += $$PWD
 
