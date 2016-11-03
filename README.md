@@ -2,9 +2,9 @@
 
 [![Build Status](https://travis-ci.org/supamii/QttpServer.svg?branch=master)](https://travis-ci.org/supamii/QttpServer)
 
-See Current Release: [QttpServer v0.1.0](https://github.com/supamii/QttpServer/tree/QTTPv0.1.0)
-
 <b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/nodenative).
+
+> **Getting started is EASY!  Just load `qttpserver.pro` into QtCreator IDE!**
 
 Check out the [examples](./examples/) and samples to get started with your RESTful API server!
 
@@ -139,15 +139,21 @@ make
 
 By default, qttpserver will compile as a static library for ease of use.  Check out the [examples here](./examples/) for a quick-start.  If you run into any blockers, feel free to open bug(s) and ask questions!
 
-# Older Resources
+# More Resources
 
 ## Building Redis and MongoDB
 
-Checkout the guide [here](./BUILD_OTHERS.md).
+Checkout the [guide](./BUILD_OTHERS.md).
+
+## Examples and Tutorials
+
+Riiiight over... [Here](./examples/)
 
 ## Alternate Build Scripts
 
-node.native was previously built using **gyp** - you can checkout more about that [here](./BUILD.md)
+node.native was previously built using **gyp** - you can learn more about that [here](./BUILD.md)
+
+Note: It's likely that these will get phased out.
 
 # TODOs
 
