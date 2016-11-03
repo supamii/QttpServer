@@ -18,9 +18,9 @@ class QTTPSHARED_EXPORT HttpResponse
   friend class HttpServer;
   friend class HttpData;
 
-  private:
+QTTP_PRIVATE:
 
-    HttpResponse(native::http::QttpResponse* resp);
+  HttpResponse(native::http::QttpResponse* resp);
 
   public:
 
@@ -88,7 +88,7 @@ class QTTPSHARED_EXPORT HttpResponse
       setTerminated();
     }
 
-  protected:
+QTTP_PROTECTED:
 
     quint32 getFlag() const;
     void setFlag(DataControl flag);
@@ -107,7 +107,7 @@ class QTTPSHARED_EXPORT HttpResponse
      */
     const native::http::QttpResponse* getResponse();
 
-  private:
+QTTP_PRIVATE:
 
     QTTP_DECLARE_ASSERT_MEMBER(native::http::QttpResponse)
 

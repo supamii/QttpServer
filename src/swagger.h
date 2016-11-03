@@ -25,7 +25,7 @@ class QTTPSHARED_EXPORT Swagger : public Action
 
     static const char* ACTION_NAME;
 
-  private:
+QTTP_PRIVATE:
 
     /**
      * @brief Returns swagger-ready json for consumption

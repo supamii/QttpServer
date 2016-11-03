@@ -114,27 +114,14 @@ bool HttpServer::initialize()
      QCoreApplication::translate("main", "routes")},
     {{"d", "dir"},
      QCoreApplication::translate("main", "absolute path to the config directory, don't combine with -c or -r args"),
-     QCoreApplication::translate("main", "dir")}
+     QCoreApplication::translate("main", "dir")},
+    {{"w", "www"},
+     QCoreApplication::translate("main", "absolute path to the www folder to serve http files"),
+     QCoreApplication::translate("main", "www")}
   });
 
   m_CmdLineParser.addHelpOption();
   m_CmdLineParser.process(*app);
-
-  QJsonValue i = m_CmdLineParser.value("i");
-  if((i.isString() || i.isDouble()) && !i.toString().trimmed().isEmpty())
-  {
-    QString ip = i.toString();
-    m_GlobalConfig["bindIp"] = ip;
-    LOG_DEBUG("Cmd line ip" << ip);
-  }
-
-  QJsonValue p = m_CmdLineParser.value("p");
-  if((p.isString() || p.isDouble()) && !p.toString().trimmed().isEmpty())
-  {
-    qint32 port = p.toInt();
-    m_GlobalConfig["bindPort"] = port;
-    LOG_DEBUG("Cmd line port" << port);
-  }
 
   if(env.contains(CONFIG_DIRECTORY_ENV_VAR))
   {
@@ -181,6 +168,30 @@ bool HttpServer::initialize()
   if(!m_SendRequestMetadata)
   {
     m_SendRequestMetadata = m_CmdLineParser.isSet("m");
+    LOG_DEBUG("CmdLine meta-data" << m_SendRequestMetadata);
+  }
+
+  QJsonValue i = m_CmdLineParser.value("i");
+  if((i.isString() || i.isDouble()) && !i.toString().trimmed().isEmpty())
+  {
+    QString ip = i.toString();
+    m_GlobalConfig["bindIp"] = ip;
+    LOG_DEBUG("CmdLine ip" << ip);
+  }
+
+  QJsonValue p = m_CmdLineParser.value("p");
+  if((p.isString() || p.isDouble()) && !p.toString().trimmed().isEmpty())
+  {
+    qint32 port = p.toInt();
+    m_GlobalConfig["bindPort"] = port;
+    LOG_DEBUG("CmdLine port" << port);
+  }
+
+  QJsonValue w = m_CmdLineParser.value("w");
+  if(w.isString() && !w.isNull() && !w.toString().trimmed().isEmpty())
+  {
+    initHttpDirectory(w.toString());
+    LOG_DEBUG("CmdLine www/web/http-files" << w);
   }
 
   m_IsInitialized = true;
@@ -381,6 +392,22 @@ void HttpServer::initConfigDirectory(const QString &path)
   initRoutes(dir.filePath(ROUTES_CONFIG_FILE));
 }
 
+void HttpServer::initHttpDirectory(const QString &path)
+{
+  m_ServeFilesDirectory = QDir::cleanPath(path);
+  LOG_DEBUG("Using directory" << m_ServeFilesDirectory.absolutePath());
+  m_ShouldServeFiles = m_ServeFilesDirectory.exists();
+
+  if(m_ShouldServeFiles)
+  {
+    m_FileLookup.populateFiles(m_ServeFilesDirectory);
+  }
+  else
+  {
+    LOG_ERROR("Unable to serve files from invalid directory [" << m_ServeFilesDirectory.absolutePath() << "]");
+  }
+}
+
 void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const QString& method)
 {
   return registerRouteFromJSON(obj, Utils::fromString(method.toUpper()));
@@ -411,18 +438,16 @@ void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, HttpMethod method)
 
 void HttpServer::startServer()
 {
-  HttpServer* svr = HttpServer::getInstance();
-
-  if(svr->m_IsSwaggerEnabled)
+  if(m_IsSwaggerEnabled)
   {
-    svr->addActionAndRegister<Swagger>();
+    addActionAndRegister<Swagger>();
   }
 
-  svr->addDefaultProcessor<OptionsPreprocessor>();
+  addDefaultProcessor<OptionsPreprocessor>();
 
-  auto quitCB = [svr](){
+  auto quitCB = [](){
                   LOG_TRACE;
-                  svr->stop();
+                  HttpServer::getInstance()->stop();
                 };
 
   QObject::connect(QCoreApplication::instance(),
@@ -431,6 +456,13 @@ void HttpServer::startServer()
 
   std::thread newThread(HttpServer::start);
   newThread.detach();
+}
+
+void HttpServer::startServer(QString ip, int port)
+{
+  m_GlobalConfig["bindIp"] = ip;
+  m_GlobalConfig["bindPort"] = port;
+  startServer();
 }
 
 int HttpServer::start()
@@ -457,9 +489,7 @@ int HttpServer::start()
       svr->m_ServerErrorCallback();
     }
 
-    stringstream ss;
-    ss << ip.toStdString() << ":" << port << " " << SERVER_ERROR_MSG;
-    LOG_FATAL(ss.str().c_str());
+    LOG_FATAL(ip << ":" << port << " " << SERVER_ERROR_MSG);
     return 1;
   }
 

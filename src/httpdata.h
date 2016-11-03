@@ -22,16 +22,16 @@ class QTTPSHARED_EXPORT HttpData
 {
   friend class HttpServer;
 
-  private:
+QTTP_PRIVATE:
 
-    /**
-     * @brief Private constructor because the underlying native::http::request
-     * and native::http::response objects are privately managed as well.
-     *
-     * Throws an exception if arguments are NULL.
-     */
-    HttpData(native::http::QttpRequest*, native::http::QttpResponse*);
-    ~HttpData();
+  /**
+   * @brief Private constructor because the underlying native::http::request
+   * and native::http::response objects are privately managed as well.
+   *
+   * Throws an exception if arguments are NULL.
+   */
+  HttpData(native::http::QttpRequest*, native::http::QttpResponse*);
+  ~HttpData();
 
   public:
 
@@ -59,7 +59,7 @@ class QTTPSHARED_EXPORT HttpData
     const QDateTime& getTimestamp() const;
     const QTime& getTime() const;
 
-  private:
+QTTP_PRIVATE:
 
     HttpRequest m_HttpRequest;
     HttpResponse m_HttpResponse;

@@ -37,13 +37,13 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     virtual ~HttpServer();
 
     /**
-     * @brief A statically accessible function to kick off the libuv event loop.
+     * @brief Kick off the libuv event loop.
      * @return The integer result from node.native's run method.
      */
-    static void startServer();
+    void startServer();
+    void startServer(QString ip, int port);
 
     static int start();
-
     static void stop();
 
     /**
@@ -207,6 +207,7 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     void initGlobal(const QString& filepath);
     void initRoutes(const QString& filepath);
     void initConfigDirectory(const QString& path);
+    void initHttpDirectory(const QString& path);
 
     QCommandLineParser& getCommandLineParser();
 
@@ -250,7 +251,7 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
 
     void setServerInfo(const HttpServer::ServerInfo& serverInfo);
 
-  private:
+QTTP_PRIVATE:
 
     template<class T> bool addDefaultProcessor()
     {

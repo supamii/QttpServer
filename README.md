@@ -15,11 +15,11 @@ Check out the [examples](./examples/) and samples to get started with your RESTf
 * Compatible with [Qt](http://www.qt.io/download/) 5.5, 5.6, [5.7](http://download.qt.io/official_releases/qt/5.7/5.7.0/single/)
 * NodeJS's blazing fast [libuv](https://github.com/libuv/libuv)
 * NodeJS's lightning quick [http-parser](https://github.com/nodejs/http-parser)
-* URL routing e.g. /v1/your/api/path
+* URL routing e.g. [/v1/your/api/path](./examples/README.md)
 * Pre & Post processing hooks with chaining
 * Submodules ready to support [MongoDb](https://github.com/mongodb/mongo-cxx-driver), [Redis](https://github.com/uglide/qredisclient) (see [build guide](./BUILD_OTHERS.md))
 * Logging support
-* [Swagger-UI](img/swagger.png) support
+* [SwaggerUI](img/swagger.png) support and [integration](./examples/SWAGGER.md)
 * Very basic support for HTML files (html, js, css, txt, etc)
 
 ## Example 1: 
@@ -37,7 +37,7 @@ int main(int argc, char** argv)
   httpSvr->initialize();
 
   // Create an action, named "sayHello", that will handle all requests
-  auto action = httpSvr->createAction("sayHello", [](qttp::HttpData& data) {
+  auto action = httpSvr->createAction([](qttp::HttpData& data) {
     // Form the JSON content and let the framework handle the rest.
     QJsonObject& json = data.getResponse().getJson();
     json["hello"] = "world";
@@ -185,7 +185,7 @@ node.native was previously built using **gyp** - you can checkout more about tha
 32. ~~Serve basic http files~~
 33. More swagger support and thorough examples on how to create interface based actions
 34. ~~Rename some "routes" to the more appropriate "path"~~
-35. Simplify API unit tests with more macros
+35. Expand unit tests support with more macros, utilities
 36. Refactor to use more PRIVATE implementations (PIMPL) to help readability
 37. ~~Optimize Qt Http parsing by translating directly into QString instead of std::string~~
 38. Investigate using a faster JSON parser/framework

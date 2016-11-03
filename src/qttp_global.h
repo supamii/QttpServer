@@ -275,7 +275,18 @@ enum class HttpError : int
 #  define QTTP_INIT_ASSERT_MEMBER(X) m_Assertion( X ),
 #endif
 
-/// Quick a dirty mechanism to assert ptrs within the initializer list!
+//! Turn all private and protected members into PUBLIC members to help with
+//! unit testing.
+
+#ifdef QTTP_ALL_MEMBERS_PUBLIC
+#define QTTP_PRIVATE public
+#define QTTP_PROTECTED public
+#else
+#define QTTP_PRIVATE private
+#define QTTP_PROTECTED protected
+#endif
+
+//! Quick a dirty mechanism to assert ptrs within the initializer list!
 template<class T> class Assert
 {
   public:
@@ -292,6 +303,9 @@ class HttpServer;
 class QTTPSHARED_EXPORT Global
 {
   friend class HttpServer;
+
+QTTP_PRIVATE:
+
   Global();
 
   public:
@@ -300,7 +314,7 @@ class QTTPSHARED_EXPORT Global
 
     static const std::vector<QStringPair>& getDefaultHeaders();
 
-  private:
+QTTP_PRIVATE:
 
     static std::vector<QStringPair> DEFAULT_HEADERS;
 };

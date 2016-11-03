@@ -20,8 +20,8 @@ class QTTPSHARED_EXPORT HttpUrl
   friend class HttpRequest;
   friend class HttpResponse;
 
-  private:
-    HttpUrl(native::http::QttpRequest* req);
+QTTP_PRIVATE:
+  HttpUrl(native::http::QttpRequest* req);
 
   public:
     ~HttpUrl();
@@ -33,7 +33,7 @@ class QTTPSHARED_EXPORT HttpUrl
     const QByteArray& getQuery() const;
     const QByteArray& getFragment() const;
 
-  private:
+QTTP_PRIVATE:
     QTTP_DECLARE_ASSERT_MEMBER(native::http::QttpRequest)
 
     const native::http::QttpRequest * m_Request;

@@ -12,6 +12,7 @@ namespace qttp
 class QTTPSHARED_EXPORT FileUtils
 {
   public:
+
     FileUtils();
     FileUtils(QString directory);
 
@@ -20,6 +21,11 @@ class QTTPSHARED_EXPORT FileUtils
      */
     void populateFiles();
     void populateFiles(QDir dir);
+
+QTTP_PRIVATE:
+    void populateFilesInternal(QDir dir);
+
+  public:
 
     bool hasFile(const QString& file) const;
     bool hasDir(const QString& dir) const;
@@ -32,7 +38,7 @@ class QTTPSHARED_EXPORT FileUtils
 
     static QString determineContentType(const QString& urlPath);
 
-  private:
+QTTP_PRIVATE:
 
     class FileInfo
     {

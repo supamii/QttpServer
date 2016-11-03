@@ -36,7 +36,9 @@ class Laptops : public qttp::Action
     std::vector<qttp::Input> getInputs() const
     {
       return {
-               qttp::Input("model", {{ qttp::HttpMethod::GET, "laptops/:model" }})
+               qttp::Input("model", {{ qttp::HttpMethod::GET, "laptops/:model" },
+                                     { qttp::HttpMethod::GET, "laptops/:model/:color" }}),
+               qttp::Input("color", {{ qttp::HttpMethod::GET, "laptops/:model/:color" }})
       };
     }
 
@@ -45,6 +47,7 @@ class Laptops : public qttp::Action
       return {
                { qttp::HttpMethod::GET, "laptops" },
                { qttp::HttpMethod::GET, "laptops/:model" },
+               { qttp::HttpMethod::GET, "laptops/:model/:color" },
                { qttp::HttpMethod::PUT, "laptops" },
       };
     }
@@ -64,6 +67,12 @@ class Laptops : public qttp::Action
         QString model = data.getRequest().getJson()["model"].toString();
         if(laptops.contains(model))
         {
+          if(data.getRequest().getJson().contains("color"))
+          {
+            data.getResponse().getJson()["color"] = "always beige!";
+            return;
+          }
+
           data.getResponse().getJson()[model] = "info";
           return;
         }
