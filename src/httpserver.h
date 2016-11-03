@@ -117,7 +117,6 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     bool registerRoute(std::shared_ptr<Action> action, const qttp::HttpPath& path, Visibility visibility = Visibility::Show);
     bool registerRoute(HttpMethod method, const Route& route);
 
-
     template<class T> std::shared_ptr<Action> addActionAndRegister(Visibility visibilty = Visibility::Show)
     {
       std::shared_ptr<Action> action(new T());
@@ -208,6 +207,7 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     void initRoutes(const QString& filepath);
     void initConfigDirectory(const QString& path);
     void initHttpDirectory(const QString& path);
+    void initSwagger(bool isEnabled);
 
     QCommandLineParser& getCommandLineParser();
 

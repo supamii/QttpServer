@@ -117,7 +117,9 @@ bool HttpServer::initialize()
      QCoreApplication::translate("main", "dir")},
     {{"w", "www"},
      QCoreApplication::translate("main", "absolute path to the www folder to serve http files"),
-     QCoreApplication::translate("main", "www")}
+     QCoreApplication::translate("main", "www")},
+    {{"s", "swagger"},
+     QCoreApplication::translate("main", "exposes swagger-api json responses for the path /swagger/")},
   });
 
   m_CmdLineParser.addHelpOption();
@@ -169,6 +171,12 @@ bool HttpServer::initialize()
   {
     m_SendRequestMetadata = m_CmdLineParser.isSet("m");
     LOG_DEBUG("CmdLine meta-data" << m_SendRequestMetadata);
+  }
+
+  if(!m_IsSwaggerEnabled)
+  {
+    initSwagger(m_CmdLineParser.isSet("s"));
+    LOG_DEBUG("CmdLine swagger" << m_IsSwaggerEnabled);
   }
 
   QJsonValue i = m_CmdLineParser.value("i");
@@ -317,7 +325,7 @@ void HttpServer::initGlobal(const QString &filepath)
   }
 
   QJsonObject swagger = m_GlobalConfig["swagger"].toObject();
-  m_IsSwaggerEnabled = swagger["isEnabled"].toBool(false);
+  initSwagger(swagger["isEnabled"].toBool(false));
 
 #ifndef ASSIGN_SWAGGER
 #  define ASSIGN_SWAGER(X) m_ServerInfo.X = swagger[#X].toString()
@@ -406,6 +414,11 @@ void HttpServer::initHttpDirectory(const QString &path)
   {
     LOG_ERROR("Unable to serve files from invalid directory [" << m_ServeFilesDirectory.absolutePath() << "]");
   }
+}
+
+void HttpServer::initSwagger(bool isEnabled)
+{
+  m_IsSwaggerEnabled = isEnabled;
 }
 
 void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const QString& method)

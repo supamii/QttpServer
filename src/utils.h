@@ -115,7 +115,7 @@
   #endif
 
   #ifndef LOG_FATAL
-    #define LOG_FATAL(X) LOG_ERROR(X); { QString str; QTextStream stream(&str); stream << "FATAL" << __FUNCTION__ << ":" << (int)__LINE__ << " " << X; qFatal(str.toStdString().c_str()); }
+    #define LOG_FATAL(X) LOG_ERROR(X); { QByteArray fatal; QTextStream fts(&fatal); fts << "FATAL" << __FUNCTION__ << ":" << (int)__LINE__ << " " << X; fatal.append('\0'); qFatal("%s", fatal.constData()); }
   #endif
 #endif
 

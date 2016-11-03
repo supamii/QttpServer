@@ -34,6 +34,7 @@ int main(int argc, char** argv)
   httpSvr->setServerInfo(info);
 
   httpSvr->initHttpDirectory(QDir().absoluteFilePath("./www"));
+  httpSvr->initSwagger(true);
 
   // Libuv runs in its own thread.
   httpSvr->startServer();

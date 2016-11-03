@@ -105,7 +105,10 @@ Note: QttpServer will automatically search the current directory for a `./config
 more about it [here](./CONFIG.md).
 
 ``` c++
+  // Swagger UI
   httpSvr->initHttpDirectory(QDir().absoluteFilePath("./www"));
+  // Swagger JSON/API
+  httpSvr->initSwagger(true);
 ```
 
 To get going quickly, make a call to `initHttpDirectory()` to point to the folder with SwaggerUI.

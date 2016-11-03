@@ -87,7 +87,6 @@ Intended to be provided for convenience, the call to `HttpRequest::getJson()` wi
 all input parameters from the query string as well as the body.
 
 ## Routes
-___
 
 *main.cpp:*
 
@@ -128,7 +127,6 @@ $ curl localhost:8080/desktops
 `{"list":["iMac","inspiron","z800"]}`
 
 ## More Routes
-___
 
 There's more we can do with our routes!  Let's create a route that will return information about a 
 computer desktop model.
@@ -188,7 +186,6 @@ $ curl localhost:8080/desktops/z800
 
 
 ## Action Scoped Routes
-___
 
 *laptops.h:*
 
