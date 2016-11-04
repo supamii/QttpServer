@@ -1,17 +1,23 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [1.0.0]
+## [Unreleased]
+### 
+
+## [1.0.0] - 2016-11-04
 ### Added
-- Everything @supamii
+- Reimplemented node.native components to copy into Qt classes such as QByteArray instead of std::stream @supamii
+- SwaggerUI integration @supamii
+- Tutorials for Action and Routing @supamii
 
 ### Changed
-- A lot of stuff
+- All std::function callbacks are wrapped with qttp::Action
 
-## [0.1.0] - 2015-12-03
+## [0.1.0] - 2016-10-01
 ### Added
 - Basic http routing features and qt integration @supamii
+- QEvents generated from libuv/node.native to the main qt thread/application @supamii
 
-[Unreleased]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.3.0...HEAD
-[1.0.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.2.0...v0.3.0
-[0.1.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.2.0...v0.3.0
+[Unreleased]: https://github.com/supamii/QttpServer/compare/QTTPv1.0.0...supamii:master
+[1.0.0]: https://github.com/supamii/QttpServer/compare/QTTPv0.1.0...supamii:QTTPv1.0.0
+[0.1.0]: https://github.com/supamii/QttpServer/compare/v0.1.0...supamii:QTTPv0.1.0

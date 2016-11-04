@@ -1,10 +1,10 @@
-# QttpServer 1.0.0 beta
-
 [![Build Status](https://travis-ci.org/supamii/QttpServer.svg?branch=master)](https://travis-ci.org/supamii/QttpServer)
 
-<b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/nodenative).
+# QttpServer 1.0.0
 
-> **Getting started is EASY!  Just load `qttpserver.pro` into QtCreator IDE!**
+`QttpServer` is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/nodenative).
+
+**Getting started is EASY!**  Just load [qttpserver.pro](./qttpserver.pro) into [QtCreator](./img/qtcreator_project_setup_full.png)!
 
 Check out the [examples](./examples/) and samples to get started with your RESTful API server!
 
@@ -154,44 +154,3 @@ Riiiight over... [Here](./examples/)
 node.native was previously built using **gyp** - you can learn more about that [here](./BUILD.md)
 
 Note: It's likely that these will get phased out.
-
-# TODOs
-
-1. ~~Address subtle techdebt surrounding references with native::http components~~
-2. ~~Create default preprocessors for meta data for each incomming request guid generation~~
-3. ~~Config parsing is still incomplete - action-routes should be configurable instead of being set in code~~
-4. ~~Determine versioning support in the path e.g. /v1/ /v2/~~
-5. ~~Clean up configuration deployment on mac (make install files to the correct folder)~~
-6. ~~Setup utilities for MongoDB and Redis access~~
-7. ~~Add pre and post processor callbacks as an alternative to the interface class~~
-8. ~~Make available a metrics pre/post processor~~
-9. ~~Design an error response mechanism~~ (rely on exceptions)
-10. ~~Record PID in a file to kill the most recently launched process~~ (printed in logs instead)
-11. ~~Create an equivalent build system with QMake to support more platforms (MinGW)~~
-12. Re-work node.native to improve testability by allowing tests to inject requests into qt event loop - allow factory to create instances and prevent shallow copying
-13. Figure out if we can introduce Qt's daemon/services legacy add-on
-14. Distributed scheduling with redis or mongo
-15. Server diagnostics UI
-16. Authentication basics - api token
-17. ~~Support ids and nouns within url routes~~
-18. Introduce modules to load shared libs for pre, post, and action processing
-19. ~~File logging~~
-20. Support for remote logging services
-21. Add syslog support
-22. ~~Include diagram of framework~~
-23. ~~Command line arguments for common config values~~
-24. ~~Prevent copy constructor access where it makes sense~~
-25. ~~Revisit common and trivial methods - add inline hint~~
-26. SUPPORT web sockets ??
-27. Add oauth support (google api)
-28. ~~Support shared library and add exports/import decl macros~~
-29. Include SSL support (evt-tls)
-30. Include periodic TASKS to execute in between libuv call-backs!
-31. ~~Swagger suppport~~
-32. ~~Serve basic http files~~
-33. More swagger support and thorough examples on how to create interface based actions
-34. ~~Rename some "routes" to the more appropriate "path"~~
-35. Expand unit tests support with more macros, utilities
-36. Refactor to use more PRIVATE implementations (PIMPL) to help readability
-37. ~~Optimize Qt Http parsing by translating directly into QString instead of std::string~~
-38. Investigate using a faster JSON parser/framework
