@@ -311,7 +311,7 @@ QTTP_PRIVATE:
     std::function<void(HttpEvent*)> m_EventCallback;
     QHash<QString, std::shared_ptr<Action> > m_Actions;
     QHash<QString, std::shared_ptr<const Action> > m_ConstActions;
-    QMap<HttpMethod, QHash<QString, Route> > m_Routes;
+    std::vector<QHash<QString, Route> > m_Routes;
     std::vector<std::shared_ptr<Processor> > m_Processors;
     std::vector<std::function<void(HttpData& data)> > m_Preprocessors;
     std::vector<std::function<void(HttpData& data)> > m_Postprocessors;

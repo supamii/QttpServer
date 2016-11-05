@@ -57,7 +57,8 @@ HttpServer::HttpServer() :
       method != Global::HTTP_METHODS.end();
       ++method)
   {
-    m_Routes[*method] = QHash<QString, Route>();
+    m_Routes.push_back(QHash<QString, Route>());
+    //m_Routes[*method] =;
   }
 }
 
@@ -591,10 +592,8 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                return;
            }
 
-           auto routes = m_Routes.find(method);
-
            // Err on the side of caution since this ptr may be null.
-           if(routes == m_Routes.end())
+           if(method < 0 || method >= (int) m_Routes.size())
            {
              LOG_ERROR("Invalid route");
              response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
@@ -603,14 +602,16 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
              return;
            }
 
+           auto & routes = m_Routes.at(method);
+
            QUrlQuery parameters;
            const QString& urlPath = request.getUrl().getPath();
-           auto route = routes->begin();
+           auto route = routes.begin();
 
            // TODO: ROOM FOR IMPROVEMENT: We can reduce the total number of searches
            // for the worst case scenario.
 
-           for(; route != routes->end(); ++route)
+           for(; route != routes.end(); ++route)
            {
              parameters.clear();
 
@@ -632,7 +633,7 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
 
            try
            {
-             if(route != routes->end())
+             if(route != routes.end())
              {
                auto action = m_Actions.find(route.value().action);
                if(action != m_Actions.end() && action.value().get() != nullptr)
@@ -1001,12 +1002,11 @@ std::shared_ptr<Action> HttpServer::getAction(const QString& name)
 
 const QHash<QString, Route>& HttpServer::getRoutes(HttpMethod method) const
 {
-  auto route = m_Routes.find(method);
-  if(route == m_Routes.end())
+  if(method < 0 || method >= (int) m_Routes.size())
   {
     THROW_EXCEPTION("Invalid route method [" << (int) method << "]");
   }
-  return route.value();
+  return m_Routes.at(method);
 }
 
 const QHash<QString, Route>& HttpServer::getRoutes(const QString& method) const
@@ -1065,23 +1065,24 @@ bool HttpServer::registerRoute(std::shared_ptr<Action> action, const qttp::HttpP
 
 bool HttpServer::registerRoute(HttpMethod method, const Route& route)
 {
-  auto routes = m_Routes.find(method);
-  if(routes == m_Routes.end())
+  if(method < 0 || method >= (int) m_Routes.size())
   {
-    LOG_ERROR("Invalid http "
+    LOG_ERROR("Invalid http method [" << method << "]"
               "action [" << route.action << "] "
               "path [" << route.path << "]");
     return false;
   }
 
+  auto & routes = m_Routes.at(method);
+
   LOG_DEBUG("method [" << Utils::toString(method) << "] "
             "action [" << route.action << "] "
             "path [" << route.path << "]");
 
-  bool containsKey = (routes->find(route.path) != routes->end());
+  bool containsKey = (routes.find(route.path) != routes.end());
 
   // Initialize and assign the Route struct.
-  routes->insert(route.path, route);
+  routes.insert(route.path, route);
 
   return !containsKey;
 }

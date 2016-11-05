@@ -2,7 +2,10 @@
 
 # QttpServer 1.0.0
 
-`QttpServer` is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/nodenative).
+QttpServer focuses on developing a lean and mean C++ based API server. In addition to leveraging
+modern C++, QttpServer also employs Qt to promote productivity and reinforce best practices. Use it
+for systems that are resource constrained, general prototyping, integrate into existing Qt 
+Applications, or if you simply wish to save a few bucks on your cloud servers.
 
 **Getting started is EASY!**  Just load [qttpserver.pro](./qttpserver.pro) into [QtCreator](./img/qtcreator_project_setup_full.png)!
 
@@ -154,3 +157,19 @@ Riiiight over... [Here](./examples/)
 node.native was previously built using **gyp** - you can learn more about that [here](./BUILD.md)
 
 Note: It's likely that these will get phased out.
+
+# Credits
+
+`QttpServer` is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/nodenative).
+
+# License
+
+The MIT License (MIT)
+
+Copyright (c) 2016 Son-Huy Pham
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

@@ -76,7 +76,7 @@ enum class Visibility : char
   Hide = 1
 };
 
-enum class HttpMethod : char
+typedef enum HttpMethod
 {
   // TODO: Circle back and make sure this can be used or rejected for other
   // scenarios.
@@ -93,7 +93,7 @@ enum class HttpMethod : char
   OPTIONS = 6,
   CONNECT = 7,
   TRACE = 8,
-};
+} HttpMethod;
 
 /**
  * Extends int in order to match the internal type inside native::http:response.
