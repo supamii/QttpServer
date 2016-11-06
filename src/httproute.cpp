@@ -38,7 +38,7 @@ Input::Input(const Input& from)
   paths = from.paths;
 }
 
-Input::Input(const QString& inputname, const std::vector<qttp::HttpPath>& path) :
+Input::Input(const QString& inputname, const std::set<qttp::HttpPath>& path) :
   name(inputname),
   description(),
   isRequired(false),
@@ -50,7 +50,7 @@ Input::Input(const QString& inputname, const std::vector<qttp::HttpPath>& path) 
 {
 }
 
-Input::Input(const QString& inputname, const QString& desc, const QStringList& vals, const std::vector<qttp::HttpPath>& path) :
+Input::Input(const QString& inputname, const QString& desc, const QStringList& vals, const std::set<qttp::HttpPath>& path) :
   name(inputname),
   description(desc),
   isRequired(false),
@@ -80,13 +80,13 @@ RequiredInput::RequiredInput() :
 {
 }
 
-RequiredInput::RequiredInput(const QString& inputname, const std::vector<qttp::HttpPath>& path) :
+RequiredInput::RequiredInput(const QString& inputname, const std::set<qttp::HttpPath>& path) :
   Input(inputname, path)
 {
   isRequired = true;
 }
 
-RequiredInput::RequiredInput(const QString& inputname, const QString& desc, const QStringList& vals, const std::vector<qttp::HttpPath>& path) :
+RequiredInput::RequiredInput(const QString& inputname, const QString& desc, const QStringList& vals, const std::set<qttp::HttpPath>& path) :
   Input(inputname, desc, vals, path)
 {
   isRequired = true;
@@ -98,13 +98,13 @@ HeaderInput::HeaderInput() :
   paramType = "header";
 }
 
-HeaderInput::HeaderInput(const QString& inputname, const std::vector<qttp::HttpPath>& path) :
+HeaderInput::HeaderInput(const QString& inputname, const std::set<qttp::HttpPath>& path) :
   Input(inputname, path)
 {
   paramType = "header";
 }
 
-HeaderInput::HeaderInput(const QString& inputname, const QString& desc, const QStringList& vals, const std::vector<qttp::HttpPath>& path) :
+HeaderInput::HeaderInput(const QString& inputname, const QString& desc, const QStringList& vals, const std::set<qttp::HttpPath>& path) :
   Input(inputname, desc, vals, path)
 {
   paramType = "header";

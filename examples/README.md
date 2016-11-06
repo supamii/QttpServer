@@ -195,11 +195,11 @@ class Laptops : public qttp::Action
 ```
 
 The preferred way to associate routes with an action is by reimplementing
-`QList<qttp::HttpPath> getRoutes() const`.  We return a list of `HttpPath`
+`std::set<qttp::HttpPath> getRoutes() const`.  We return a list of `HttpPath`
 objects that specify pairs of `HttpMethod` and URL path.
 
 ``` c++
-    QList<qttp::HttpPath> getRoutes() const
+    std::set<qttp::HttpPath> getRoutes() const
     {
       return {
                { qttp::HttpMethod::GET, "laptops" },

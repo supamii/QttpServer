@@ -21,7 +21,7 @@ class QTTPSHARED_EXPORT Swagger : public Action
     void initialize();
 
     const char* getName() const;
-    QList<HttpPath> getRoutes() const;
+    std::set<HttpPath> getRoutes() const;
 
     static const char* ACTION_NAME;
 

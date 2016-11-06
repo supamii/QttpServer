@@ -23,7 +23,7 @@ const char* Swagger::getName() const
   return ACTION_NAME;
 }
 
-QList<HttpPath> Swagger::getRoutes() const
+set<HttpPath> Swagger::getRoutes() const
 {
   return {
            { HttpMethod::GET, "/swagger" }
@@ -75,18 +75,19 @@ void Swagger::initialize()
 
   const QHash<QString, shared_ptr<const Action> >& actions = svr->getActions();
 
+  // Holds the path and each input referenced string.
+  std::map<HttpPath, QVector<QJsonObject> > inputLookup;
+
   for(const auto & action : actions)
   {
     QJsonObject properties;
-
-    QJsonArray refParams;
     QJsonArray required;
     QJsonArray tags = QJsonArray::fromStringList(action->getTags());
 
     QString actionName = action->getName();
-    const std::vector<Input> & inputs = action->getInputs();
+    const vector<Input> & inputs = action->getInputs();
 
-    for(const Input & input : inputs)
+    for(const Input &input : inputs)
     {
       if(input.visibility == Visibility::Hide)
       {
@@ -116,9 +117,17 @@ void Swagger::initialize()
         required.append(input.name);
       }
 
-      refParams.append(QJsonObject {
-        { "$ref", "#/parameters/" + paramKey }
-      });
+      for(HttpPath i : input.paths)
+      {
+        auto iter = inputLookup.find(i);
+        if(iter == inputLookup.end())
+        {
+          inputLookup.insert({i, QVector<QJsonObject>()});
+        }
+        inputLookup[i].append(QJsonObject {
+          { "$ref", "#/parameters/" + paramKey }
+        });
+      }
 
       properties[input.name] = QJsonObject { { "type", "string" } };
     }
@@ -131,34 +140,55 @@ void Swagger::initialize()
     {
       const QHash<QString, Route>& routes = svr->getRoutes(httpMethod);
 
-      QJsonArray routeParameters(refParams);
-
-      if(httpMethod == HttpMethod::POST ||
-         httpMethod == HttpMethod::PUT ||
-         httpMethod == HttpMethod::PATCH)
-      {
-        // TODO: Try and include the schema?
-
-        routeParameters.append(QJsonObject {
-          { "name", "body" },
-          { "in", "body" },
-          { "description", "Body of the action" },
-          { "schema", QJsonObject { { "type", "object" } } }
-        });
-      }
-
       for(const auto & route : routes)
       {
+        QJsonArray routeParameters;
+
         if(route.visibility == Visibility::Hide)
         {
           // If this is meant to be private then let's not list on SwaggerUI.
           continue;
         }
+
         if(route.action != actionName)
         {
           // A route with a blank action is usually the default base-route.
           continue;
         }
+
+        // TODO FIXME
+        // Unfortunately was unable to just do a QHash::find() but might be
+        // able to revisit and fix since this is silly and expensive.
+        for(auto iter = inputLookup.begin(); iter != inputLookup.end(); ++iter)
+        {
+          const HttpPath& key = iter->first;
+          const QVector<QJsonObject>& value = iter->second;
+          QString routePath = route.path.startsWith('/') ? route.path.mid(1) : route.path;
+
+          if(key.first == httpMethod && key.second == routePath)
+          {
+            for(const QJsonObject & i : value)
+            {
+              LOG_INFO("FOUND " << Utils::toString(key.first) << "\t" << key.second << "\t" << i);
+              routeParameters.append(i);
+            }
+          }
+        }
+
+        if(httpMethod == HttpMethod::POST ||
+           httpMethod == HttpMethod::PUT ||
+           httpMethod == HttpMethod::PATCH)
+        {
+          // TODO: Try and include the schema?
+
+          routeParameters.append(QJsonObject {
+            { "name", "body" },
+            { "in", "body" },
+            { "description", "Body of the action" },
+            { "schema", QJsonObject { { "type", "object" } } }
+          });
+        }
+
         QString routePath;
         for(QString part : route.parts)
         {
@@ -208,6 +238,10 @@ void Swagger::onGet(HttpData& data)
   }
   else
   {
-    // TODO: FIXME: Do something? At least finish the response.
+    // TODO: BUILD from some centralized class - Should have something more
+    // uniform.
+    data.setErrorResponse(QJsonObject {
+      { "error", "Invalid request" }
+    });
   }
 }

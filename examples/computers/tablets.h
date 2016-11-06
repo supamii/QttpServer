@@ -18,7 +18,7 @@ class Tablets : public qttp::Action
       return "tablet-action-name";
     }
 
-    QList<qttp::HttpPath> getRoutes() const
+    std::set<qttp::HttpPath> getRoutes() const
     {
       return {
                { qttp::HttpMethod::GET, "tablets" },

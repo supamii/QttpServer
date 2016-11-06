@@ -42,7 +42,7 @@ class Laptops : public qttp::Action
       };
     }
 
-    QList<qttp::HttpPath> getRoutes() const
+    std::set<qttp::HttpPath> getRoutes() const
     {
       return {
                { qttp::HttpMethod::GET, "laptops" },

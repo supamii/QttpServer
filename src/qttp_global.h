@@ -25,6 +25,8 @@
 #include <QProcessEnvironment>
 #include <QJsonObject>
 #include <QList>
+#include <QSet>
+#include <QHash>
 
 #include <qttp.h>
 #include <functional>

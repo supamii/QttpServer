@@ -1087,7 +1087,6 @@ bool HttpServer::registerRoute(HttpMethod method, const Route& route)
   return !containsKey;
 }
 
-
 bool HttpServer::addProcessor(std::shared_ptr<Processor>& processor)
 {
   if(processor.get() == nullptr)

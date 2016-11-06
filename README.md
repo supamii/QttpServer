@@ -24,7 +24,7 @@ Check out the [examples](./examples/) and samples to get started with your RESTf
 * Logging support
 * [SwaggerUI](img/swagger.png) support and [integration](./examples/SWAGGER.md)
 * Very basic support for HTML files (html, js, css, txt, etc)
-* [Test Utilities](./test/) based on QtTest to keep you confident
+* [Test Utilities](./test/) based on QtTest to keep you developing with confidence
 
 ## Example 1: 
 Using a raw std::function based callback
@@ -101,7 +101,7 @@ int main(int argc, char** argv)
 
 <img src="/img/swagger.png" alt="SwaggerUI" width="50%" height="50%"><img src="/img/swagger_operations.png" alt="QttpServer Operations" width="50%" height="50%">
 
-## **Getting started on Mac & Linux**
+## **Get Started NOW**
 
 ### **Prerequisites**
 

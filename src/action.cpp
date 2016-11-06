@@ -4,7 +4,7 @@
 using namespace std;
 using namespace qttp;
 
-const QList<qttp::HttpPath> Action::EMPTY_ROUTES;
+const std::set<qttp::HttpPath> Action::EMPTY_ROUTES;
 const std::vector<Input> Action::EMPTY_INPUTS;
 const QStringList Action::EMPTY_STRING_LIST;
 const std::vector<QStringPair> Action::EMPTY_STRINGPAIR_LIST;
@@ -114,7 +114,7 @@ void Action::onUnknown(HttpData& data)
   Q_UNUSED(data);
 }
 
-QList<qttp::HttpPath> Action::getRoutes() const
+set<qttp::HttpPath> Action::getRoutes() const
 {
   return EMPTY_ROUTES;
 }
@@ -196,12 +196,12 @@ void SimpleAction::onAction(HttpData &data)
   m_Callback(data);
 }
 
-void SimpleAction::setRoutes(const QList<qttp::HttpPath>& routes)
+void SimpleAction::setRoutes(const std::set<qttp::HttpPath>& routes)
 {
   m_Routes = routes;
 }
 
-QList<qttp::HttpPath> SimpleAction::getRoutes() const
+std::set<qttp::HttpPath> SimpleAction::getRoutes() const
 {
   return m_Routes;
 }
