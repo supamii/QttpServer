@@ -15,12 +15,13 @@
 #define THROW_EXCEPTION(X) QString s; QTextStream x(&s); x << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": " << X; throw qttp::QttpException(s.toStdString());
 #endif
 
-#ifdef NO_QTTP_LOGGING
+#ifdef QTTP_DISABLE_LOGGING
   #define LOG_DATETIME QString()
   #define LOG_FILE QString()
   #define LOG_FUNCTION(X)
   #define LOG_TRACE
   #define LOG_DBG(X)
+  #define LOG_DEBUG(X)
   #define LOG_INFO(X)
   #define LOG_WARN(X)
   #define LOG_ALERT(X)

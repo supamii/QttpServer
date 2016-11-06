@@ -218,6 +218,169 @@ class TestUtils
       TestUtils::requestValidPost(endpoint, result);
       TestUtils::verifyJson(result, expected);
     }
+
+    void requestPut(QString endpoint)
+    {
+      QByteArray ignore;
+      requestPut(endpoint, ignore);
+    }
+
+    void requestPut(QString endpoint,
+                    QByteArray& result,
+                    QByteArray putBody = QByteArray(),
+                    QString contentType = "text/plain")
+    {
+      bool done = false;
+      auto callback = [&result, &done](QNetworkReply* reply) {
+                        result = reply->readAll();
+                        done = true;
+                      };
+      QNetworkAccessManager* netMgr = new QNetworkAccessManager(qparent);
+      QObject::connect(netMgr, &QNetworkAccessManager::finished, callback);
+      QUrl url = endpoint;
+      QNetworkRequest networkRequest(url);
+      networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, contentType);
+      QNetworkReply* reply = netMgr->put(networkRequest, putBody);
+      QVERIFY(result.isEmpty());
+      waitUntil(done, MAX_TEST_WAIT_MS);
+      Q_UNUSED(reply);
+    }
+
+    void requestValidPut(QString endpoint,
+                         QByteArray& result,
+                         QByteArray putBody = QByteArray(),
+                         QString contentType = "text/plain")
+    {
+      bool done = false;
+      auto callback = [&result, &done](QNetworkReply* reply) {
+                        result = reply->readAll();
+                        done = true;
+                      };
+      QNetworkAccessManager* netMgr = new QNetworkAccessManager(qparent);
+      QObject::connect(netMgr, &QNetworkAccessManager::finished, callback);
+      QUrl url = endpoint;
+      QNetworkRequest networkRequest(url);
+      networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, contentType);
+      QNetworkReply* reply = netMgr->put(networkRequest, putBody);
+      QVERIFY(result.isEmpty());
+      waitUntil(done, MAX_TEST_WAIT_MS);
+      QCOMPARE(reply->error(), QNetworkReply::NoError);
+    }
+
+    void verifyPut(QString endpoint,
+                   QNetworkReply::NetworkError error = QNetworkReply::NoError,
+                   QByteArray putBody = QByteArray(),
+                   QString contentType = "text/plain")
+    {
+      bool done = false;
+      auto callback = [ &done](QNetworkReply* reply) {
+                        done = true;
+                        Q_UNUSED(reply);
+                      };
+      QNetworkAccessManager* netMgr = new QNetworkAccessManager(qparent);
+      QObject::connect(netMgr, &QNetworkAccessManager::finished, callback);
+      QUrl url = endpoint;
+      QNetworkRequest networkRequest(url);
+      networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, contentType);
+      QNetworkReply* reply = netMgr->put(networkRequest, putBody);
+      waitUntil(done, MAX_TEST_WAIT_MS);
+      QCOMPARE(reply->error(), error);
+    }
+
+    void verifyErrorPut(QString endpoint,
+                        QByteArray putBody = QByteArray(),
+                        QString contentType = "text/plain")
+    {
+      bool done = false;
+      auto callback = [ &done](QNetworkReply* reply) {
+                        done = true;
+                        Q_UNUSED(reply);
+                      };
+      QNetworkAccessManager* netMgr = new QNetworkAccessManager(qparent);
+      QObject::connect(netMgr, &QNetworkAccessManager::finished, callback);
+      QUrl url = endpoint;
+      QNetworkRequest networkRequest(url);
+      networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, contentType);
+      QNetworkReply* reply = netMgr->put(networkRequest, putBody);
+      waitUntil(done, MAX_TEST_WAIT_MS);
+      QVERIFY(reply->error() != QNetworkReply::NoError);
+    }
+
+    void verifyPutJson(QString endpoint, const QByteArray& expected)
+    {
+      QByteArray result;
+      TestUtils::requestValidPut(endpoint, result);
+      TestUtils::verifyJson(result, expected);
+    }
+
+    void requestDelete(QString endpoint, QByteArray& result)
+    {
+      bool done = false;
+      auto callback = [&result, &done](QNetworkReply* reply) {
+                        result = reply->readAll();
+                        done = true;
+                      };
+      QNetworkAccessManager* netMgr = new QNetworkAccessManager(qparent);
+      QObject::connect(netMgr, &QNetworkAccessManager::finished, callback);
+      QUrl url = endpoint;
+      QNetworkReply* reply = netMgr->deleteResource(QNetworkRequest(url));
+      QVERIFY(result.isEmpty());
+      waitUntil(done, MAX_TEST_WAIT_MS);
+      Q_UNUSED(reply);
+    }
+
+    void requestValidDelete(QString endpoint, QByteArray& result)
+    {
+      bool done = false;
+      auto callback = [&result, &done](QNetworkReply* reply) {
+                        result = reply->readAll();
+                        done = true;
+                      };
+      QNetworkAccessManager* netMgr = new QNetworkAccessManager(qparent);
+      QObject::connect(netMgr, &QNetworkAccessManager::finished, callback);
+      QUrl url = endpoint;
+      QNetworkReply* reply = netMgr->deleteResource(QNetworkRequest(url));
+      QVERIFY(result.isEmpty());
+      waitUntil(done, MAX_TEST_WAIT_MS);
+      QCOMPARE(reply->error(), QNetworkReply::NoError);
+    }
+
+    void verifyDelete(QString endpoint, QNetworkReply::NetworkError error = QNetworkReply::NoError)
+    {
+      bool done = false;
+      auto callback = [&done](QNetworkReply* reply) {
+                        done = true;
+                        Q_UNUSED(reply);
+                      };
+      QNetworkAccessManager* netMgr = new QNetworkAccessManager(qparent);
+      QObject::connect(netMgr, &QNetworkAccessManager::finished, callback);
+      QUrl url = endpoint;
+      QNetworkReply* reply = netMgr->deleteResource(QNetworkRequest(url));
+      waitUntil(done, MAX_TEST_WAIT_MS);
+      QCOMPARE(reply->error(), error);
+    }
+
+    void verifyErrorDelete(QString endpoint)
+    {
+      bool done = false;
+      auto callback = [&done](QNetworkReply* reply) {
+                        done = true;
+                        Q_UNUSED(reply);
+                      };
+      QNetworkAccessManager* netMgr = new QNetworkAccessManager(qparent);
+      QObject::connect(netMgr, &QNetworkAccessManager::finished, callback);
+      QUrl url = endpoint;
+      QNetworkReply* reply = netMgr->deleteResource(QNetworkRequest(url));
+      waitUntil(done, MAX_TEST_WAIT_MS);
+      QVERIFY(reply->error() != QNetworkReply::NoError);
+    }
+
+    void verifyDeleteJson(QString endpoint, const QByteArray& expected)
+    {
+      QByteArray result;
+      TestUtils::requestValidDelete(endpoint, result);
+      TestUtils::verifyJson(result, expected);
+    }
 };
 
 int TestUtils::MAX_TEST_WAIT_MS = 5000;
