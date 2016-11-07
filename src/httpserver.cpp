@@ -1050,7 +1050,7 @@ bool HttpServer::registerRoute(const QString& method, const QString& actionName,
 
 bool HttpServer::registerRoute(HttpMethod method, const QString& action, const QString& path, Visibility visibility)
 {
-  return registerRoute(method, Route(action, path, visibility));
+  return registerRoute(method, Route(action, { method, path }, visibility));
 }
 
 bool HttpServer::registerRoute(std::shared_ptr<Action> action, HttpMethod method, const QString& path, Visibility visibility)
@@ -1060,7 +1060,7 @@ bool HttpServer::registerRoute(std::shared_ptr<Action> action, HttpMethod method
 
 bool HttpServer::registerRoute(std::shared_ptr<Action> action, const qttp::HttpPath& path, Visibility visibility)
 {
-  return registerRoute(path.first, Route(action->getName(), path.second, visibility));
+  return registerRoute(path.first, Route(action->getName(), path, visibility));
 }
 
 bool HttpServer::registerRoute(HttpMethod method, const Route& route)
