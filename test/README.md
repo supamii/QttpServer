@@ -5,9 +5,70 @@
 The QttpServer framework can help you test your API.  Along with using QtTest,
 additional hooks and MACROs are also provided to further increase testability.
 
-## Test Results from QttpTest
+## Writing Tests
 
-Take a peek at [qttptest](./qttptest/) to see how QttpServer tests executed.
+With QtTest, we can write our unit tests like such:
+
+``` c++
+#include <qttptest.h>
+
+using namespace std;
+using namespace qttp;
+using namespace qttp::test;
+using namespace native::http;
+
+class QttpTest : public QObject, public TestUtils
+{
+  Q_OBJECT
+  private slots:
+    void initTestCase();
+    void test();
+    void cleanupTestCase();
+};
+```
+
+Above, we extend from `QObject` as well as `TestUtils`.  And then below we'll define the main 
+`tests()` method that utilizes `TestUtils`:
+
+``` c++
+void QttpTest::test()
+{
+  QByteArray expected = "{\"hello\":\"world\"}";
+  TestUtils::verifyGetJson("http://127.0.0.1:8080/test", expected);
+}
+```
+
+And below we'll go wrap it up and include setting up the server configurations:
+
+``` c++
+void QttpTest::initTestCase()
+{
+  HttpServer* httpSvr = TestUtils::setUp(this);
+  QVERIFY(httpSvr != nullptr);
+  QVERIFY(httpSvr->initialize() == true);
+
+  auto action = httpSvr->createAction("", [](HttpData& data) {
+    QJsonObject& json = data.getResponse().getJson();
+    json["response"] = "C++ FTW";
+  });
+  action->registerRoute(qttp::HttpMethod::GET, "/test");
+
+  httpSvr->startServer("127.0.0.1", 8080);
+  QTest::qWait(1000);
+}
+
+void QttpTest::cleanupTestCase()
+{
+  TestUtils::tearDown();
+}
+
+QTEST_MAIN(QttpTest)
+#include "qttptest.moc"
+```
+
+## Test Output
+
+Take a peek at [QttpServer](./qttptest/):
 
 ```
 Starting qttptest...

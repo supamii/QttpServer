@@ -38,7 +38,8 @@ class Laptops : public qttp::Action
       return {
                qttp::Input("model", {{ qttp::HttpMethod::GET, "laptops/:model" },
                                      { qttp::HttpMethod::GET, "laptops/:model/:color" }}),
-               qttp::Input("color", {{ qttp::HttpMethod::GET, "laptops/:model/:color" }})
+               qttp::Input("color", {{ qttp::HttpMethod::GET, "laptops/:model/:color" }}),
+               qttp::Input("alllaptops", {{ qttp::HttpMethod::ALL, "laptops" }})
       };
     }
 

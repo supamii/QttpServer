@@ -159,17 +159,18 @@ void Swagger::initialize()
         // TODO FIXME
         // Unfortunately was unable to just do a QHash::find() but might be
         // able to revisit and fix since this is silly and expensive.
+
         for(auto iter = inputLookup.begin(); iter != inputLookup.end(); ++iter)
         {
           const HttpPath& key = iter->first;
           const QVector<QJsonObject>& value = iter->second;
           QString routePath = route.path.startsWith('/') ? route.path.mid(1) : route.path;
 
-          if(key.first == httpMethod && key.second == routePath)
+          if((key.first == httpMethod || key.first == qttp::HttpMethod::ALL) &&
+             key.second == routePath)
           {
             for(const QJsonObject & i : value)
             {
-              LOG_INFO("FOUND " << Utils::toString(key.first) << "\t" << key.second << "\t" << i);
               routeParameters.append(i);
             }
           }
