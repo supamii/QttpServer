@@ -31,7 +31,7 @@ class Another : public Action
       };
     }
 
-    QList<qttp::HttpPath> getRoutes() const
+    std::set<qttp::HttpPath> getRoutes() const
     {
       static const QString route = "/another";
       return {

@@ -57,7 +57,8 @@ HttpServer::HttpServer() :
       method != Global::HTTP_METHODS.end();
       ++method)
   {
-    m_Routes[*method] = QHash<QString, Route>();
+    m_Routes.push_back(QHash<QString, Route>());
+    //m_Routes[*method] =;
   }
 }
 
@@ -114,27 +115,16 @@ bool HttpServer::initialize()
      QCoreApplication::translate("main", "routes")},
     {{"d", "dir"},
      QCoreApplication::translate("main", "absolute path to the config directory, don't combine with -c or -r args"),
-     QCoreApplication::translate("main", "dir")}
+     QCoreApplication::translate("main", "dir")},
+    {{"w", "www"},
+     QCoreApplication::translate("main", "absolute path to the www folder to serve http files"),
+     QCoreApplication::translate("main", "www")},
+    {{"s", "swagger"},
+     QCoreApplication::translate("main", "exposes swagger-api json responses for the path /swagger/")},
   });
 
   m_CmdLineParser.addHelpOption();
   m_CmdLineParser.process(*app);
-
-  QJsonValue i = m_CmdLineParser.value("i");
-  if((i.isString() || i.isDouble()) && !i.toString().trimmed().isEmpty())
-  {
-    QString ip = i.toString();
-    m_GlobalConfig["bindIp"] = ip;
-    LOG_DEBUG("Cmd line ip" << ip);
-  }
-
-  QJsonValue p = m_CmdLineParser.value("p");
-  if((p.isString() || p.isDouble()) && !p.toString().trimmed().isEmpty())
-  {
-    qint32 port = p.toInt();
-    m_GlobalConfig["bindPort"] = port;
-    LOG_DEBUG("Cmd line port" << port);
-  }
 
   if(env.contains(CONFIG_DIRECTORY_ENV_VAR))
   {
@@ -181,6 +171,36 @@ bool HttpServer::initialize()
   if(!m_SendRequestMetadata)
   {
     m_SendRequestMetadata = m_CmdLineParser.isSet("m");
+    LOG_DEBUG("CmdLine meta-data" << m_SendRequestMetadata);
+  }
+
+  if(!m_IsSwaggerEnabled)
+  {
+    initSwagger(m_CmdLineParser.isSet("s"));
+    LOG_DEBUG("CmdLine swagger" << m_IsSwaggerEnabled);
+  }
+
+  QJsonValue i = m_CmdLineParser.value("i");
+  if((i.isString() || i.isDouble()) && !i.toString().trimmed().isEmpty())
+  {
+    QString ip = i.toString();
+    m_GlobalConfig["bindIp"] = ip;
+    LOG_DEBUG("CmdLine ip" << ip);
+  }
+
+  QJsonValue p = m_CmdLineParser.value("p");
+  if((p.isString() || p.isDouble()) && !p.toString().trimmed().isEmpty())
+  {
+    qint32 port = p.toInt();
+    m_GlobalConfig["bindPort"] = port;
+    LOG_DEBUG("CmdLine port" << port);
+  }
+
+  QJsonValue w = m_CmdLineParser.value("w");
+  if(w.isString() && !w.isNull() && !w.toString().trimmed().isEmpty())
+  {
+    initHttpDirectory(w.toString());
+    LOG_DEBUG("CmdLine www/web/http-files" << w);
   }
 
   m_IsInitialized = true;
@@ -306,7 +326,7 @@ void HttpServer::initGlobal(const QString &filepath)
   }
 
   QJsonObject swagger = m_GlobalConfig["swagger"].toObject();
-  m_IsSwaggerEnabled = swagger["isEnabled"].toBool(false);
+  initSwagger(swagger["isEnabled"].toBool(false));
 
 #ifndef ASSIGN_SWAGGER
 #  define ASSIGN_SWAGER(X) m_ServerInfo.X = swagger[#X].toString()
@@ -381,6 +401,27 @@ void HttpServer::initConfigDirectory(const QString &path)
   initRoutes(dir.filePath(ROUTES_CONFIG_FILE));
 }
 
+void HttpServer::initHttpDirectory(const QString &path)
+{
+  m_ServeFilesDirectory = QDir::cleanPath(path);
+  LOG_DEBUG("Using directory" << m_ServeFilesDirectory.absolutePath());
+  m_ShouldServeFiles = m_ServeFilesDirectory.exists();
+
+  if(m_ShouldServeFiles)
+  {
+    m_FileLookup.populateFiles(m_ServeFilesDirectory);
+  }
+  else
+  {
+    LOG_ERROR("Unable to serve files from invalid directory [" << m_ServeFilesDirectory.absolutePath() << "]");
+  }
+}
+
+void HttpServer::initSwagger(bool isEnabled)
+{
+  m_IsSwaggerEnabled = isEnabled;
+}
+
 void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, const QString& method)
 {
   return registerRouteFromJSON(obj, Utils::fromString(method.toUpper()));
@@ -411,18 +452,16 @@ void HttpServer::registerRouteFromJSON(QJsonValueRef& obj, HttpMethod method)
 
 void HttpServer::startServer()
 {
-  HttpServer* svr = HttpServer::getInstance();
-
-  if(svr->m_IsSwaggerEnabled)
+  if(m_IsSwaggerEnabled)
   {
-    svr->addActionAndRegister<Swagger>();
+    addActionAndRegister<Swagger>();
   }
 
-  svr->addDefaultProcessor<OptionsPreprocessor>();
+  addDefaultProcessor<OptionsPreprocessor>();
 
-  auto quitCB = [svr](){
+  auto quitCB = [](){
                   LOG_TRACE;
-                  svr->stop();
+                  HttpServer::getInstance()->stop();
                 };
 
   QObject::connect(QCoreApplication::instance(),
@@ -431,6 +470,13 @@ void HttpServer::startServer()
 
   std::thread newThread(HttpServer::start);
   newThread.detach();
+}
+
+void HttpServer::startServer(QString ip, int port)
+{
+  m_GlobalConfig["bindIp"] = ip;
+  m_GlobalConfig["bindPort"] = port;
+  startServer();
 }
 
 int HttpServer::start()
@@ -457,9 +503,7 @@ int HttpServer::start()
       svr->m_ServerErrorCallback();
     }
 
-    stringstream ss;
-    ss << ip.toStdString() << ":" << port << " " << SERVER_ERROR_MSG;
-    LOG_FATAL(ss.str().c_str());
+    LOG_FATAL(ip << ":" << port << " " << SERVER_ERROR_MSG);
     return 1;
   }
 
@@ -548,10 +592,8 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                return;
            }
 
-           auto routes = m_Routes.find(method);
-
            // Err on the side of caution since this ptr may be null.
-           if(routes == m_Routes.end())
+           if(method < 0 || method >= (int) m_Routes.size())
            {
              LOG_ERROR("Invalid route");
              response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
@@ -560,14 +602,16 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
              return;
            }
 
+           auto & routes = m_Routes.at(method);
+
            QUrlQuery parameters;
            const QString& urlPath = request.getUrl().getPath();
-           auto route = routes->begin();
+           auto route = routes.begin();
 
            // TODO: ROOM FOR IMPROVEMENT: We can reduce the total number of searches
            // for the worst case scenario.
 
-           for(; route != routes->end(); ++route)
+           for(; route != routes.end(); ++route)
            {
              parameters.clear();
 
@@ -589,7 +633,7 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
 
            try
            {
-             if(route != routes->end())
+             if(route != routes.end())
              {
                auto action = m_Actions.find(route.value().action);
                if(action != m_Actions.end() && action.value().get() != nullptr)
@@ -958,12 +1002,11 @@ std::shared_ptr<Action> HttpServer::getAction(const QString& name)
 
 const QHash<QString, Route>& HttpServer::getRoutes(HttpMethod method) const
 {
-  auto route = m_Routes.find(method);
-  if(route == m_Routes.end())
+  if(method < 0 || method >= (int) m_Routes.size())
   {
     THROW_EXCEPTION("Invalid route method [" << (int) method << "]");
   }
-  return route.value();
+  return m_Routes.at(method);
 }
 
 const QHash<QString, Route>& HttpServer::getRoutes(const QString& method) const
@@ -1022,27 +1065,27 @@ bool HttpServer::registerRoute(std::shared_ptr<Action> action, const qttp::HttpP
 
 bool HttpServer::registerRoute(HttpMethod method, const Route& route)
 {
-  auto routes = m_Routes.find(method);
-  if(routes == m_Routes.end())
+  if(method < 0 || method >= (int) m_Routes.size())
   {
-    LOG_ERROR("Invalid http "
+    LOG_ERROR("Invalid http method [" << method << "]"
               "action [" << route.action << "] "
               "path [" << route.path << "]");
     return false;
   }
 
+  auto & routes = m_Routes.at(method);
+
   LOG_DEBUG("method [" << Utils::toString(method) << "] "
             "action [" << route.action << "] "
             "path [" << route.path << "]");
 
-  bool containsKey = (routes->find(route.path) != routes->end());
+  bool containsKey = (routes.find(route.path) != routes.end());
 
   // Initialize and assign the Route struct.
-  routes->insert(route.path, route);
+  routes.insert(route.path, route);
 
   return !containsKey;
 }
-
 
 bool HttpServer::addProcessor(std::shared_ptr<Processor>& processor)
 {

@@ -19,9 +19,9 @@ class QTTPSHARED_EXPORT HttpRequest
   friend class HttpServer;
   friend class HttpData;
 
-  private:
+QTTP_PRIVATE:
 
-    HttpRequest(native::http::QttpRequest* req);
+  HttpRequest(native::http::QttpRequest* req);
 
   public:
 
@@ -61,7 +61,7 @@ class QTTPSHARED_EXPORT HttpRequest
     QUrlQuery& getQuery();
     const QUrlQuery& getQuery() const;
 
-  protected:
+QTTP_PROTECTED:
 
     /**
      * @brief This will swap data - beware
@@ -77,7 +77,7 @@ class QTTPSHARED_EXPORT HttpRequest
      */
     native::http::QttpRequest* getRequest();
 
-  private:
+QTTP_PRIVATE:
 
     QTTP_DECLARE_ASSERT_MEMBER(native::http::QttpRequest)
 

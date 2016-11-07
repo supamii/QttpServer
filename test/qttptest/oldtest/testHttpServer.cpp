@@ -42,10 +42,10 @@ class TestHttpServer : public QObject
 
 void TestHttpServer::initTestCase()
 {
+  QVERIFY(HttpServer::getInstance() != nullptr);
+
   HttpServer& httpSvr = *(HttpServer::getInstance());
   httpSvr.initialize();
-
-  QVERIFY(HttpServer::getInstance() != nullptr);
 
   bool result = false;
 

@@ -1,3 +1,23 @@
+# Configuration
+
+``` json
+{
+    "bindIp": "0.0.0.0",
+    "bindPort": 8080,
+    "swagger": {
+            "isEnabled": true,
+            "host": "127.0.0.1:8080",
+            "basePath": "/"
+    },
+    "httpFiles": {
+        "isEnabled": true,
+        "directory": "$QTTP_HOME"
+    }
+}
+```
+
+
+``` json
 {
     "bindIp": "0.0.0.0",
     "bindPort": 8080,
@@ -5,7 +25,7 @@
         "strictHttpMethod": false,
         "metadata": true,
         "processors": {
-            "options": true
+            "options" : true
         }
     },
     "logfile": {
@@ -20,7 +40,7 @@
         "version": "0.1",
         "title": "QttpServer",
         "description": "Build RESTful web services using Qt, powered by Node's libuv!",
-        "company": {
+        "company" : {
             "name": "QttpServer",
             "url": "http://github.com/supamii/QttpServer"
         },
@@ -32,19 +52,21 @@
             "url": "https://opensource.org/licenses/MIT"
         },
         "termsOfService": "https://opensource.org/ToS",
-        "schemes": ["http"],
-        "consumes": ["application/json"],
-        "produces": ["application/json"]
+        "schemes" : [ "http" ],
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ]
     },
     "httpFiles": {
         "isEnabled": true,
         "path": "/",
         "directory": "$QTTP_HOME"
     },
-    "defaultHeaders": {
+    "defaultHeaders" : {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Methods": "GET, POST, DELETE, PUT, PATCH, HEAD, OPTIONS, TRACE",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization" ,
+        "Access-Control-Allow-Methods": "GET, POST, DELETE, PUT, PATCH, HEAD, OPTIONS, TRACE" ,
         "Access-Control-Allow-Origin": "*"
     }
 }
+
+```

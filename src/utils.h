@@ -15,12 +15,13 @@
 #define THROW_EXCEPTION(X) QString s; QTextStream x(&s); x << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": " << X; throw qttp::QttpException(s.toStdString());
 #endif
 
-#ifdef NO_QTTP_LOGGING
+#ifdef QTTP_DISABLE_LOGGING
   #define LOG_DATETIME QString()
   #define LOG_FILE QString()
   #define LOG_FUNCTION(X)
   #define LOG_TRACE
   #define LOG_DBG(X)
+  #define LOG_DEBUG(X)
   #define LOG_INFO(X)
   #define LOG_WARN(X)
   #define LOG_ALERT(X)
@@ -62,7 +63,7 @@
   #ifndef LOG_FUNCTION
 // Sample below confuses QtCreator syntax editor:
 // QString(__FUNCTION__":%1").arg(__LINE__)
-    #define LOG_FUNCTION(LEVEL) LOG_DATETIME.append(LEVEL) << LOG_FILE.append(__FUNCTION__).append(":").append(std::to_string(__LINE__).c_str())
+    #define LOG_FUNCTION(LEVEL) LOG_DATETIME.append(LEVEL) << LOG_FILE.append(__FUNCTION__).append(":").append(QString::number(__LINE__))
   #endif
 
 // If the function and line numbers are too noisy then define
@@ -115,7 +116,7 @@
   #endif
 
   #ifndef LOG_FATAL
-    #define LOG_FATAL(X) LOG_ERROR(X); qFatal(LOG_DATETIME.append("FATAL ").append(LOG_FILE.append(__FUNCTION__).append(":").append(std::to_string(__LINE__).c_str()).append(" ").append(X)).toStdString().c_str())
+    #define LOG_FATAL(X) LOG_ERROR(X); { QByteArray fatal; QTextStream fts(&fatal); fts << "FATAL" << __FUNCTION__ << ":" << (int)__LINE__ << " " << X; fatal.append('\0'); qFatal("%s", fatal.constData()); }
   #endif
 #endif
 
@@ -150,7 +151,8 @@ class QTTPSHARED_EXPORT QttpException : public std::exception
     QttpException(const std::string& message);
     const char* what() const QTTP_NOEXCEPT;
 
-  private:
+QTTP_PRIVATE:
+
     std::string m_Message;
 };
 
@@ -326,12 +328,14 @@ class QTTPSHARED_EXPORT Stats
   friend class HttpServer;
 
   public:
+
     Stats();
     ~Stats();
     void increment(const QString& key);
     void setValue(const QString& key, const QVariant& value);
 
-  private:
+QTTP_PRIVATE:
+
     QHash<QString, QVariant> m_Statistics;
 };
 
@@ -366,7 +370,8 @@ class QTTPSHARED_EXPORT LoggingUtils : public QObject
 
     void timerEvent(QTimerEvent* event);
 
-  private:
+QTTP_PRIVATE:
+
     QMutex m_Mutex;
     QFile m_File;
     QTextStream m_Stream;

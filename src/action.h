@@ -43,7 +43,7 @@ class QTTPSHARED_EXPORT Action
      * @brief Override  in order to associate this action to a specific
      * HttpMethod and path (e.g. "/myroute/").
      */
-    virtual QList<qttp::HttpPath> getRoutes() const;
+    virtual std::set<qttp::HttpPath> getRoutes() const;
 
     virtual const char* getName() const = 0;
     virtual const char* getSummary() const;
@@ -55,7 +55,7 @@ class QTTPSHARED_EXPORT Action
     bool registerRoute(const qttp::HttpPath& path, Visibility visibility = Visibility::Show);
     void registerRoute(const std::vector<qttp::HttpPath>& routes, Visibility visibility = Visibility::Show);
 
-  protected:
+QTTP_PROTECTED:
 
     /**
      * @brief Override in order to return a list of headers to automatically
@@ -69,12 +69,12 @@ class QTTPSHARED_EXPORT Action
      */
     virtual void applyHeaders(HttpData& data) const;
 
-  private:
+QTTP_PRIVATE:
 
-    static const QList<qttp::HttpPath> m_EmptyRoutes;
-    static const std::vector<Input> m_EmptyInputList;
-    static const QStringList m_EmptyStringList;
-    static const std::vector<QStringPair> m_EmptyStringPairList;
+    static const std::set<qttp::HttpPath> EMPTY_ROUTES;
+    static const std::vector<Input> EMPTY_INPUTS;
+    static const QStringList EMPTY_STRING_LIST;
+    static const std::vector<QStringPair> EMPTY_STRINGPAIR_LIST;
 };
 
 /**
@@ -94,8 +94,8 @@ class QTTPSHARED_EXPORT SimpleAction : public Action
 
     const char* getName() const;
 
-    void setRoutes(const QList<qttp::HttpPath>& routes);
-    QList<qttp::HttpPath> getRoutes() const;
+    void setRoutes(const std::set<qttp::HttpPath>& routes);
+    std::set<qttp::HttpPath> getRoutes() const;
 
     void setSummary(const char* summary);
     const char* getSummary() const;
@@ -109,13 +109,15 @@ class QTTPSHARED_EXPORT SimpleAction : public Action
     void setInputs(const std::vector<Input>& inputs);
     std::vector<Input> getInputs() const;
 
-  protected:
+QTTP_PROTECTED:
+
     std::vector<QStringPair> getHeaders() const;
 
-  private:
+QTTP_PRIVATE:
+
     std::function<void(qttp::HttpData&)> m_Callback;
     QByteArray m_Name;
-    QList<qttp::HttpPath> m_Routes;
+    std::set<qttp::HttpPath> m_Routes;
     QByteArray m_Summary;
     QByteArray m_Description;
     QStringList m_Tags;

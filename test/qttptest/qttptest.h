@@ -1,21 +1,25 @@
-#ifndef QTTPSAMPLE_H
-#define QTTPSAMPLE_H
+#ifndef QTTPTEST_H
+#define QTTPTEST_H
 
-#include <QtTest/QtTest>
-
+#include <QtTest>
 #include <qttpserver>
-#include <action.h>
-#include <utils.h>
+#include <testutils.h>
 
 namespace qttp
 {
+
+#ifdef QTTP_DEBUG_TESTS
+#define TEST_TRACE LOG_TRACE;
+#else
+#define TEST_TRACE
+#endif
 
 class SampleAction : public Action
 {
   public:
     void onAction(HttpData& data)
     {
-      LOG_TRACE;
+      TEST_TRACE;
       QJsonObject& json = data.getResponse().getJson();
       json["response"] = "Sample C++ FTW";
     }
@@ -31,28 +35,28 @@ class SampleActionWithHttpMethods : public Action
   public:
     void onGet(HttpData& data)
     {
-      LOG_TRACE;
+      TEST_TRACE;
       QJsonObject& json = data.getResponse().getJson();
       json["response"] = "Sample C++ FTW Get";
     }
 
     void onPost(HttpData& data)
     {
-      LOG_TRACE;
+      TEST_TRACE;
       QJsonObject& json = data.getResponse().getJson();
       json["response"] = "Sample C++ FTW Post";
     }
 
     void onPut(HttpData& data)
     {
-      LOG_TRACE;
+      TEST_TRACE;
       QJsonObject& json = data.getResponse().getJson();
       json["response"] = "Sample C++ FTW Put";
     }
 
     void onDelete(HttpData& data)
     {
-      LOG_TRACE;
+      TEST_TRACE;
       QJsonObject& json = data.getResponse().getJson();
       json["response"] = "Sample C++ FTW Delete";
     }
@@ -72,7 +76,7 @@ class ActionWithParameter : public Action
 
     void onAction(HttpData& data)
     {
-      LOG_TRACE;
+      TEST_TRACE;
       QJsonObject& json = data.getResponse().getJson();
       json["response"] = "Sample C++ FTW With Parameter " + m_Param;
     }
@@ -95,17 +99,17 @@ class SampleProcessor : public Processor
 
     void preprocess(HttpData& data)
     {
-      LOG_TRACE;
+      TEST_TRACE;
       data.getResponse().getJson()["preprocess"] = true;
     }
 
     void postprocess(HttpData& data)
     {
-      LOG_TRACE;
+      TEST_TRACE;
       data.getResponse().getJson()["postprocess"] = true;
     }
 };
 
 }
 
-#endif // QTTPSAMPLE_H
+#endif // QTTPTEST_H

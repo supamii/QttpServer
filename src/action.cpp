@@ -4,10 +4,10 @@
 using namespace std;
 using namespace qttp;
 
-const QList<qttp::HttpPath> Action::m_EmptyRoutes;
-const std::vector<Input> Action::m_EmptyInputList;
-const QStringList Action::m_EmptyStringList;
-const std::vector<QStringPair> Action::m_EmptyStringPairList;
+const std::set<qttp::HttpPath> Action::EMPTY_ROUTES;
+const std::vector<Input> Action::EMPTY_INPUTS;
+const QStringList Action::EMPTY_STRING_LIST;
+const std::vector<QStringPair> Action::EMPTY_STRINGPAIR_LIST;
 
 Action::Action()
 {
@@ -114,9 +114,9 @@ void Action::onUnknown(HttpData& data)
   Q_UNUSED(data);
 }
 
-QList<qttp::HttpPath> Action::getRoutes() const
+set<qttp::HttpPath> Action::getRoutes() const
 {
-  return m_EmptyRoutes;
+  return EMPTY_ROUTES;
 }
 
 const char* Action::getSummary() const
@@ -131,12 +131,12 @@ const char* Action::getDescription() const
 
 QStringList Action::getTags() const
 {
-  return m_EmptyStringList;
+  return EMPTY_STRING_LIST;
 }
 
 std::vector<Input> Action::getInputs() const
 {
-  return m_EmptyInputList;
+  return EMPTY_INPUTS;
 }
 
 std::vector<QStringPair> Action::getHeaders() const
@@ -196,12 +196,12 @@ void SimpleAction::onAction(HttpData &data)
   m_Callback(data);
 }
 
-void SimpleAction::setRoutes(const QList<qttp::HttpPath>& routes)
+void SimpleAction::setRoutes(const std::set<qttp::HttpPath>& routes)
 {
   m_Routes = routes;
 }
 
-QList<qttp::HttpPath> SimpleAction::getRoutes() const
+std::set<qttp::HttpPath> SimpleAction::getRoutes() const
 {
   return m_Routes;
 }

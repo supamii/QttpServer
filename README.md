@@ -1,10 +1,13 @@
-# QttpServer 1.0.0 beta
-
 [![Build Status](https://travis-ci.org/supamii/QttpServer.svg?branch=master)](https://travis-ci.org/supamii/QttpServer)
 
-See Current Release: [QttpServer v0.1.0](https://github.com/supamii/QttpServer/tree/QTTPv0.1.0)
+# QttpServer 1.0.0
 
-<b>QttpServer</b> is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/nodenative).
+QttpServer focuses on developing a lean and mean C++ based API server. In addition to leveraging
+modern C++, QttpServer also employs Qt to promote productivity and reinforce best practices. Use it
+for systems that are resource constrained, general prototyping, integrate into existing Qt 
+Applications, or if you simply wish to save a few bucks on your cloud servers.
+
+**Getting started is EASY!**  Just load [qttpserver.pro](./qttpserver.pro) into [QtCreator](./img/qtcreator_project_setup_full.png)!
 
 Check out the [examples](./examples/) and samples to get started with your RESTful API server!
 
@@ -15,12 +18,13 @@ Check out the [examples](./examples/) and samples to get started with your RESTf
 * Compatible with [Qt](http://www.qt.io/download/) 5.5, 5.6, [5.7](http://download.qt.io/official_releases/qt/5.7/5.7.0/single/)
 * NodeJS's blazing fast [libuv](https://github.com/libuv/libuv)
 * NodeJS's lightning quick [http-parser](https://github.com/nodejs/http-parser)
-* URL routing e.g. /v1/your/api/path
+* URL routing e.g. [/v1/your/api/path](./examples/README.md)
 * Pre & Post processing hooks with chaining
 * Submodules ready to support [MongoDb](https://github.com/mongodb/mongo-cxx-driver), [Redis](https://github.com/uglide/qredisclient) (see [build guide](./BUILD_OTHERS.md))
 * Logging support
-* [Swagger-UI](img/swagger.png) support
+* [SwaggerUI](img/swagger.png) support and [integration](./examples/SWAGGER.md)
 * Very basic support for HTML files (html, js, css, txt, etc)
+* [Test Utilities](./test/) based on QtTest to keep you developing with confidence
 
 ## Example 1: 
 Using a raw std::function based callback
@@ -37,7 +41,7 @@ int main(int argc, char** argv)
   httpSvr->initialize();
 
   // Create an action, named "sayHello", that will handle all requests
-  auto action = httpSvr->createAction("sayHello", [](qttp::HttpData& data) {
+  auto action = httpSvr->createAction([](qttp::HttpData& data) {
     // Form the JSON content and let the framework handle the rest.
     QJsonObject& json = data.getResponse().getJson();
     json["hello"] = "world";
@@ -97,7 +101,7 @@ int main(int argc, char** argv)
 
 <img src="/img/swagger.png" alt="SwaggerUI" width="50%" height="50%"><img src="/img/swagger_operations.png" alt="QttpServer Operations" width="50%" height="50%">
 
-## **Getting started on Mac & Linux**
+## **Get Started NOW**
 
 ### **Prerequisites**
 
@@ -139,53 +143,34 @@ make
 
 By default, qttpserver will compile as a static library for ease of use.  Check out the [examples here](./examples/) for a quick-start.  If you run into any blockers, feel free to open bug(s) and ask questions!
 
-# Older Resources
+# More Resources
 
 ## Building Redis and MongoDB
 
-Checkout the guide [here](./BUILD_OTHERS.md).
+Checkout the [guide](./BUILD_OTHERS.md).
+
+## Examples and Tutorials
+
+Riiiight over... [Here](./examples/)
 
 ## Alternate Build Scripts
 
-node.native was previously built using **gyp** - you can checkout more about that [here](./BUILD.md)
+node.native was previously built using **gyp** - you can learn more about that [here](./BUILD.md)
 
-# TODOs
+Note: It's likely that these will get phased out.
 
-1. ~~Address subtle techdebt surrounding references with native::http components~~
-2. ~~Create default preprocessors for meta data for each incomming request guid generation~~
-3. ~~Config parsing is still incomplete - action-routes should be configurable instead of being set in code~~
-4. ~~Determine versioning support in the path e.g. /v1/ /v2/~~
-5. ~~Clean up configuration deployment on mac (make install files to the correct folder)~~
-6. ~~Setup utilities for MongoDB and Redis access~~
-7. ~~Add pre and post processor callbacks as an alternative to the interface class~~
-8. ~~Make available a metrics pre/post processor~~
-9. ~~Design an error response mechanism~~ (rely on exceptions)
-10. ~~Record PID in a file to kill the most recently launched process~~ (printed in logs instead)
-11. ~~Create an equivalent build system with QMake to support more platforms (MinGW)~~
-12. Re-work node.native to improve testability by allowing tests to inject requests into qt event loop - allow factory to create instances and prevent shallow copying
-13. Figure out if we can introduce Qt's daemon/services legacy add-on
-14. Distributed scheduling with redis or mongo
-15. Server diagnostics UI
-16. Authentication basics - api token
-17. ~~Support ids and nouns within url routes~~
-18. Introduce modules to load shared libs for pre, post, and action processing
-19. ~~File logging~~
-20. Support for remote logging services
-21. Add syslog support
-22. ~~Include diagram of framework~~
-23. ~~Command line arguments for common config values~~
-24. ~~Prevent copy constructor access where it makes sense~~
-25. ~~Revisit common and trivial methods - add inline hint~~
-26. SUPPORT web sockets ??
-27. Add oauth support (google api)
-28. ~~Support shared library and add exports/import decl macros~~
-29. Include SSL support (evt-tls)
-30. Include periodic TASKS to execute in between libuv call-backs!
-31. ~~Swagger suppport~~
-32. ~~Serve basic http files~~
-33. More swagger support and thorough examples on how to create interface based actions
-34. ~~Rename some "routes" to the more appropriate "path"~~
-35. Simplify API unit tests with more macros
-36. Refactor to use more PRIVATE implementations (PIMPL) to help readability
-37. ~~Optimize Qt Http parsing by translating directly into QString instead of std::string~~
-38. Investigate using a faster JSON parser/framework
+# Credits
+
+`QttpServer` is a fork from [node.native](https://github.com/d5/node.native) with some additional contributions from [tojocky](https://github.com/tojocky/nodenative).
+
+# License
+
+The MIT License (MIT)
+
+Copyright (c) 2016 Son-Huy Pham
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

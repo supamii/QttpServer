@@ -37,13 +37,13 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     virtual ~HttpServer();
 
     /**
-     * @brief A statically accessible function to kick off the libuv event loop.
+     * @brief Kick off the libuv event loop.
      * @return The integer result from node.native's run method.
      */
-    static void startServer();
+    void startServer();
+    void startServer(QString ip, int port);
 
     static int start();
-
     static void stop();
 
     /**
@@ -116,7 +116,6 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     bool registerRoute(std::shared_ptr<Action> action, HttpMethod method, const QString& path, Visibility visibility = Visibility::Show);
     bool registerRoute(std::shared_ptr<Action> action, const qttp::HttpPath& path, Visibility visibility = Visibility::Show);
     bool registerRoute(HttpMethod method, const Route& route);
-
 
     template<class T> std::shared_ptr<Action> addActionAndRegister(Visibility visibilty = Visibility::Show)
     {
@@ -207,6 +206,8 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     void initGlobal(const QString& filepath);
     void initRoutes(const QString& filepath);
     void initConfigDirectory(const QString& path);
+    void initHttpDirectory(const QString& path);
+    void initSwagger(bool isEnabled);
 
     QCommandLineParser& getCommandLineParser();
 
@@ -250,7 +251,7 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
 
     void setServerInfo(const HttpServer::ServerInfo& serverInfo);
 
-  private:
+QTTP_PRIVATE:
 
     template<class T> bool addDefaultProcessor()
     {
@@ -310,7 +311,7 @@ class QTTPSHARED_EXPORT HttpServer : public QObject
     std::function<void(HttpEvent*)> m_EventCallback;
     QHash<QString, std::shared_ptr<Action> > m_Actions;
     QHash<QString, std::shared_ptr<const Action> > m_ConstActions;
-    QMap<HttpMethod, QHash<QString, Route> > m_Routes;
+    std::vector<QHash<QString, Route> > m_Routes;
     std::vector<std::shared_ptr<Processor> > m_Processors;
     std::vector<std::function<void(HttpData& data)> > m_Preprocessors;
     std::vector<std::function<void(HttpData& data)> > m_Postprocessors;

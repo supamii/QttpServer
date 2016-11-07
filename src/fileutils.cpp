@@ -32,6 +32,13 @@ void FileUtils::populateFiles()
 
 void FileUtils::populateFiles(QDir directory)
 {
+  m_Dirs.clear();
+  m_Files.clear();
+  populateFilesInternal(directory);
+}
+
+void FileUtils::populateFilesInternal(QDir directory)
+{
   if(directory.exists())
   {
     m_Dirs.insert(directory.absolutePath());
@@ -50,7 +57,7 @@ void FileUtils::populateFiles(QDir directory)
       {
         continue;
       }
-      populateFiles(directory.absoluteFilePath(dir));
+      populateFilesInternal(directory.absoluteFilePath(dir));
     }
   }
 }
