@@ -6,6 +6,10 @@
 namespace qttp
 {
 
+/**
+ * @brief This class is generally for internal use only.  It derives from
+ * QEvent in order forward data from libuv's eventloop to Qt's eventloop.
+ */
 class QTTPSHARED_EXPORT HttpEvent : public QEvent
 {
   public:
@@ -24,26 +28,6 @@ QTTP_PRIVATE:
     native::http::QttpResponse* m_Response;
     QDateTime m_Timestamp;
 };
-
-class QTTPSHARED_EXPORT NativeHttpEvent : public QEvent
-{
-  public:
-
-    NativeHttpEvent();
-    NativeHttpEvent(native::http::request*, native::http::response*);
-    virtual ~NativeHttpEvent();
-
-    native::http::request* getRequest() const;
-    native::http::response* getResponse() const;
-    const QDateTime& getTimestamp() const;
-
-QTTP_PRIVATE:
-
-    native::http::request * m_Request;
-    native::http::response* m_Response;
-    QDateTime m_Timestamp;
-};
-
 
 } // End namespace qttp
 

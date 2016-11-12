@@ -45,10 +45,19 @@ class QTTPSHARED_EXPORT Action
      */
     virtual std::set<qttp::HttpPath> getRoutes() const;
 
+    //! Returns the unique name for this action.
     virtual const char* getName() const = 0;
+
+    //! The summary about this action - used for SwaggerUI.
     virtual const char* getSummary() const;
+
+    //! The description about this action - used for SwaggerUI.
     virtual const char* getDescription() const;
+
+    //! The tags help SwaggerUI organize and group actions, like hashtags/labels.
     virtual QStringList getTags() const;
+
+    //! The inputs help SwaggerUI include parameters.
     virtual std::vector<Input> getInputs() const;
 
     bool registerRoute(HttpMethod method, const QString& path, Visibility visibility = Visibility::Show);
