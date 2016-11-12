@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### 
 
-## [1.0.0] - 2016-11-04
+## [1.0.0] - 2016-11-06
 ### Added
 - Reimplemented node.native components to copy into Qt classes such as QByteArray instead of std::stream @supamii
 - SwaggerUI integration @supamii

@@ -69,12 +69,18 @@ class QTTPSHARED_EXPORT Route
 {
   public:
 
-    Route() : action(), path(), parts(), visibility(Visibility::Show)
+    Route() : action(), method(HttpMethod::UNKNOWN), path(), parts(), visibility(Visibility::Show)
     {
     }
 
-    Route(const QString& actionName, const QString& routePath, Visibility visibility = Visibility::Show) :
+    Route(const QString& actionName, const HttpPath& httpPath, Visibility visibility = Visibility::Show) :
+      Route(actionName, httpPath.first, httpPath.second, visibility)
+    {
+    }
+
+    Route(const QString& actionName, HttpMethod routeMethod, const QString& routePath, Visibility visibility = Visibility::Show) :
       action(actionName),
+      method(routeMethod),
       path(routePath.startsWith('/') ? routePath : "/" + routePath),
       parts(routePath.split('/', QString::SkipEmptyParts)),
       visibility(visibility)
@@ -83,6 +89,7 @@ class QTTPSHARED_EXPORT Route
 
     Route(Route&& from) :
       action(std::move(from.action)),
+      method(from.method),
       path(std::move(from.path)),
       parts(std::move(from.parts)),
       visibility(from.visibility)
@@ -92,6 +99,7 @@ class QTTPSHARED_EXPORT Route
     Route(const Route& from)
     {
       action = from.action;
+      method = from.method;
       path = from.path;
       parts = from.parts;
       visibility = from.visibility;
@@ -100,6 +108,7 @@ class QTTPSHARED_EXPORT Route
     Route& operator=(const Route& from)
     {
       action = from.action;
+      method = from.method;
       path = from.path;
       parts = from.parts;
       visibility = from.visibility;
@@ -107,6 +116,7 @@ class QTTPSHARED_EXPORT Route
     }
 
     QString action;
+    HttpMethod method;
     QString path;
     QStringList parts;
     Visibility visibility;

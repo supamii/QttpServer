@@ -27,8 +27,9 @@ class QttpTest : public QObject, public TestUtils
 };
 ```
 
-Above, we extend from `QObject` as well as `TestUtils`.  And then below we'll define the main 
-`tests()` method that utilizes `TestUtils`:
+Above, we extend from `QObject` as well as `TestUtils`. For API testing, it's typical to make a 
+series of http GET/PUT/POST calls and we've rolled that up into `TestUtils` for convenience. Then 
+below we'll define the main `tests()` method that utilizes `TestUtils`:
 
 ``` c++
 void QttpTest::test()
@@ -68,7 +69,7 @@ QTEST_MAIN(QttpTest)
 
 ## Test Output
 
-Take a peek at [QttpServer](./qttptest/):
+Take a peek at [QttpTest](./qttptest/):
 
 ```
 Starting qttptest...

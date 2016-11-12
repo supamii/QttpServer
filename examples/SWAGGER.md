@@ -63,7 +63,7 @@ So now that we have some of the boilerplate code out of the way, let's describe
       };
     }
 
-    QList<qttp::HttpPath> getRoutes() const
+    std::set<qttp::HttpPath> getRoutes() const
     {
       return {
                { qttp::HttpMethod::GET, "laptops" },

@@ -156,21 +156,21 @@ void Action::applyHeaders(HttpData& data) const
 bool Action::registerRoute(HttpMethod method, const QString& path, Visibility visibility)
 {
   HttpServer* svr = HttpServer::getInstance();
-  return svr->registerRoute(method, Route(this->getName(), path, visibility));
+  return svr->registerRoute(method, Route(this->getName(), { method, path }, visibility));
 }
 
 bool Action::registerRoute(const qttp::HttpPath& path, Visibility visibility)
 {
   HttpServer* svr = HttpServer::getInstance();
-  return svr->registerRoute(path.first, Route(this->getName(), path.second, visibility));
+  return svr->registerRoute(path.first, Route(this->getName(), path, visibility));
 }
 
-void Action::registerRoute(const std::vector<qttp::HttpPath>& routes, Visibility visibility)
+void Action::registerRoute(const std::vector<qttp::HttpPath>& paths, Visibility visibility)
 {
   HttpServer* svr = HttpServer::getInstance();
-  for(const auto & path : routes)
+  for(const auto & path : paths)
   {
-    svr->registerRoute(path.first, Route(this->getName(), path.second, visibility));
+    svr->registerRoute(path.first, Route(this->getName(), path, visibility));
   }
 }
 
