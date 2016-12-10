@@ -749,7 +749,7 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
 
 bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QUrlQuery& params)
 {
-  // Using splitRef to reduce string copies.
+// Using splitRef to reduce string copies.
   QVector<QStringRef> urlParts = path.splitRef('/', QString::SkipEmptyParts);
 
   if(urlParts.length() != routeParts.length())
@@ -776,8 +776,10 @@ bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QU
       // Proceed to grab the regular expression inside the expressed route.
       // TODO: TEST THIS
       QString urlPartTmp = urlPart.toString();
-      regexp = routePart.mid(routePart.indexOf('(') + 1, routePart.length() - 1);
-      bool matches = urlPartTmp.contains(QRegularExpression(regexp));
+      int regexpBeginIndex = routePart.indexOf('(') + 1;
+      int regexpEndIndex = routePart.indexOf(')');
+      regexp = routePart.mid(regexpBeginIndex, regexpEndIndex - regexpBeginIndex);
+      bool matches = urlPartTmp.contains(QRegExp(regexp));
       if(matches)
       {
         variable = QString(routePart).replace(':', "").split('(')[0];
@@ -792,6 +794,10 @@ bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QU
     {
       return false;
     }
+  }
+
+  LOG_DEBUG("Found path" << path);
+  return true;
   }
 
   LOG_DEBUG("Found path" << path);
