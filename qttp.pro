@@ -20,7 +20,7 @@ contains(CONFIG, SAMPLEAPP) {
     TEMPLATE = lib
     VERSION = 0.0.1
     TARGET = qttpserver
-    DEFINES += QTTP_LIBRARY
+    DEFINES += QTTP_LIBRARY QTTP_EXPORT
 
     contains(CONFIG, QTTP_SHARED_LIBRARY) {
         message(********* Building shared library qttpserver *********)

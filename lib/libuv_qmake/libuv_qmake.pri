@@ -12,8 +12,12 @@ HEADERS += $$PWD/../libuv/src/*.h \
     $$PWD/../libuv/include/tree.h
 
 win32 {
-    HEADERS += $$PWD/../libuv/include/uv-win.h
-
+    contains(CONFIG, MINGW) {
+        message("Adding mingw files")
+        HEADERS += $$PWD/../libuv/include/uv-unix.h
+    } else {
+        HEADERS += $$PWD/../libuv/include/uv-win.h
+    }
 }
 
 unix:!macx {
@@ -24,12 +28,44 @@ macx: {
     HEADERS += $$PWD/../libuv/include/uv-darwin.h
 }
 
-SOURCES += $$PWD/../libuv/src/*.c
-
 win32 {
-    INCLUDEPATH += $$PWD/../libuv/src/win
-    HEADERS += $$PWD/../libuv/src/win/*.h
-    SOURCES += $$PWD/../libuv/src/win/*.c
+    contains(CONFIG, MINGW) {
+        message("Adding mingw LEAN AND MEAN sfiles")
+        DEFINES += WIN32_LEAN_AND_MEAN
+        INCLUDEPATH += $$PWD/../libuv/src/win
+        HEADERS += $$PWD/../libuv/src/win/*.h
+        SOURCES += $$PWD/../libuv/src/win/async.c \
+            $$PWD/../libuv/src/win/core.c \
+            $$PWD/../libuv/src/win/detect-wakeup.c \
+            $$PWD/../libuv/src/win/dl.c \
+            $$PWD/../libuv/src/win/error.c \
+            $$PWD/../libuv/src/win/fs-event.c \
+            $$PWD/../libuv/src/win/fs.c \
+            $$PWD/../libuv/src/win/getaddrinfo.c \
+            $$PWD/../libuv/src/win/getnameinfo.c \
+            $$PWD/../libuv/src/win/handle.c \
+            $$PWD/../libuv/src/win/loop-watcher.c \
+            $$PWD/../libuv/src/win/pipe.c \
+            $$PWD/../libuv/src/win/poll.c \
+            $$PWD/../libuv/src/win/process-stdio.c \
+            $$PWD/../libuv/src/win/process.c \
+            $$PWD/../libuv/src/win/req.c \
+            $$PWD/../libuv/src/win/signal.c \
+            $$PWD/../libuv/src/win/snprintf.c \
+            $$PWD/../libuv/src/win/stream.c \
+            $$PWD/../libuv/src/win/tcp.c \
+            $$PWD/../libuv/src/win/thread.c \
+            $$PWD/../libuv/src/win/timer.c \
+            $$PWD/../libuv/src/win/tty.c \
+            $$PWD/../libuv/src/win/udp.c \
+            $$PWD/../libuv/src/win/util.c \
+            $$PWD/../libuv/src/win/winapi.c \
+            $$PWD/../libuv/src/win/winsock.c
+    } else {
+        INCLUDEPATH += $$PWD/../libuv/src/win
+        HEADERS += $$PWD/../libuv/src/win/*.h
+        SOURCES += $$PWD/../libuv/src/win/*.c
+    }
 }
 
 unix {

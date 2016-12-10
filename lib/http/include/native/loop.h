@@ -9,7 +9,7 @@ namespace native
     /*!
      *  Class that represents the loop instance.
      */
-    class loop
+    class NNATIVE_DLLEXPORT loop
     {
     public:
         /*!
@@ -71,7 +71,7 @@ namespace native
     /*!
      *  Starts the default loop.
      */
-    bool run();
+    NNATIVE_DLLEXPORT bool run();
 
     /*!
      *  Polls for new events once for the default loop.
@@ -79,14 +79,14 @@ namespace native
      *  or requests left), or non-zero if more events are expected (meaning you
      *  should run the event loop again sometime in the future).
      */
-    bool run_once();
+    NNATIVE_DLLEXPORT bool run_once();
 
     /*!
      *  Polls for new events once but don't block if there are no pending events for the default loop.
      */
-    bool run_nowait();
+    NNATIVE_DLLEXPORT bool run_nowait();
 
-    void stop();
+    NNATIVE_DLLEXPORT void stop();
 }
 
 

@@ -99,8 +99,18 @@ win32 {
         -luser32
 }
 
-# ARG order matters here, always make sure node_native goes first!
-LIBS += -lnode_native -luv -lhttp_parser
+contains(CONFIG, MINGW) {
+    # TODO: FIX BUILDS FOR MINGW
+    # Support for MINGW is extremely poor - we are making some big assumptions
+    LIBS += \
+        -L$$PWD/build/$$BUILDTYPE/lib/libnode_native.a \
+        -L$$PWD/build/$$BUILDTYPE/lib/libuv.a \
+        -L$$PWD/build/$$BUILDTYPE/lib/libhttp_parser.a
+
+} else {
+    # ARG order matters here, always make sure node_native goes first!
+    LIBS += -lnode_native -luv -lhttp_parser
+}
 
 contains(TEMPLATE, lib) {
     message('Building QTTP library')
@@ -113,7 +123,12 @@ contains(TEMPLATE, lib) {
 } else {
     contains(CONFIG, QTTP_LIBRARY) {
         message('Including QTTP library')
-        LIBS += -lqttpserver
+        contains(CONFIG, MINGW) {
+            # TODO: FIX BUILDS FOR MINGW
+            LIBS += -L$$PWD/build/$$BUILDTYPE/lib/libqttpserver.a
+        } else {
+            LIBS += -lqttpserver
+        }
     }
 }
 

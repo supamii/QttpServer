@@ -44,6 +44,10 @@ contains(QT, core) {
   INCLUDEPATH += $$PWD/qttp
 }
 
+contains(CONFIG, MINGW) {
+    DEFINES += NNATIVE_EXPORT
+}
+
 contains(CONFIG, SSL_TLS) {
 
     DEFINES += SSL_TLS_UV
