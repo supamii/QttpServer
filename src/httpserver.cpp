@@ -774,7 +774,6 @@ bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QU
     else if(routePart.startsWith(':') && routePart.indexOf('(') >= 0)
     {
       // Proceed to grab the regular expression inside the expressed route.
-      // TODO: TEST THIS
       QString urlPartTmp = urlPart.toString();
       int regexpBeginIndex = routePart.indexOf('(') + 1;
       int regexpEndIndex = routePart.indexOf(')');
@@ -794,10 +793,6 @@ bool HttpServer::matchUrl(const QStringList& routeParts, const QString& path, QU
     {
       return false;
     }
-  }
-
-  LOG_DEBUG("Found path" << path);
-  return true;
   }
 
   LOG_DEBUG("Found path" << path);

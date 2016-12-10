@@ -13,6 +13,8 @@ class QttpTest : public QObject, public TestUtils
 
     void initTestCase();
 
+    void testGET_RegExRouteResponse();
+
     void testGET_EchoResponse();
     void testGET_NoEchoResponse();
     void testPOST_EchoBodyResponse();
@@ -41,6 +43,12 @@ class QttpTest : public QObject, public TestUtils
 
     void cleanupTestCase();
 };
+
+void QttpTest::testGET_RegExRouteResponse()
+{
+  QByteArray expected = "{\"preprocess\":true,\"response\":\"data\",\"postprocess\":true}";
+  TestUtils::verifyGetJson("http://127.0.0.1:8080/regex/data", expected);
+}
 
 void QttpTest::testGET_EchoResponse()
 {
@@ -272,6 +280,15 @@ void QttpTest::initTestCase()
   QVERIFY((action.get() != nullptr));
 
   result = httpSvr->registerRoute("get", "terminates", "/terminates");
+  QVERIFY(result == true);
+
+  action = httpSvr->createAction("regex", [](HttpData& data) {
+    QJsonObject& json = data.getResponse().getJson();
+    QString name = data.getRequest().getJson()["name"].toString();
+    json["response"] = name;
+  });
+
+  result = httpSvr->registerRoute(qttp::GET, "regex", "/regex/:name([A-Za-z]+)");
   QVERIFY(result == true);
 
   httpSvr->startServer("127.0.0.1", 8080);
