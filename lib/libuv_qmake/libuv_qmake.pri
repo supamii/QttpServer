@@ -61,11 +61,23 @@ win32 {
             $$PWD/../libuv/src/win/util.c \
             $$PWD/../libuv/src/win/winapi.c \
             $$PWD/../libuv/src/win/winsock.c
+
+        SOURCES +=  $$PWD/../libuv/src/fs-poll.c \
+            $$PWD/../libuv/src/inet.c \
+            $$PWD/../libuv/src/threadpool.c \
+            $$PWD/../libuv/src/uv-common.c \
+            $$PWD/../libuv/src/version.c
+
     } else {
         INCLUDEPATH += $$PWD/../libuv/src/win
         HEADERS += $$PWD/../libuv/src/win/*.h
         SOURCES += $$PWD/../libuv/src/win/*.c
+        SOURCES += $$PWD/../libuv/src/*.c
     }
+}
+
+!win32 {
+    SOURCES += $$PWD/../libuv/src/*.c
 }
 
 unix {
@@ -103,5 +115,5 @@ macx {
         $$PWD/../libuv/src/unix/fsevents.c \
         $$PWD/../libuv/src/unix/kqueue.c \
         $$PWD/../libuv/src/unix/pthread-barrier.c \
-        $$PWD/../libuv/src/unix/pthread-fixes.c \
+        $$PWD/../libuv/src/unix/pthread-fixes.c
 }
