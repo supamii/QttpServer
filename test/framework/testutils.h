@@ -46,7 +46,7 @@ class TestUtils
     void verifyJson(QByteArray& result, const QByteArray& expectedResp)
     {
       QJsonDocument doc = QJsonDocument::fromJson(expectedResp);
-      QByteArray expected = doc.toJson();
+      QByteArray expected = doc.toJson(QJsonDocument::Compact);
       QCOMPARE(result, expected);
     }
 

@@ -9,7 +9,6 @@ namespace qttp
 /**
  * @brief When included, this should help reveal all public API end points in
  * Swagger-consumable JSON format.
- *
  */
 class QTTPSHARED_EXPORT Swagger : public Action
 {
