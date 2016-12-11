@@ -139,7 +139,7 @@ int main(int argc, char** argv)
                                         HttpMethod::POST });
 
     svr->addActionAndRegister<Simple>("/simple",
-                                      { "put", "patch" });
+                                      { "PUT", "PATCH" });
 
     svr->addActionAndRegister<Another>();
 
