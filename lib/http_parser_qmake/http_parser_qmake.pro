@@ -2,9 +2,11 @@ QT -= gui core network
 
 TEMPLATE = lib
 CONFIG += staticlib
-
-VERSION = 2.7.1
 TARGET = http_parser
+
+!win32 {
+    VERSION = 2.7.1
+}
 
 include($$PWD/http_parser_qmake.pri)
 

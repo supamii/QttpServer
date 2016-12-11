@@ -18,8 +18,12 @@ contains(CONFIG, SAMPLEAPP) {
 } else {
 
     TEMPLATE = lib
-    VERSION = 0.0.1
     TARGET = qttpserver
+
+    !win32 {
+        VERSION = 0.0.1
+    }
+
     DEFINES += QTTP_LIBRARY QTTP_EXPORT
 
     contains(CONFIG, QTTP_SHARED_LIBRARY) {

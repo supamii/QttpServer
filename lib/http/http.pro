@@ -6,9 +6,11 @@ QT += core
 
 TEMPLATE = lib
 CONFIG += staticlib
-
-VERSION = 0.0.1
 TARGET = node_native
+
+!win32 {
+    VERSION = 0.0.1
+}
 
 DEFINES += NNATIVE_ERROR_LOGGING
 
