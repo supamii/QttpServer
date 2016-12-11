@@ -21,7 +21,7 @@ namespace native
 namespace http
 {
 
-class QttpUrl
+class NNATIVE_DLLEXPORT QttpUrl
 {
   friend class QttpClientContext;
 
@@ -70,7 +70,7 @@ class QttpUrl
 class QttpClientContext;
 typedef std::shared_ptr<QttpClientContext> qttp_client_ptr;
 
-class QttpResponse
+class NNATIVE_DLLEXPORT QttpResponse
 {
   friend class QttpClientContext;
 
@@ -146,7 +146,7 @@ class QttpResponse
     bool is_response_written_;
 };
 
-class QttpRequest
+class NNATIVE_DLLEXPORT QttpRequest
 {
   friend class QttpClientContext;
 
@@ -185,7 +185,7 @@ class QttpRequest
     static const QString default_value_;
 };
 
-class QttpClientContext
+class NNATIVE_DLLEXPORT QttpClientContext
 {
   friend class Qttp;
 
@@ -212,7 +212,7 @@ class QttpClientContext
     callbacks* callback_lut_;
 };
 
-class Qttp
+class NNATIVE_DLLEXPORT Qttp
 {
   public:
     Qttp();

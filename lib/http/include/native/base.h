@@ -16,6 +16,18 @@
 
 #include <uv.h>
 
+#ifdef NNATIVE_EXPORT
+#define NNATIVE_DLLEXPORT __declspec(dllexport)
+#endif
+
+#ifdef NNATIVE_IMPORT
+#define NNATIVE_DLLEXPORT __declspec(dllimport)
+#endif
+
+#ifndef NNATIVE_DLLEXPORT
+#define NNATIVE_DLLEXPORT
+#endif
+
 #define NNATIVE_MAKE_VERSION(major, minor, patch)                                \
   ((major) * 0x1000 + (minor) * 0x100 + (patch))
 

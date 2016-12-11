@@ -2,9 +2,11 @@ QT -= gui core network
 
 TEMPLATE = lib
 CONFIG += staticlib
-
-VERSION = 1.10.0
 TARGET = uv
+
+!win32 {
+    VERSION = 1.10.0
+}
 
 include($$PWD/libuv_qmake.pri)
 
@@ -51,6 +53,12 @@ win32 {
 # meanwhile we can go ahead and stub them by adding stubs.
 
 SOURCES += $$PWD/workaround.c
+
+win32 {
+    # Terrible work-around to include "winapi.h" before "winsock2.h"
+    INCLUDEPATH += $$PWD
+    HEADERS += $$PWD/uv-win.h $$PWD/uv.h
+}
 
 INCLUDEPATH = $$unique(INCLUDEPATH)
 HEADERS = $$unique(HEADERS)

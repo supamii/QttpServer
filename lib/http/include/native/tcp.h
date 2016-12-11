@@ -12,7 +12,7 @@ namespace native
 {
 namespace net
 {
-class tcp : public native::base::stream
+class NNATIVE_DLLEXPORT tcp : public native::base::stream
 {
   public:
     template<typename X>
