@@ -15,7 +15,7 @@ Check out the [examples](./examples/) and samples to get started with your RESTf
 
 ## Features
 
-* Compatible with [Qt](http://www.qt.io/download/) 5.5, 5.6, [5.7](http://download.qt.io/official_releases/qt/5.7/5.7.0/single/)
+* Compatible with [Qt](http://www.qt.io/download/) 5.5, 5.6, [5.7](http://download.qt.io/official_releases/qt/5.7/5.7.0/single/), [5.8](http://download.qt.io/official_releases/qt/5.8/5.8.0/single/)
 * NodeJS's blazing fast [libuv](https://github.com/libuv/libuv)
 * NodeJS's lightning quick [http-parser](https://github.com/nodejs/http-parser)
 * URL routing e.g. [/v1/your/api/path](./examples/README.md)
