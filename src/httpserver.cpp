@@ -587,8 +587,8 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
              default:
                STATS_INC("http:method:unknown");
                response.setStatus(HttpStatus::BAD_REQUEST);
-               QJsonObject& json = data.getResponse().getJson();
-               json["error"] = QSTR("Invalid HTTP method");
+               QJsonDocument& json = data.getResponse().getJson();
+               json.setObject({{"error", QSTR("Invalid HTTP method")}});
                return;
            }
 
@@ -597,8 +597,8 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
            {
              LOG_ERROR("Invalid route");
              response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
-             QJsonObject& json = data.getResponse().getJson();
-             json["error"] = QSTR("Internal error");
+             QJsonDocument& json = data.getResponse().getJson();
+             json.setObject({{"error", QSTR("Internal error")}});
              return;
            }
 
@@ -682,8 +682,8 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                    if(!searchAndServeFile(data))
                    {
                      response.setStatus(HttpStatus::BAD_REQUEST);
-                     QJsonObject& json = data.getResponse().getJson();
-                     json["error"] = QSTR("Invalid request");
+                     QJsonDocument& json = data.getResponse().getJson();
+                     json.setObject({{"error", QSTR("Invalid request")}});
                      performPostprocessing(data);
                    }
                  }
@@ -694,20 +694,20 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
            {
              LOG_ERROR("Exception caught" << e.what());
              response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
-             QJsonObject& json = data.getResponse().getJson();
-             json["error"] = e.what();
+             QJsonDocument& json = data.getResponse().getJson();
+             json.setObject({{"error", e.what()}});
            }
            catch(const QJsonObject& e)
            {
              LOG_ERROR("JSON caught" << e);
              response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
-             data.getResponse().getJson() = e;
+             data.getResponse().getJson().setObject(e);
            }
            catch(...)
            {
              response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
-             QJsonObject& json = data.getResponse().getJson();
-             json["error"] = QSTR("Internal server error");
+             QJsonDocument& json = data.getResponse().getJson();
+             json.setObject({{"error", QSTR("Internal server error")}});
            }
 
            if(!response.isFinished())
@@ -734,8 +734,8 @@ function<void(HttpEvent*)> HttpServer::defaultEventCallback() const
                  obj["timeElapsedMs"] = (qreal)(uv_hrtime() - request.getTimestamp()) /
                                         (qreal)1000000.00;
 
-                 QJsonObject& json = data.getResponse().getJson();
-                 json["requestMetadata"] = obj;
+                 QJsonDocument& json = data.getResponse().getJson();
+                 json.setObject({{"requestMetadata", obj}});
                }
 
                if( !response.finish())

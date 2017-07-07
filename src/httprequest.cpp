@@ -59,7 +59,7 @@ HttpMethod HttpRequest::getMethod(bool strictComparison) const
   return m_MethodEnum;
 }
 
-const QJsonObject& HttpRequest::getJson() const
+const QJsonDocument& HttpRequest::getJson() const
 {
   if(!m_Json.isEmpty())
   {
@@ -86,7 +86,9 @@ const QJsonObject& HttpRequest::getJson() const
   QList<QPair<QString, QString> > list = getQuery().queryItems();
   for(auto i = list.begin(); i != list.end(); ++i)
   {
-    m_Json.insert(i->first, i->second);
+    QJsonObject old = m_Json.object();
+    old.insert(i->first, i->second);
+    m_Json.setObject(old);
   }
 
   return m_Json;

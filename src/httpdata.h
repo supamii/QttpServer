@@ -46,7 +46,7 @@ QTTP_PRIVATE:
      *
      * This is the same as getResponse().setJson();
      */
-    void setResponse(const QJsonObject& json);
+    void setResponse(const QJsonDocument &json);
 
     //! Quick and easy way to set error messages.
     void setErrorResponse(const QString& msg);

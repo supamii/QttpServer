@@ -235,7 +235,7 @@ void Swagger::onGet(HttpData& data)
 {
   if(m_IsEnabled)
   {
-    data.getResponse().setJson(m_Response);
+    data.getResponse().setJson(QJsonDocument(m_Response));
   }
   else
   {

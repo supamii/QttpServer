@@ -54,7 +54,7 @@ QTTP_PRIVATE:
      * should be called before dispatching to multiple threads (if there's some
      * reason for multiple threads).
      */
-    const QJsonObject& getJson() const;
+    const QJsonDocument& getJson() const;
 
     const QByteArray& getBody() const;
 
@@ -84,7 +84,7 @@ QTTP_PRIVATE:
     native::http::QttpRequest * m_Request;
     HttpUrl m_HttpUrl;
     mutable HttpMethod m_MethodEnum;
-    mutable QJsonObject m_Json;
+    mutable QJsonDocument m_Json;
     QUrlQuery m_Query;
 };
 

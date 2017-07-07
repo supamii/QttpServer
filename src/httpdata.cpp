@@ -38,7 +38,7 @@ HttpResponse& HttpData::getResponse()
   return m_HttpResponse;
 }
 
-void HttpData::setResponse(const QJsonObject& json)
+void HttpData::setResponse(const QJsonDocument& json)
 {
   getResponse().setJson(json);
 }
@@ -51,7 +51,7 @@ void HttpData::setErrorResponse(const QString& msg)
 void HttpData::setErrorResponse(const QString &msg, HttpError code)
 {
   getResponse().setStatus(static_cast<HttpStatus>(code));
-  getResponse().getJson()["error"] = msg;
+  getResponse().getJson().setObject({{"error", msg}});
 }
 
 void HttpData::setErrorResponse(const QJsonObject& json)
@@ -62,7 +62,7 @@ void HttpData::setErrorResponse(const QJsonObject& json)
 void HttpData::setErrorResponse(const QJsonObject &json, HttpError code)
 {
   getResponse().setStatus(static_cast<HttpStatus>(code));
-  getResponse().setJson(json);
+  getResponse().setJson(QJsonDocument(json));
 }
 
 const QUuid& HttpData::getUid() const
