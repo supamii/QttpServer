@@ -44,9 +44,9 @@ QTTP_PRIVATE:
      * As an alternative, the caller may optionally complete the transaction
      * with finishResponse().
      */
-    QJsonObject& getJson();
-    const QJsonObject& getJson() const;
-    void setJson(const QJsonObject& json);
+    QJsonDocument &getJson();
+    const QJsonDocument& getJson() const;
+    void setJson(const QJsonDocument &json);
 
     /**
      * @brief Preferred method when working with the json object.  Populate
@@ -63,7 +63,7 @@ QTTP_PRIVATE:
      */
     bool finish(const std::string& body);
     bool finish(const QByteArray& bytes);
-    bool finish(const QJsonObject& json);
+    bool finish(const QJsonDocument &json);
 
     /**
      * @return Boolean indicating if finishResponse() has been called.
@@ -113,7 +113,7 @@ QTTP_PRIVATE:
 
     native::http::QttpResponse * m_Response;
     HttpStatus m_Status;
-    QJsonObject m_Json;
+    QJsonDocument m_Json;
     quint32 m_ControlFlag;
 };
 

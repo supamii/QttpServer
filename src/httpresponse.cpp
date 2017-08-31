@@ -46,17 +46,17 @@ HttpStatus HttpResponse::getStatus() const
   return m_Status;
 }
 
-QJsonObject& HttpResponse::getJson()
+QJsonDocument& HttpResponse::getJson()
 {
   return m_Json;
 }
 
-const QJsonObject& HttpResponse::getJson() const
+const QJsonDocument& HttpResponse::getJson() const
 {
   return m_Json;
 }
 
-void HttpResponse::setJson(const QJsonObject& json)
+void HttpResponse::setJson(const QJsonDocument& json)
 {
   m_Json = json;
 }
@@ -80,16 +80,15 @@ bool HttpResponse::finish(const string& body)
   return m_Response->close();
 }
 
-bool HttpResponse::finish(const QJsonObject& json)
+bool HttpResponse::finish(const QJsonDocument& json)
 {
   LOG_TRACE;
   setHeader("Content-Type", "application/json");
-  QJsonDocument doc(json);
 
 #ifdef QTTP_FORMAT_JSON_RESPONSE
-  return finish(doc.toJson(QJsonDocument::Indented));
+  return finish(json.toJson(QJsonDocument::Indented));
 #else
-  return finish(doc.toJson(QJsonDocument::Compact));
+  return finish(json.toJson(QJsonDocument::Compact));
 #endif
 }
 

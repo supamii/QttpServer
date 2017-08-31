@@ -20,8 +20,9 @@ class SampleAction : public Action
     void onAction(HttpData& data)
     {
       TEST_TRACE;
-      QJsonObject& json = data.getResponse().getJson();
+      QJsonObject json = data.getResponse().getJson().object();
       json["response"] = "Sample C++ FTW";
+      data.getResponse().getJson().setObject(json);
     }
 
     const char* getName() const
@@ -36,29 +37,33 @@ class SampleActionWithHttpMethods : public Action
     void onGet(HttpData& data)
     {
       TEST_TRACE;
-      QJsonObject& json = data.getResponse().getJson();
+      QJsonObject json = data.getResponse().getJson().object();
       json["response"] = "Sample C++ FTW Get";
+      data.getResponse().getJson().setObject(json);
     }
 
     void onPost(HttpData& data)
     {
       TEST_TRACE;
-      QJsonObject& json = data.getResponse().getJson();
+      QJsonObject json = data.getResponse().getJson().object();
       json["response"] = "Sample C++ FTW Post";
+      data.getResponse().getJson().setObject(json);
     }
 
     void onPut(HttpData& data)
     {
       TEST_TRACE;
-      QJsonObject& json = data.getResponse().getJson();
+      QJsonObject json = data.getResponse().getJson().object();
       json["response"] = "Sample C++ FTW Put";
+      data.getResponse().getJson().setObject(json);
     }
 
     void onDelete(HttpData& data)
     {
       TEST_TRACE;
-      QJsonObject& json = data.getResponse().getJson();
+      QJsonObject json = data.getResponse().getJson().object();
       json["response"] = "Sample C++ FTW Delete";
+      data.getResponse().getJson().setObject(json);
     }
 
     const char* getName() const
@@ -77,8 +82,9 @@ class ActionWithParameter : public Action
     void onAction(HttpData& data)
     {
       TEST_TRACE;
-      QJsonObject& json = data.getResponse().getJson();
+      QJsonObject json = data.getResponse().getJson().object();
       json["response"] = "Sample C++ FTW With Parameter " + m_Param;
+      data.getResponse().getJson().setObject(json);
     }
 
     const char* getName() const
@@ -100,13 +106,17 @@ class SampleProcessor : public Processor
     void preprocess(HttpData& data)
     {
       TEST_TRACE;
-      data.getResponse().getJson()["preprocess"] = true;
+      QJsonObject obj = data.getResponse().getJson().object();
+      obj["preprocess"] = true;
+      data.getResponse().getJson().setObject(obj);
     }
 
     void postprocess(HttpData& data)
     {
       TEST_TRACE;
-      data.getResponse().getJson()["postprocess"] = true;
+      QJsonObject obj = data.getResponse().getJson().object();
+      obj["postprocess"] = true;
+      data.getResponse().getJson().setObject(obj);
     }
 };
 

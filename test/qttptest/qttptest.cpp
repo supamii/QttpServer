@@ -198,16 +198,18 @@ void QttpTest::initTestCase()
   QVERIFY(httpSvr->initialize() == true);
 
   auto action = httpSvr->createAction("", [](HttpData& data) {
-    QJsonObject& json = data.getResponse().getJson();
+    QJsonObject json = data.getResponse().getJson().object();
     json["response"] = "C++ FTW";
+    data.getResponse().getJson().setObject(json);
   });
 
   httpSvr->addProcessor<SampleProcessor>();
 
   action = httpSvr->createAction("echo", [](HttpData& data) {
-    QJsonObject& json = data.getResponse().getJson();
+    QJsonObject json = data.getResponse().getJson().object();
     auto& query = data.getRequest().getQuery();
     json["response"] = "C++ FTW " + query.queryItemValue("id");
+    data.getResponse().getJson().setObject(json);
   });
 
   auto result = httpSvr->registerRoute("get", "", "/echo/:id");
@@ -217,8 +219,9 @@ void QttpTest::initTestCase()
   QVERIFY(result == true);
 
   action = httpSvr->createAction("echobody", [](HttpData& data) {
-    QJsonObject& json = data.getResponse().getJson();
-    json["response"] = data.getRequest().getJson();
+    QJsonObject json = data.getResponse().getJson().object();
+    json["response"] = data.getRequest().getJson().object();
+    data.getResponse().getJson().setObject(json);
   });
 
   result = httpSvr->registerRoute("post", "echobody", "/echobody");
@@ -257,8 +260,9 @@ void QttpTest::initTestCase()
 
   // Uses a raw std::function based callback.
   action = httpSvr->createAction("test", [](HttpData& data) {
-    QJsonObject& json = data.getResponse().getJson();
+    QJsonObject json = data.getResponse().getJson().object();
     json["response"] = "Test C++ FTW";
+    data.getResponse().getJson().setObject(json);
 
     // NOTE: This terminates early so we should not expect any post-processing.
     data.getResponse().finish();
@@ -272,8 +276,9 @@ void QttpTest::initTestCase()
   QVERIFY(result == true);
 
   action = httpSvr->createAction("terminates", [](HttpData& data) {
-    QJsonObject& json = data.getResponse().getJson();
+    QJsonObject json = data.getResponse().getJson().object();
     json["response"] = "Test C++ FTW";
+    data.getResponse().getJson().setObject(json);
     // NOTE: This terminates early so we should not expect any post-processing.
     data.getResponse().terminate();
   });
@@ -283,9 +288,10 @@ void QttpTest::initTestCase()
   QVERIFY(result == true);
 
   action = httpSvr->createAction("regex", [](HttpData& data) {
-    QJsonObject& json = data.getResponse().getJson();
-    QString name = data.getRequest().getJson()["name"].toString();
+    QJsonObject json = data.getResponse().getJson().object();
+    QString name = data.getRequest().getJson().object()["name"].toString();
     json["response"] = name;
+    data.getResponse().getJson().setObject(json);
   });
 
   result = httpSvr->registerRoute(qttp::GET, "regex", "/regex/:name([A-Za-z]+)");
