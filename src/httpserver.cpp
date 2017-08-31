@@ -854,7 +854,7 @@ bool HttpServer::searchAndServeFile(HttpData& data) const
   // TODO: WOULD BE NICE TO CACHE STRING CONSTRUCTION.
 
   QString urlPath = data.getRequest().getUrl().getPath();
-  if(urlPath.startsWith('/'))
+  while(urlPath.startsWith('/'))
   {
     urlPath = urlPath.mid(1);
   }
