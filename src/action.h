@@ -1,6 +1,8 @@
 #ifndef QTTPACTION_H
 #define QTTPACTION_H
 
+#include <map>
+
 #include "qttp_global.h"
 #include "httproute.h"
 #include "httpdata.h"
@@ -59,6 +61,9 @@ class QTTPSHARED_EXPORT Action
 
     //! The inputs help SwaggerUI include parameters.
     virtual std::vector<Input> getInputs() const;
+
+    //! The possible responses of this action - used for SwaggerUI.
+    virtual std::map<qttp::HttpStatus, QString> getResponses() const;
 
     bool registerRoute(HttpMethod method, const QString& path, Visibility visibility = Visibility::Show);
     bool registerRoute(const qttp::HttpPath& path, Visibility visibility = Visibility::Show);

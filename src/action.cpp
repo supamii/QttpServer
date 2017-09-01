@@ -139,6 +139,11 @@ std::vector<Input> Action::getInputs() const
   return EMPTY_INPUTS;
 }
 
+std::map<qttp::HttpStatus, QString> Action::getResponses() const
+{
+  return {};
+}
+
 std::vector<QStringPair> Action::getHeaders() const
 {
   return Global::getDefaultHeaders();
