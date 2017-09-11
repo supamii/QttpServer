@@ -123,6 +123,9 @@ class QTTPSHARED_EXPORT SimpleAction : public Action
     void setInputs(const std::vector<Input>& inputs);
     std::vector<Input> getInputs() const;
 
+    void setResponses(const std::map<qttp::HttpStatus, QString>& responses);
+    std::map<qttp::HttpStatus, QString> getResponses() const;
+
 QTTP_PROTECTED:
 
     std::vector<QStringPair> getHeaders() const;
@@ -136,6 +139,7 @@ QTTP_PRIVATE:
     QByteArray m_Description;
     QStringList m_Tags;
     std::vector<Input> m_Inputs;
+    std::map<qttp::HttpStatus, QString> m_Responses;
     std::vector<QStringPair> m_Headers;
 };
 

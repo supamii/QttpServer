@@ -256,6 +256,16 @@ std::vector<Input> SimpleAction::getInputs() const
   return m_Inputs;
 }
 
+void SimpleAction::setResponses(const std::map<qttp::HttpStatus, QString>& responses)
+{
+  m_Responses.insert(responses.begin(), responses.end());
+}
+
+std::map<qttp::HttpStatus, QString> SimpleAction::getResponses() const
+{
+  return m_Responses;
+}
+
 std::vector<QStringPair> SimpleAction::getHeaders() const
 {
   return m_Headers;
