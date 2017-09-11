@@ -1,6 +1,8 @@
 #ifndef QTTPACTION_H
 #define QTTPACTION_H
 
+#include <map>
+
 #include "qttp_global.h"
 #include "httproute.h"
 #include "httpdata.h"
@@ -60,6 +62,9 @@ class QTTPSHARED_EXPORT Action
     //! The inputs help SwaggerUI include parameters.
     virtual std::vector<Input> getInputs() const;
 
+    //! The possible responses of this action - used for SwaggerUI.
+    virtual std::map<qttp::HttpStatus, QString> getResponses() const;
+
     bool registerRoute(HttpMethod method, const QString& path, Visibility visibility = Visibility::Show);
     bool registerRoute(const qttp::HttpPath& path, Visibility visibility = Visibility::Show);
     void registerRoute(const std::vector<qttp::HttpPath>& routes, Visibility visibility = Visibility::Show);
@@ -118,6 +123,9 @@ class QTTPSHARED_EXPORT SimpleAction : public Action
     void setInputs(const std::vector<Input>& inputs);
     std::vector<Input> getInputs() const;
 
+    void setResponses(const std::map<qttp::HttpStatus, QString>& responses);
+    std::map<qttp::HttpStatus, QString> getResponses() const;
+
 QTTP_PROTECTED:
 
     std::vector<QStringPair> getHeaders() const;
@@ -131,6 +139,7 @@ QTTP_PRIVATE:
     QByteArray m_Description;
     QStringList m_Tags;
     std::vector<Input> m_Inputs;
+    std::map<qttp::HttpStatus, QString> m_Responses;
     std::vector<QStringPair> m_Headers;
 };
 

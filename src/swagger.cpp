@@ -84,6 +84,14 @@ void Swagger::initialize()
     QJsonArray required;
     QJsonArray tags = QJsonArray::fromStringList(action->getTags());
 
+    QJsonObject responses;
+    for(auto response : action->getResponses())
+    {
+      responses.insert(QString::number(static_cast<int>(response.first)), QJsonObject {
+        { "description", response.second }
+      });
+    }
+
     QString actionName = action->getName();
     const vector<Input> & inputs = action->getInputs();
 
@@ -216,7 +224,8 @@ void Swagger::initialize()
           { "description", action->getDescription() },
           { "operationId", routePath },
           { "parameters", routeParameters },
-          { "tags", tags }
+          { "tags", tags },
+          { "responses", responses }
         });
         paths[routePath] = pathRoute;
       }

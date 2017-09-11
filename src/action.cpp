@@ -139,6 +139,11 @@ std::vector<Input> Action::getInputs() const
   return EMPTY_INPUTS;
 }
 
+std::map<qttp::HttpStatus, QString> Action::getResponses() const
+{
+  return {};
+}
+
 std::vector<QStringPair> Action::getHeaders() const
 {
   return Global::getDefaultHeaders();
@@ -249,6 +254,16 @@ void SimpleAction::setInputs(const std::vector<Input>& inputs)
 std::vector<Input> SimpleAction::getInputs() const
 {
   return m_Inputs;
+}
+
+void SimpleAction::setResponses(const std::map<qttp::HttpStatus, QString>& responses)
+{
+  m_Responses.insert(responses.begin(), responses.end());
+}
+
+std::map<qttp::HttpStatus, QString> SimpleAction::getResponses() const
+{
+  return m_Responses;
 }
 
 std::vector<QStringPair> SimpleAction::getHeaders() const
