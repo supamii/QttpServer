@@ -50,6 +50,19 @@ Input::Input(const QString& inputname, const std::set<qttp::HttpPath>& path) :
 {
 }
 
+Input::Input(const QString& inputname, const QString& dataType, const std::set<qttp::HttpPath>& paths) :
+  name(inputname),
+  description(),
+  isRequired(false),
+  paramType("query"),
+  dataType(dataType),
+  values(),
+  visibility(Visibility::Show),
+  paths(paths)
+{
+}
+
+
 Input::Input(const QString& inputname, const QString& desc, const QStringList& vals, const std::set<qttp::HttpPath>& path) :
   name(inputname),
   description(desc),
