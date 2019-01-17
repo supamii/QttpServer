@@ -17,6 +17,8 @@ class QTTPSHARED_EXPORT Input
     Input(Input&& from);
     Input(const Input& from);
     Input(const QString& name, const std::set<qttp::HttpPath>& paths = std::set<qttp::HttpPath>());
+    Input(const QString& name, const QString& dataType, const std::set<qttp::HttpPath>& paths = std::set<qttp::HttpPath>());
+    Input(const QString& name, const QString& dataType, const QString& desc, const std::set<qttp::HttpPath>& paths = std::set<qttp::HttpPath>());
     Input(const QString& name, const QString& desc, const QStringList& values, const std::set<qttp::HttpPath>& paths = std::set<qttp::HttpPath>());
 
     Input& operator=(const Input& from);
